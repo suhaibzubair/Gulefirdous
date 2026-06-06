@@ -1,0 +1,39 @@
+.course-card-container {
+    border-radius: 8px;
+    padding:20px;
+    
+
+    .view-all-button {
+        color: #10BAAC;
+        font-family: Work Sans;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 19px;
+        letter-spacing: 0px;
+
+    }
+
+    .cards {
+        display: flex;
+        justify-content: space-between;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .card-image {
+        width: 100%;
+        height: 150px;
+        border-radius: 8px;
+        margin: 0 auto;
+    }
+
+    .card-stats {
+        font-family: Work Sans;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 19px;
+        letter-spacing: 0px;
+    }
+
+
+}

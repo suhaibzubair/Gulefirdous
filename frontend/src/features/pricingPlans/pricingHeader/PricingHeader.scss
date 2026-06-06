@@ -1,0 +1,182 @@
+// @import "../../../assets/styles/generalClasses.scss";
+
+// .pricing-header {
+//     display: flex;
+//     align-items: center;
+//     justify-content: space-between;
+//     // height: 105px;
+//     padding: 16px 100px;
+//     background-color: $white;
+
+//     .logo-and-name {
+//         display: flex;
+//         align-items: center;
+//         overflow: hidden;
+
+//         img {
+//             // width: 55px;
+//             // height: 77px;
+//             width: 70%;
+//         }
+//     }
+
+//     .menu-items {
+//         height: 44px;
+//         width: 495px;
+//         gap: 32px;
+
+//         ul {
+//             display: flex;
+//             align-items: center;
+//             justify-content: space-between;
+//             list-style: none;
+//             margin: 0;
+//             padding: 0;
+
+//             li {
+//                 width: 66px;
+//                 height: 44px;
+//                 padding: 10px;
+//                 gap: 8px;
+//                 text-align: left;
+//                 display: flex;
+//                 align-items: center;
+
+//                 .menu-link {
+//                     font-family: 'Work Sans';
+//                     font-size: 16px;
+//                     font-weight: 500;
+//                     line-height: 19px;
+//                     letter-spacing: 0px;
+//                     color: $subtitle-color;
+//                     text-decoration: none;
+//                 }
+
+//                 .menu-link:hover,
+//                 .menu-link:active {
+//                     background-color: $menu-hover-background;
+//                     color: $black;
+//                     padding: 2px;
+//                 }
+//             }
+//         }
+//     }
+
+//     .user-and-language-selector {
+//         height: 24px;
+//         gap: 32px;
+//         display: flex;
+//         align-items: center;
+//         justify-content: space-between;
+
+//         .user-info {
+//             width: 24px;
+//             height: 24px;
+//         }
+
+//         .language-selector {
+//             width: 66px;
+//             height: 24px;
+//             margin-right: 8px;
+
+//             select {
+//                 font-family: 'Work Sans';
+//                 font-size: 16px;
+//                 font-weight: 400;
+//                 line-height: 19px;
+//                 letter-spacing: 0px;
+//                 text-align: left;
+//                 border: none;
+//                 background-color: $secondary-color;
+//             }
+//         }
+//     }
+// }
+
+
+@import "../../../assets/styles/generalClasses.scss";
+
+.pricing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 12vh;
+  padding: 16px 100px;
+  background-color: $white;
+
+  .logo-and-name img {
+    max-height: 50px; 
+  }
+
+  .menu-items {
+    height: 44px;
+    width: 495px;
+    gap: 32px;
+
+    ul {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      li {
+        width: 66px;
+        height: 44px;
+        padding: 10px;
+        gap: 8px;
+        text-align: left;
+        display: flex;
+        align-items: center;
+
+        .menu-link {
+          font-family: 'Work Sans';
+          font-size: 16px;
+          font-weight: 500;
+          line-height: 19px;
+          letter-spacing: 0px;
+          color: $subtitle-color;
+          text-decoration: none;
+        }
+
+        .menu-link:hover,
+        .menu-link:active {
+          background-color: $menu-hover-background;
+          color: $black;
+          padding: 2px;
+        }
+      }
+    }
+  }
+
+  .user-and-language-selector {
+    height: 24px;
+    gap: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .user-info {
+      width: 24px;
+      height: 24px;
+    }
+
+    .language-selector {
+      width: 66px;
+      height: 24px;
+      margin-right: 8px;
+
+      select {
+        font-family: 'Work Sans';
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 19px;
+        letter-spacing: 0px;
+        text-align: left;
+        border: none;
+        background-color: $secondary-color;
+      }
+    }
+  }
+}

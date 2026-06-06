@@ -1,0 +1,72 @@
+.custom-tooltip {
+    border-radius: 20px;
+}
+
+.ant-table-cell::before {
+    display: none;
+}
+
+th.ant-table-cell {
+    color: white !important;
+    background: rgba(16, 186, 172, 1) !important;
+}
+
+tr.ant-table-row.ant-table-row-level-0:nth-child(even) {
+    background-color: #F7F9FB !important;
+}
+
+tr.ant-table-row.ant-table-row-level-0 {
+    color: #77838F;
+}
+
+.ant-alert-content svg {
+    color: white !important;
+}
+
+:where(.css-dev-only-do-not-override-i0102m).ant-alert-info {
+    background-color: #08496D;
+    border: 1px solid #08496D;
+    border-radius: 4px;
+    font-family: Jost;
+    font-size: 16px;
+    font-weight: 500;
+    height: 75px;
+}
+
+.ant-alert-message {
+    color: white;
+}
+
+:where(.css-dev-only-do-not-override-i0102m).ant-alert-warning {
+    background-color: #F8B406;
+    border: 1px solid #F8B406;
+    border-radius: 4px;
+    font-family: Jost;
+    font-size: 16px;
+    font-weight: 500;
+    height: 75px;
+}
+
+:where(.css-dev-only-do-not-override-i0102m).ant-alert-error {
+    background-color: #E63946;
+    border: 1px solid #E63946;
+    border-radius: 4px;
+    font-family: Jost;
+    font-size: 16px;
+    font-weight: 500;
+    height: 75px;
+}
+
+:where(.css-dev-only-do-not-override-i0102m).ant-alert-success {
+    background-color: #218C75;
+    border: 1px solid #218C75;
+    border-radius: 4px;
+    font-family: Jost;
+    font-size: 16px;
+    font-weight: 500;
+    height: 75px;
+}
+
+:where(.css-dev-only-do-not-override-i0102m).ant-alert .ant-alert-close-icon .anticon-close {
+    color: white;
+}

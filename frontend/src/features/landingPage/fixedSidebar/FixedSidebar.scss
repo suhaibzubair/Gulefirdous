@@ -1,0 +1,323 @@
+.fixed-sidebar {
+    width: 370px;
+    height: 1523px;
+    top: 203px;
+    left: 785px;
+    position: absolute;
+    margin-bottom: 20px;
+
+
+    .features-and-price {
+
+        width: 370px;
+        height: 910px;
+        top: 0;
+        left: 0;
+        border-radius: 4px;
+        border: 1px solid #E7E7EC;
+        position: absolute;
+        box-shadow: 0px 8px 15px 0px #8C98A41A;
+
+        .video-placeholder {
+            width: 350px;
+            height: 220px;
+            border-radius: 4px;
+            background-image: url('../../../assets/images/videobg.png');
+            background-size: cover;
+            background-position: center;
+            margin: 5px auto;
+
+            .video-icon {
+                width: 60px;
+                height: 60px;
+                margin-top: 73px;
+                margin-left: 135px;
+                position: absolute;
+                background-color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                i {
+                    color: #fff;
+                    font-size: 36px;
+                }
+            }
+        }
+
+        .pricing-details {
+            width: 310px;
+            height: 73px;
+            margin: 16px auto;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+
+            .price-wraper {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+            }
+
+            .original-price {
+                width: 98px;
+                height: 43px;
+                font-family: Jost;
+                font-size: 30px;
+                font-weight: 500;
+                line-height: 43px;
+                letter-spacing: 0em;
+                text-align: right;
+            }
+
+            .discounted-price {
+                width: 49px;
+                height: 23px;
+                font-family: Jost;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 23px;
+                letter-spacing: 0em;
+                text-align: left;
+            }
+
+            .discount-button {
+                width: 81px;
+                height: 30px;
+                background: #F8B406;
+                color: white;
+                border: none;
+                border-radius: 4px;
+            }
+
+            .time-left {
+                width: 169px;
+                height: 23px;
+                font-family: Jost;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 23px;
+                letter-spacing: 0em;
+                text-align: left;
+                color: #E63946;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-left: 16px;
+            }
+        }
+
+        .buttons {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            width: 310px;
+            height: 130px;
+            border-radius: 4px;
+            margin: 10px auto;
+
+            .custom-btn-buy {
+                color: white;
+                background-color: #10baac;
+                width: 310px;
+                margin-bottom: 10px;
+                box-shadow: 0px 3px 4px 0px #00000040;
+                font-family: Jost;
+                font-size: 16px;
+                font-weight: 500;
+                line-height: 23px;
+                letter-spacing: 0em;
+                text-align: center;
+
+            }
+
+            .custom-btn-enroll {
+                color: white;
+                background-color: #DCDBDB;
+                border: none;
+                width: 310px;
+                margin-bottom: 8px;
+                box-shadow: 0px 3px 4px 0px #00000040;
+                font-family: Jost;
+                font-size: 16px;
+                font-weight: 500;
+                line-height: 23px;
+                letter-spacing: 0em;
+                text-align: center;
+
+            }
+        }
+
+        .course-details-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 313px;
+            height: 413px;
+            padding: 10px 0px;
+            margin: auto;
+
+            .course-wrap{
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                .course-detail {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    border-bottom: 1px solid #E7E7EC;
+                    ;
+    
+                    .detail-text {
+                        font-family: Jost;
+                        font-size: 16px;
+                        font-weight: 500;
+                        line-height: 50px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #2F2D51;
+                        margin-left: 10px;
+                    }
+    
+                    .detail-value {
+                        font-family: Jost;
+                        font-size: 16px;
+                        font-weight: 400;
+                        line-height: 50px;
+                        letter-spacing: 0em;
+                        text-align: right;
+                        color: #77838F;
+                    }
+                }
+            }
+
+            
+
+            .course-share {
+                width: 162px;
+                height: 10px;
+                margin: auto;
+                color: #10baac;
+
+                a {
+                    text-decoration: none;
+                    display: flex;
+                    align-items: center;
+                    color: #10baac;
+
+                }
+
+                .share-text {
+                    font-size: 16px;
+                    margin-left: 10px;
+                }
+
+            }
+        }
+
+
+
+
+    }
+
+    .latest-courses {
+        width: 370px;
+        height: 563px;
+        top: 943px;
+        left: 0;
+        position: absolute;
+        border-radius: 4px;
+        border: 1px solid #E7E7EC;
+        box-shadow: 0px 8px 15px 0px #8C98A41A;
+
+
+        .courses-wrapper {
+            width: 311px;
+            margin: auto;
+
+            h2 {
+                width: 140px;
+                height: 32px;
+                font-family: Jost;
+                font-size: 22px;
+                font-weight: 500;
+                line-height: 32px;
+                letter-spacing: 0em;
+                text-align: left;
+            }
+
+            .course-item {
+                display: flex;
+                align-items: center;
+                width: 302px;
+                height: 90px;
+                margin-bottom: 35px;
+
+
+                .course-image {
+                    margin-right: 12px;
+
+                    img {
+                        width: 100px;
+                        height: 90px;
+                        border-radius: 8px;
+                    }
+                }
+
+                .course-details {
+                    width: 181px;
+                    height: 82px;
+
+                    .course-title {
+                        font-family: Jost;
+                        font-size: 16px;
+                        font-weight: 500;
+                        line-height: 24px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        width: 181px;
+                        height: 48px;
+                    }
+
+                    .course-prices {
+                        .cutoff-price {
+                            width: 33px;
+                            height: 20px;
+                            font-family: Jost;
+                            font-size: 14px;
+                            font-weight: 400;
+                            line-height: 20px;
+                            letter-spacing: 0em;
+                            text-align: left;
+                            color: #77838F;
+                            margin-right: 10px;
+                        }
+
+                        .active-price {
+                            width: 62px;
+                            height: 23px;
+                            font-family: Jost;
+                            font-size: 16px;
+                            font-weight: 500;
+                            line-height: 23px;
+                            letter-spacing: 0em;
+                            text-align: right;
+                            color: #2F2D51;
+
+                        }
+                    }
+
+                }
+            }
+        }
+
+
+
+    }
+
+
+}

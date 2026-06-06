@@ -1,0 +1,158 @@
+.flashcard_container {
+  width: 100%;
+
+  h1 {
+    font-size: 24px;
+    margin-top: 20px;
+    font-family: Work Sans;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 38px;
+    letter-spacing: 0px;
+    text-align: left;
+    color: #081735;
+  }
+}
+
+.green-box1 {
+  background-color: #218c75;
+  padding: 10px;
+  margin: 10px 0;
+
+  .image-container1 {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: -webkit-fill-available;
+
+    .courseimg1 {
+      // display: flex;
+      // justify-content: flex-start;
+      // margin-right: 30px;
+      opacity: 0.5;
+      width: 79.88px;
+      height: 97.76px;
+      top: 0.19px;
+      left: 27.63px;
+    }
+   
+
+    .image_inner_container1 {
+      display: flex;
+      // justify-content: flex-end;
+      align-items: center;
+      width: 55%;
+
+      .courseimg2 {
+        overflow: hidden;
+        margin: 20px;
+      }
+
+      .courseimg3 {
+        margin: 20px;
+      }
+    }
+  }
+}
+
+.green-box2 {
+  background-color: #0F745E;
+  padding: 10px;
+  margin: 10px 0;
+
+  .image-container2 {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: -webkit-fill-available;
+
+    .image_inner_container2 {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      width: 55%;
+      // margin: 10px;
+      // padding: 20px;
+
+      .quizimg1 {
+        margin-left: 20%;
+      }
+
+      .quizimg3 {
+        margin-right: 20px;
+      }
+    }
+    .image_underInner_container2{
+border: 2px solid red;
+width: 50%;
+display: flex;
+justify-content: flex-end;
+    }
+  }
+}
+
+.green-box3 {
+  background-color: #095A49;
+  padding: 10px;
+  margin: 10px 0;
+
+  .image-container3 {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: -webkit-fill-available;
+
+    .image_inner_container3 {
+      display: flex;
+      // justify-content: center;
+      align-items: center;
+      width: 55%;
+
+      .flashcard2 {
+        overflow: hidden;
+        margin: 20px;
+      }
+
+      .flashcard3 {
+        margin: 20px;
+      }
+    }
+  }
+}
+
+
+
+/* Add a media query for responsiveness */
+@media screen and (max-width: 768px) {
+  .flashcard_container {
+    width: 100%;
+  }
+
+  .green-box1,
+  .green-box2,
+  .green-box3 {
+    width: 100%;
+    margin: 0;
+  }
+
+  .image-container1,
+  .image-container2,
+  .image-container3 {
+    flex-direction: column; 
+        align-items: center;
+    gap: 10px; 
+  }
+
+  .courseimg1,
+  .courseimg2,
+  .courseimg3,
+  .quizimg1,
+  .quizimg2,
+  .quizimg3,
+  .flashcard1,
+  .flashcard2,
+  .flashcard3 {
+    width: 100%; 
+    max-width: 100%;
+  }
+}

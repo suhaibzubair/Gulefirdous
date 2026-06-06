@@ -1,0 +1,121 @@
+.MainBackground_Thankyou {
+  background: #f7f7f7;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .Background_Thankyou {
+    background: #ffffff;
+    width: 85%;
+    /* border: 2px solid red; */
+
+    .centered-content_Thankyou {
+      text-align: center;
+
+      .logo_Thankyou {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 10px;
+      }
+
+      .heading_Thankyou {
+        margin: 20px 0;
+        font-family: "Work Sans";
+        font-size: 35px;
+        font-weight: 700;
+        line-height: 38px;
+        letter-spacing: 0px;
+        text-align: center;
+        color: #161D25;
+      }
+
+      .para_Thankyou {
+        font-size: 16px;
+        margin: 20px 0;
+        font-family: "Work Sans";
+        font-weight: 400;
+        line-height: 24px;
+        letter-spacing: 0px;
+        text-align: center;
+        color: #77838F;
+      }
+
+      /* Styling for the Resend Code and Terms and Conditions */
+      .resend-code_Thankyou {
+        font-size: 14px;
+        margin: 10px 0;
+        font: Raleway;
+        font-weight: 400;
+        font-size: 15px;
+        text-align: center;
+        color: #818181;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: center;
+        margin: 15px;
+
+        .centered-button_Thankyou {
+          display: inline-block;
+          margin: 10px;
+          color: black;
+          background: white;
+          font-family: "Work Sans";
+          font-size: 14px;
+          font-weight: 500;
+          border: 1px solid #ccc;
+          padding: 10px;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+
+        .secondary-button_Thankyou {
+          display: block;
+          margin: 10px;
+          background: #10BAAC;
+          color: #FFFFFF;
+          font-family: "Work Sans";
+          font-size: 14px;
+          font-weight: 500;
+          border: none;
+          padding: 10px;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+      }
+
+      .topRightCorner {
+        display: flex;
+        margin: 10px;
+        justify-content: flex-end;
+
+       
+        }
+     
+      }
+
+    }
+ 
+  }
+  .button {
+    background: #08496D;
+    color: #fff;
+    font-family: "Work Sans";
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    padding: 7px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    img {
+      width: 17px;
+    }
+
+    &:hover {
+      background: #dddbda;
+      color: white;
+    }
+}

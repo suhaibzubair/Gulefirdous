@@ -1,0 +1,72 @@
+ /* Varification.scss */
+
+
+#MainBackground_varification {
+  background: #f7f7f7;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  #Background_varification {
+    background: #ffffff;
+    width: 80%;
+    height: 70%;
+    padding: 20px;
+
+    #centered-content_varification {
+      margin-top: 90px;
+      text-align: center;
+
+      #heading_varification {
+        margin: 20px 0;
+        font-family: Work Sans;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 38px;
+        letter-spacing: 0px;
+        text-align: center;
+        color: #091b3d;
+      }
+
+      #para_varification {
+        font-size: 16px;
+        margin: 20px 0;
+        font-family: Work Sans;
+        font-weight: 400;
+        line-height: 24px;
+        letter-spacing: 0px;
+        text-align: center;
+        color: #77838F;
+
+        /* Styling for OTP Input */
+        #otp-input_varification {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin: 20px 0;
+        }        
+      }
+      #centered-button_varification {
+            display: block;
+            width: 35%;
+            margin: 20px auto;
+            background: #10baac;
+            font-family: Work Sans;
+            font-size: 14px;
+            font-weight: 500;
+            color: #ffffff;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+          }
+          
+          #centered-button:hover {
+            background: #f76d57;
+            color: #fff;
+          }
+          
+    }
+  }
+}

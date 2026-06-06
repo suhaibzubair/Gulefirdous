@@ -1,0 +1,94 @@
+.student-sidebar-box {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  &:first-child {
+    margin-top: 20px;
+  }
+
+  .student-sidebar-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 12px 2px 32px;
+    flex: 1;
+    flex-grow: 1;
+    position: relative;
+    border-radius: 6px;
+
+    &:hover {
+      background-color: rgba(249, 250, 251, 1);
+    }
+
+    .item-content {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+      flex-grow: 1;
+      max-width: fit-content;
+      padding: 4px 0px;
+
+      .item-icon {
+        width: 24px;
+        height: 49px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .item-text {
+        margin-right: 20px;
+        color: #464154;
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0;
+        line-height: normal;
+        white-space: nowrap;
+        width: fit-content;
+      }
+    }
+    .cheveron {
+      transition: all 0.3s;
+    }
+
+    .cheveron-up {
+      transform: rotate(180deg);
+    }
+  }
+
+  .suboption-wrapper {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+    gap: 4px;
+    padding: 0 0 8px;
+    flex: 0 0 auto;
+    align-self: stretch;
+    align-self: flex-start;
+    transition: all 0.5s ease;
+  }
+  @keyframes inAnimation {
+    0% {
+      opacity: 0;
+      visibility: hidden;
+    }
+    100% {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  @keyframes outAnimation {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+}

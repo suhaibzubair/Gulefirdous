@@ -1,0 +1,46 @@
+.breadcrumb-wraper {
+    height: 92px;
+    top: 108px;
+    left: 311px;
+    gap: 32px;
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        list-style-type: none;
+        height: 20px;
+        gap: 8px;
+        padding: 0px;
+
+        .breadcrumb-item {
+            width: 100px;
+            font-family: Work Sans;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+            letter-spacing: 0em;
+            text-align: left;
+
+            a {
+                color: #818181;
+            }
+
+            &.active {
+                color: black;
+            }
+        }
+    }
+
+    h1 {
+        width: 253px;
+        height: 38px;
+        font-family: Work Sans;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 38px;
+        letter-spacing: 0px;
+        text-align: left;
+        color: #081735;
+    }
+
+}

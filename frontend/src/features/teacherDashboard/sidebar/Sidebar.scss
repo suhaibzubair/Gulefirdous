@@ -1,0 +1,19 @@
+.student-sidebar-container {
+  display: flex;
+  height: 100%;
+  .student-sidebar-wrapper {
+    height: 100%;
+    max-width: 100%;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 10px;
+  }
+}
+@media (max-width: 420px) {
+  .student-sidebar-container {
+      display: none;
+  }
+}

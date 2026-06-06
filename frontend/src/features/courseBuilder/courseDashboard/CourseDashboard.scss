@@ -1,0 +1,37 @@
+/* MyLayoutComponent.css */
+
+.layout-container {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    
+  }
+  
+  .course-header {
+    // background-color: #333;
+    width: 100%;
+    // padding: 10px;
+    // text-align: center;
+  }
+  
+  .course-main-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  
+  .course-sidebar {
+    flex-basis:17%;
+    
+  }
+  
+  .course-content {
+   flex-basis: 83%;
+  }
+  .course-width{
+    flex-basis: 95%;
+  }
+  

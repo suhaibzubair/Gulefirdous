@@ -1,0 +1,48 @@
+.subitem-item {
+  background-color: white;
+  align-self: stretch;
+  flex: 0 0 auto;
+  padding: 2px 12px 2px 48px !important;
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  overflow: hidden;
+  position: relative;
+  border-radius: 6px;
+  &:hover {
+    background-color: rgba(249, 250, 251, 1);
+  }
+
+  .subitem-item-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    flex-grow: 1;
+    gap: 12px;
+    position: relative;
+
+    .subitem-item-icon {
+      width: 24px;
+      height: 24px;
+    }
+    .subitem-item-icon-selected {
+      fill: white;
+    }
+
+    .subitem-item-text {
+      color: #464154;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0;
+      line-height: normal;
+    }
+
+    .subitem-item-text-selected {
+      color: white !important;
+    }
+  }
+}
+
+.subitem-item-selected {
+  background-color: #10baac !important;
+}

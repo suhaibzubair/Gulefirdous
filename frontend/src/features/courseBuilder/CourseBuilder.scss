@@ -1,0 +1,159 @@
+.build-course-text {
+    margin-top: 20px;
+    font-family: Arial;
+    font-size: 48px;
+    font-weight: 400;
+    line-height: 55px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #716B6B;
+
+    @media (max-width: 900px) {
+        font-size: 36px; 
+        line-height: 45px;
+    }
+
+    @media (max-width: 420px) {
+        font-size: 24px; 
+        line-height: 30px;
+        
+    }
+}
+
+.create-section-text {
+    font-family: Jost;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 29px;
+    letter-spacing: 0em;
+    text-align: left;
+
+    @media (max-width: 900px) {
+        font-size: 18px; 
+        line-height: 25px;
+    }
+
+    @media (max-width: 420px) {
+        font-size: 16px; 
+        line-height: 22px;
+    }
+}
+
+.create-section-button {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    gap: 5px;
+    width: 68%;
+    cursor: pointer;
+
+    @media (max-width: 900px) {
+        width: 80%; 
+    }
+
+    @media (max-width: 420px) {
+        width: 100%; 
+        justify-content: flex-start;
+    }
+}
+
+.create-chapter-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    width: 100%;
+    min-height: 30px;
+
+    @media (max-width: 900px) {
+        width: 80%; 
+    }
+
+    @media (max-width: 420px) {
+        width: 100%; 
+    }
+}
+
+.build-course-description {
+    width: 60%;
+    margin-top: 20px;
+    font-family: Arial;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 34px;
+    letter-spacing: 0em;
+    text-align: center;
+    color: #716B6B;
+
+    @media (max-width: 900px) {
+        width: 80%; 
+        font-size: 24px; 
+        line-height: 30px;
+    }
+
+    @media (max-width: 420px) {
+        width: 100%; 
+        font-size: 18px; 
+        line-height: 24px;
+        text-align: justify;
+    }
+}
+
+.course-builder-container {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .section {
+        padding: 50px 50px;
+        width: 60%;
+        height: 40px;
+        background-color: white;
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+
+        @media (max-width: 900px) {
+            width: 80%; 
+        }
+
+        @media (max-width: 420px) {
+            width: 100%; 
+        }
+    }
+
+    .empty-section {
+        padding: 0px 50px;
+        width: 60%;
+        height: 40px;
+        background-color: white;
+        margin-top: 15px;
+
+        @media (max-width: 900px) {
+            width: 80%; 
+        }
+
+        @media (max-width: 420px) {
+            width: 100%; 
+        }
+    }
+
+    .create-section-dialoge {
+        width: 60%;
+        background-color: white;
+        margin-top: 15px;
+        padding: 30px 50px;
+        gap: 30px;
+
+        @media (max-width: 900px) {
+            width: 80%; 
+        }
+
+        @media (max-width: 420px) {
+            width: 100%; 
+        }
+    }
+}

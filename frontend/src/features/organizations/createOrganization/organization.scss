@@ -1,0 +1,171 @@
+* {
+  font-family: Work Sans;
+}
+
+.m_t_20 {
+  margin-top: 10px;
+}
+
+.letter_spac_1_3 {
+  letter-spacing: 1.3px;
+}
+
+.schoolSetup_home_container {
+  display: flex;
+  width: 100%;
+  margin: auto;
+  overflow: hidden;
+}
+
+.signup_container-org {
+  width: 50%;
+  padding: 50px 32px;
+  background-color: white;
+  border: 1px solid #e1e1e1;
+}
+
+.schoolSetup_Card_box_shadow-org {
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+}
+
+.Org_home_image {
+  display: flex;
+  align-items: center;
+  padding-left: 30px;
+  width: 50%;
+  height: auto;
+}
+
+.SchoolSetup_heading {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 38px;
+  color: #2e2c34;
+}
+
+.SchoolSetup_para {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 18px;
+
+  color: #2e2c34;
+}
+
+.Org_input_label {
+  font-family: Work Sans;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 18px;
+  letter-spacing: 0px;
+  text-align: left;
+  color: #504f54;
+}
+
+.thumbnail-label {
+  font-family: Work Sans;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0px;
+  text-align: left;
+  color: #504f54;
+}
+.Org_input_field {
+  width: 97%;
+  color: black;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+  display: flex;
+  padding: 11px 12px;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  flex: 1 0 0;
+  align-self: stretch;
+  border-radius: 4px;
+  border: 1px solid #ebeaed;
+  background: #f6f5ff;
+  margin-top: 10px;
+
+  &:is(:hover, :focus, :active) {
+    border: 1px solid #84818a;
+  }
+
+  &::placeholder {
+    font-family: Work Sans;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    letter-spacing: 0px;
+    text-align: left;
+    color: #84818a;
+  }
+}
+
+.cropped-image{
+  display: flex;
+  justify-content: center;
+  img{
+    width: 480px;
+    height: 270px;
+  }
+}
+
+.Timezone-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.SchoolSetup_form_btn_div {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.Org_form_btn {
+  height: 46px;
+  padding: 10px;
+  gap: 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #10baac;
+  color: white;
+  width: 20%;
+}
+
+.custom-dropdown {
+  appearance: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none !important;
+  padding: 5px !important;
+  color: #10baac !important;
+  max-width: 300px;
+}
+.pencil{
+  position: absolute;
+  top: 80%;
+}
+.w-100 {
+  max-width: 200px !important;
+}
+
+/* Add the media query for responsive design */
+@media (max-width: 1023px) {
+  .home_image {
+    display: none !important;
+  }
+
+  .w_100 {
+    width: 100%;
+    max-width: 720px;
+    margin: auto;
+  }
+}

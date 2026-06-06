@@ -1,0 +1,14 @@
+{
+  "name": "gulefirdous-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Secure WooCommerce proxy API for the Gulefirdous app.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

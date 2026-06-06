@@ -1,0 +1,92 @@
+// Dashboard
+.main-content {
+  margin-left: 80px; 
+  transition: margin-left 0.3s ease;
+  text-align: left;
+  overflow: hidden;
+
+  .dashboard-header {
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    margin-bottom: 50px;
+  }
+
+  .dashboard-heading {
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .dashboard-menu {
+    display: flex;
+    gap: 80px;
+  }
+
+  .dashboard-menu-item {
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .dashboard-menu-item.selected {
+    text-decoration: underline;
+    color: #10baac;
+  }
+
+  .ant-table-content {
+    .ant-table-thead {
+      tr {
+        th {
+          background-color: #10baac;
+          color: white;
+          border: 1px solid lightgray !important;
+          border-top: none !important;
+        }
+      }
+    }
+    .ant-table-tbody {
+      .ant-table-row {
+        .ant-table-cell {
+          border: 1px solid lightgray !important;
+          border-top: 1px solid gray !important;
+          border-bottom: 1px solid gray !important;
+        }
+      }
+    }
+  }
+
+  .landingpage-btn {
+    padding: 10px 20px;
+    margin-top: 30px;
+    background-color: #10baac;
+    color: white;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    margin-right: 50px;
+  }
+
+  @media (max-width: 767px) {
+    .main-content {
+      margin-left: 0; 
+    }
+
+    .landingpage-btn {
+      margin-right: 0; 
+    }
+  }
+
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+  }
+
+  @media (min-width: 1024px) {
+  }
+}
+
+.sidebar-active {
+  margin: 12px 12px 0px 345px;
+}
