@@ -1,0 +1,88 @@
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    width: 18%;
+    background-color: #f0f0f0; 
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .logo_items {
+    margin-top: 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .nav_image {
+    margin-bottom: 10px; 
+  }
+  
+  .logo_gmail {
+    margin-top: 10px; 
+  }
+
+  .menu_container {
+    display: flex;
+    flex-direction: column;
+    /* border: 2px solid red; */
+    gap: 100px; 
+    flex-grow: 0;
+  }
+  .menu_item {
+    list-style: none; 
+    padding: 0; 
+    margin: 10px 0; 
+    /* border: 2px solid red; */
+    color: #818181;
+    margin-top: 30px;
+  }
+  
+  .link:last-child {
+    padding: 10px; 
+     
+  }
+  .link:last-child span {
+    white-space: nowrap;
+  }
+  
+  .link:hover {
+   color: #10BAAC;
+    cursor: pointer;
+  }
+  .link {
+    display: flex;
+    align-items: center;
+  }
+  
+  .link img {
+    margin-right: 10px; 
+  }
+  
+  .link span {
+    white-space: nowrap;
+  }
+  
+  .link i {
+    height: 40px; 
+    min-width: 40px; 
+    display: flex;
+    font-size: 18px; 
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; 
+    /* text-decoration: none; */
+  }
+  
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 100%;
+    }
+  
+    .menu_container {
+      margin-top: 10px;
+    }
+  }
+  

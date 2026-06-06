@@ -1,0 +1,107 @@
+.MainBackground {
+    background: #f7f7f7;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .Background {
+    background: #ffffff;
+    width: 80%;
+  }
+  
+  .centered-content {
+    text-align: center;
+    padding: 50px;
+  }
+  
+  .logo {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 10px;
+  }
+  
+  .otp-heading {
+    margin: 20px 0;
+    font-family: Work Sans;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 38px;
+    letter-spacing: 0px;
+    text-align: center;
+    color: #091b3d;
+    justify-content: center !important;
+    align-items: center;
+  }
+  
+  .para {
+    font-size: 16px;
+    margin: 20px 0;
+    font-family: Work Sans;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0px;
+    text-align: center;
+    color: #77838F;
+  }
+  
+  /* Styling for OTP Input */
+  .otp-input {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+  }
+  
+  .otp-input input {
+    width: 30px !important;
+    height: 40px;
+    font-size: 18px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 9px;
+    margin: 0 5px;
+    outline: none;
+  }
+  
+  .otp-input .otp-separator {
+    font-size: 20px;
+    color: #555;
+    margin: 0 10px;
+  }
+  
+  /* Styling for the Resend Code and Terms and Conditions */
+  .resend-code, .terms-and-conditions {
+    font-size: 14px;
+    margin: 10px 0;
+  }
+  
+  .resend-code {
+    font: Raleway;
+    font-weight: 400;
+    font-size: 15px;
+    text-align: Center;
+  }
+  
+  .centered-button {
+    display: block;
+    width: 35%;
+    margin: 20px auto;
+    background: #10baac;
+    font-family: Work Sans;
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+   
+  .terms-and-conditions {
+    font-family: Work Sans;
+    font-size: 15px;
+    font-weight: 400;
+  }
+  

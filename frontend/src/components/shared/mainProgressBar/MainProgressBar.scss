@@ -1,0 +1,149 @@
+.bar-wraper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    .logo-img {
+        width: 100%;
+        height: 100%;
+        margin-bottom: 18px;
+        img{
+            width: 116px;
+            height: 62px;
+        }
+    }
+
+    .ant-steps {
+
+        //Styling for Finished step
+        .ant-steps-item-finish {
+            .ant-steps-item-container {
+                .ant-steps-item-tail {
+                    color: red !important;
+                }
+
+
+                .ant-steps-item-icon {
+                    background-color: #10baac;
+                    border: none !important;
+
+                    .ant-steps-icon {
+                        color: white !important;
+                    }
+                }
+
+                .ant-steps-item-content {
+                    .ant-steps-item-title {
+                        font-family: Inter;
+                        font-size: 16px;
+                        font-weight: 600;
+                        line-height: 24px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #000000;
+                    }
+
+                    .ant-steps-item-description {
+                        font-family: Inter;
+                        font-size: 16px;
+                        font-weight: 400;
+                        line-height: 24px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #000000;
+
+                    }
+                }
+            }
+        }
+
+        //Styling for Active step
+        .ant-steps-item-active {
+
+            .ant-steps-item-container {
+
+                .ant-steps-item-icon {
+                    background-color: #10baac;
+                    border: none;
+                    box-shadow: 0px 0px 0px 4px #F4EBFF;
+
+                    .ant-steps-icon {
+                        color: white !important;
+
+                    }
+                }
+
+                .ant-steps-item-content {
+                    .ant-steps-item-title {
+                        font-family: Inter;
+                        font-size: 16px;
+                        font-weight: 600;
+                        line-height: 24px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #000000;
+                    }
+
+                    .ant-steps-item-description {
+                        font-family: Inter;
+                        font-size: 16px;
+                        font-weight: 400;
+                        line-height: 24px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #000000;
+
+                    }
+                }
+            }
+        }
+
+        //Styling for Waiting step
+        .ant-steps-item-wait {
+
+            .ant-steps-item-container {
+
+
+                .ant-steps-item-icon {
+                    background-color: white;
+                    border: none;
+
+                    .ant-steps-icon {
+                        color: #10baac !important;
+
+                    }
+                }
+
+                .ant-steps-item-content {
+                    .ant-steps-item-title {
+                        font-family: Inter;
+                        font-size: 16px;
+                        font-weight: 600;
+                        line-height: 24px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #000000;
+                    }
+
+                    .ant-steps-item-description {
+                        font-family: Inter;
+                        font-size: 16px;
+                        font-weight: 400;
+                        line-height: 24px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #000000;
+
+                    }
+                }
+            }
+        }
+
+
+
+
+    }
+
+   
+
+}

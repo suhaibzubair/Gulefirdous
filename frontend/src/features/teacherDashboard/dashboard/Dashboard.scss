@@ -1,0 +1,24 @@
+.dashboard {
+    .teacher-dashboard-sidebar {
+        flex-basis: 17%;
+    }
+
+    .teacher-dashboard-content {
+        flex-basis: 65%;
+        overflow: hidden;
+    }
+
+    .teacher-dashboard-notifications {
+        flex-basis: 18%;
+        background-color: white;
+        padding: 10px 32px 10px 10px;
+        border-left: 1px solid #0000001A;
+
+    }
+
+    @media (max-width: 900px) {
+        .teacher-dashboard-notifications {
+            display: none;
+        }
+    }
+}

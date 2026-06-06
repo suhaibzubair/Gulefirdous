@@ -1,0 +1,21 @@
+.card {
+    width: 300px;
+    margin: 20px;
+    background-color: white;
+    padding: 8px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-content {
+    padding: 10px 5px;
+    width: 100%;
+}
+
+.card-reviews{
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+    color:#818181;
+    ;
+}

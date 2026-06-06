@@ -1,0 +1,263 @@
+.d-flex {
+    display: flex;
+}
+.justify-center {
+    justify-content: center;
+}
+.justify-space-between {
+    justify-content: space-between;
+}
+.justify-end {
+    justify-content: end;
+}
+.align-center{
+    align-items: center;
+}
+.align-start{
+    align-items: start;
+}
+.align-end {
+    align-items: end;
+}
+.flex-column {
+    flex-direction: column;
+}
+.flex-basis-50 {
+    flex-basis: 50%;
+}
+.text-center {
+    text-align: center;
+}
+.text-left {
+    text-align: left;
+}
+.text-end {
+    text-align: end;
+}
+.p-50{
+    padding: 50px;
+}
+.p-70{
+    padding: 100px 180px 50px;
+}
+.mt-50{
+    margin-top: 50px;
+}
+.light-text{
+    font-weight: 400;
+}
+.w-100{
+    width: 100%;
+}
+.gap-5{
+    gap: 5px;
+}
+.gap-10 {
+    gap: 10px;
+}
+.pointer{
+    cursor: pointer;
+}
+
+.main-container{
+    margin: 30px;
+    border-radius: 8px;
+    gap: 32px;
+    background-color: #FFFFFF;
+    width: -webkit-fill-available;
+    overflow: hidden;
+}
+
+.d-flex {
+    display: flex;
+}
+.justify-center {
+    justify-content: center;
+}
+.justify-space-between {
+    justify-content: space-between;
+}
+.justify-end {
+    justify-content: end;
+}
+.align-center{
+    align-items: center;
+}
+.align-start{
+    align-items: start;
+}
+.align-end {
+    align-items: end;
+}
+.flex-column {
+    flex-direction: column;
+}
+.flex-basis-50 {
+    flex-basis: 50%;
+}
+.text-center {
+    text-align: center;
+}
+.text-left {
+    text-align: left;
+}
+.text-end {
+    text-align: end;
+}
+.p-50{
+    padding: 50px;
+}
+.p-70{
+    padding: 100px 180px 50px;
+}
+.mt-50{
+    margin-top: 50px;
+}
+.light-text{
+    font-weight: 400;
+}
+.w-100{
+    width: 100%;
+}
+.gap-5{
+    gap: 5px;
+}
+.gap-10 {
+    gap: 10px;
+}
+.pointer{
+    cursor: pointer;
+}
+
+// Dashboard
+$primary-color: #09496d;
+$secondary-color: #ffffff;
+$button-color: #10baac;
+$text-color: #000000;
+$subtitle-color: #858a9e;
+$border-color: #ddd;
+$hr-color: gray;
+
+// Register
+$fontFamily: "Work Sans";
+$mainTextColor: #475467;
+$secondaryTextColor: #504F54;
+$inputTextColor: black;
+$inputBackground: #F6F5FF;
+$inputBorder: #EBEAED;
+$inputBorderHover: #84818A;
+$checkboxColor: #0D9488;
+$buttonBackground: #0D9488;
+$buttonBorder: rgba(0, 0, 0, 0.1);
+$buttonText: white;
+$endingDetailsColor: #475467;
+$termsServiceColor: #10BAAC;
+
+// plan 
+$color1: #2F2D51;
+$color2: #77838F;
+$color3: #10BAAC;
+$color4: #818181;
+$color5: #F3FCFB;
+$color6: #FFFFFF;
+
+// PricingHeader
+$primary-color: #09496d;
+$secondary-color: #ffffff;
+$button-color: #10baac;
+$text-color: #000000;
+$subtitle-color: #77838F;
+$menu-hover-color: #10baac;
+$menu-hover-background: white;
+
+// QuizCategoryKnowledge
+
+$primary-color: #000000;
+$secondary-color: #504F54;
+$background-color: #FFFFFF;
+$placeholder-color: #94A3B8;
+
+// Quizes
+$white: #FFFFFF;
+$black: #000000;
+$gray-light: #F7F7F7;
+$gray: #818181;
+$gray-lighter: #EBEAED;
+$green: #10BAAC;
+
+// QuizTypeSelection
+
+$primary-color: #10baac;
+$secondary-color: #818181;
+$background-color: #FFFFFF;
+$box-shadow-color: #00000026;
+$border-color: #E2E8F0;
+
+// QuizWorkingTitle
+$primary-color: #10baac;
+$secondary-color: #818181;
+$background-color: #FBFAFC;
+$border-color: #EBEAED;
+
+// Forgetpassword
+$primaryColor: #10BAAC;  
+$placeholderColor: #84818A;  
+$borderColor: #EBEAED;  
+$backgroundGradient1: linear-gradient(0deg, #FBFAFC, #FBFAFC); 
+$backgroundGradient2: linear-gradient(0deg, #EBEAED, #EBEAED);  
+$shadowColor: rgba(0, 0, 0, 0.1); 
+
+// Varification
+$main-bg-color: #f7f7f7;
+$container-bg-color: #ffffff;
+$text-color-heading: #091b3d;
+$text-color-paragraph: #77838F;
+$button-bg-color: #10baac;
+$button-hover-color: #f76d57;
+
+// login
+$primaryColor: #0D9488;
+$headingColor: #101828;
+$subheadingColor: #475467;
+$inputLabelColor: #504f54;
+$inputBorderColor: #ebeaed;
+$inputBackgroundColor: #f6f5ff;
+$hoverBorderColor: #84818a;
+
+// Otp 
+$mainBackgroundColor: #f7f7f7;
+$backgroundColor: #ffffff;
+$headingColor: #091b3d;
+$paragraphColor: #77838F;
+$otpInputBorderColor: #ccc;
+$otpInputSeparatorColor: #555;
+$buttonBackgroundColor: #10baac;
+$buttonHoverColor: #f76d57;
+$buttonTextColor: #ffffff;
+
+// Thankyou
+$mainBackgroundColor_Thankyou: #f7f7f7;
+$backgroundColor_Thankyou: #ffffff;
+$headingColor_Thankyou: #161D25;
+$paragraphColor_Thankyou: #77838F;
+$resendCodeColor_Thankyou: #818181;
+$buttonBackgroundColor_Thankyou: #10BAAC;
+$buttonTextColor_Thankyou: #FFFFFF;
+$buttonHoverColor_Thankyou: #f76d57;
+
+// CreateQuestion
+$containerBackgroundColor: white;
+$selectButtonBackgroundColor: white;
+$selectButtonTextColor: gray;
+$selectedSelectButtonBackgroundColor: #10BAAC;
+$selectedSelectButtonTextColor: white;
+
+// FIllBlankGenerator
+$containerBackgroundColor: white;
+$selectButtonBackgroundColor: white;
+$selectButtonTextColor: black;
+$selectedSelectButtonBackgroundColor: #10BAAC;
+$selectedSelectButtonTextColor: white;
+
+$borderColor: #EBEAED;
+$tokenBackgroundColor: #F7F7F7;

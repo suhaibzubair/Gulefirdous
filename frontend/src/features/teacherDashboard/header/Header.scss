@@ -1,0 +1,243 @@
+.teacher-header {
+    width: auto;
+    height: 76px;
+    border-bottom: 1px solid #000000;
+    padding: 10px 32px;
+    display: flex;
+    align-items: center;
+    background-color: white;
+    justify-content: space-between;
+
+    .header-left {
+        width: auto;
+        gap: 80px;
+        display: flex;
+        align-items: center;
+justify-content: space-between;
+
+        .logo-container {
+            width: auto;
+            height: 54px;
+            gap: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+
+            img {
+                height: 100%;
+                width: 100%;
+                max-width: 100px;
+                max-height: 70px;
+                gap: 8px;
+            }
+
+            }
+        .toggle-btn{
+             color: black;
+             background-color: #10baac;
+             padding: 5px;
+        }
+
+        // .search-bar {
+        //     display: flex;
+        //     align-items: center;
+        //     justify-content: space-between;
+            //     width: 313px;
+            //     height: 46px;
+            //     border: 1px solid #EBEBEB;
+            //     border-radius: 8px;
+            //     background-color: #FDFDFD;
+            //     padding: 10px 20px;
+
+            //     .header-search-bar {
+                //         width: 310px;
+                //         height: 26px;
+                //         gap: 4px;
+                //         border: none;
+                //         outline: none;
+
+                //         &::placeholder {
+                    //             width: 94px;
+                    //             height: 19px;
+                    //             font-family: Work Sans;
+                    //             font-size: 16px;
+                    //             font-weight: 400;
+                    //             line-height: 19px;
+                    //             letter-spacing: 0px;
+                    //             text-align: left;
+                    //             color: #969BA0;
+                //         }
+        //     }
+
+            //     .search-icon {
+                //         width: 24px;
+                //         height: 24px;
+                //         color: #969BA0;
+            //     }
+        // }
+    }
+
+    .header-right {
+        width: auto;
+        height: 56px;
+        gap: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        &.clicked{
+            background-color: #10baac;
+        }
+
+        .msgs-notification-bar,
+        .settings-notifications {
+            width: 54px;
+            height: 54px;
+
+            .notifi-icon {
+                width: 28px;
+                height: 28px;
+                margin-top: 17px;
+                margin-left: 10px;
+                font-size: 18px;
+            }
+
+            .notifi-value {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 19px;
+                height: 19px;
+                margin: -45px 0px 0px 24px;
+                position: absolute;
+                font-size: 10px;
+                background-color: red;
+                color: white;
+                border-radius: 50%;
+            }
+        }
+
+        .header-vertical-bar {
+            span {
+                width: 1px;
+                height: 56px;
+            }
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            width: auto;
+            height: 56px;
+
+            .profile-name {
+                width: auto;
+                height: 19px;
+                font-family: Work Sans;
+                font-size: 16px;
+                font-weight: 600;
+                line-height: 19px;
+                letter-spacing: 0px;
+                text-align: left;
+                color: #464255;
+            }
+
+            .profile-img {
+                width: 56px;
+                height: 56px;
+                border-radius: 63px;
+                border: 2px solid #F5F5F5;
+            }
+        }
+    }
+}
+
+@media (max-width: 900px) {
+    .teacher-header {
+
+        .header-left {
+            .search-bar {
+                width: 40%;
+            }
+        }
+
+        .header-right {
+
+            .msgs-notification-bar,
+            .header-vertical-bar,
+            .settings-notifications {
+                display: none;
+            }
+        }
+
+
+        .teacher-header .header-right .msgs-notification-bar,
+        .settings-notifications {
+            width: 34px;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .teacher-header {
+
+            .header-left {
+                .search-bar {
+                    width: 40%;
+                    height: 20px;
+                }
+
+                .logo-container {
+                    height: 34px;
+
+                    img {
+                        width: 45px;
+                        height: 20px;
+                    }
+
+                    .logo-headline {
+                        height: 15px;
+                        font-size: 12px;
+                    }
+                }
+            }
+
+            .header-right {
+
+                .msgs-notification-bar,
+                .header-vertical-bar,
+                .settings-notifications {
+                    display: none;
+                }
+
+                .user-profile {
+                    .profile-name {
+                        font-size: 12px;
+                    }
+
+                    img {
+                        width: 36px !important;
+                        height: 36px !important;
+                    }
+                }
+            }
+
+
+            .teacher-header .header-right .msgs-notification-bar,
+            .settings-notifications {
+                width: 34px;
+            }
+        }
+    }
+
+    @media (max-width: 420px) {
+        .teacher-header {
+
+            .header-left {
+                .search-bar {
+                   display: none;
+                }
+
+            }
+        }
+    }
+}

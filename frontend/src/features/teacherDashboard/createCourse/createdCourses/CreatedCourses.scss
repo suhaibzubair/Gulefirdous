@@ -1,0 +1,91 @@
+.created-courses-wrapper {
+    width: auto;
+    height: auto;
+    padding: 20px;
+    border-radius: 8px;
+    gap: 36px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .course-item {
+        display: flex;
+
+        .left-section {
+            width: 25%;
+
+            img {
+                width: 305px;
+                height: 259px;
+                border-radius: 8px;
+
+            }
+        }
+
+        .right-section {
+            height: 259px;
+            width: 75%;
+            gap: 12px;
+            display: flex;
+            flex-direction: column;
+
+            .course-title-wrapper {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                h2 {
+                    //styleName: headings/h2;
+                    font-family: Work Sans;
+                    font-size: 24px;
+                    font-weight: 700;
+                    line-height: 28px;
+                    letter-spacing: 0px;
+                    text-align: left;
+                }
+
+                Button {
+                    width: 108px;
+                    height: 44px;
+                    padding: 10px;
+                    border-radius: 6px;
+                    gap: 4px;
+
+                    &:hover {
+                        background: linear-gradient(180deg, #10BAAC 0%, #0FA2B6 100%);
+                    }
+
+                }
+
+            }
+
+            .course-description-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+
+                h3 {
+                    font-family: Work Sans;
+                    font-size: 16px;
+                    font-weight: 700;
+                    line-height: 29px;
+                    letter-spacing: 0px;
+                    text-align: left;
+                    margin: 0px;
+
+                }
+
+                p {
+                    font-family: Work Sans;
+                    font-size: 16px;
+                    font-weight: 400;
+                    line-height: 29px;
+                    letter-spacing: 0px;
+                    text-align: left;
+                }
+
+            }
+        }
+    }
+}

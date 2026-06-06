@@ -1,0 +1,144 @@
+.plans-wrapper {
+    display: flex;
+    flex-direction: column;
+  
+    .plans-header {
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      margin-bottom: 100px;
+      margin-top: -40px;
+  
+      .plans-heading {
+        font-weight: bold;
+        font-size: 20px;
+        margin-left: 10px;
+      }
+  
+      .create-plan-button {
+        padding: 12px 10px;
+        border-radius: 10px;
+        text-transform: uppercase;
+        border: none;
+        background-color: #f8b406;
+        color: white;
+        font-weight: bold;
+        margin-right: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+  
+    .plan-details {
+      display: flex;
+      align-items: center;
+      margin: 10px 0 10px 7rem;
+  
+      .plan-keys {
+        background-color: #218c75;
+        padding: 10px 20px;
+        border-radius: 10px;
+        margin-right: 15px;
+        margin-top: 48px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px rgba(0, 0, 0, 0.1);
+  
+        div {
+          margin-top: 25px;
+          color: white;
+          font-weight: 500;
+          text-transform: uppercase;
+        }
+      }
+  
+      .plan {
+        display: flex;
+        flex-direction: column;
+  
+        .plans-title {
+          background-color: #fff;
+          padding: 10px 10px;
+          font-weight: 500;
+          font-size: 16px;
+          border-radius: 8px;
+          margin-bottom: 10px;
+          text-align: center;
+          margin-right: 15px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px rgba(0, 0, 0, 0.1);
+        }
+  
+        .plan-values {
+          background-color: #ffffff;
+          padding: 10px 10px;
+          border-radius: 10px;
+          margin-right: 15px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px rgba(0, 0, 0, 0.1);
+  
+          > div {
+            margin-top: 25px;
+            color: black;
+            text-align: center;
+            font-weight: 500;
+            text-transform: uppercase;
+          }
+        }
+      }
+    }
+  }
+  
+  .edit-plan-btn {
+    padding: 10px 30px;
+    background-color: #10baac;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    text-transform: uppercase;
+    color: white;
+    font-weight: 600;
+    margin: 0 auto;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px rgba(0, 0, 0, 0.1);
+    margin-left: 558px;
+    margin-bottom: 2rem;
+  }
+  
+  @media screen and (max-width: 767px) {
+    .plans-wrapper {
+      .plan-details {
+        margin: 10px 0; 
+      }
+  
+      .plans-header {
+        .create-plan-button {
+          margin-right: 1rem; 
+        }
+      }
+  
+      .edit-plan-btn {
+        margin-left: 0;
+      }
+    }
+  }
+  
+
+  
+  @media screen and (max-width: 767px) {
+    .plans-wrapper {
+      .plan-details {
+        margin: 10px 0; 
+      }
+  
+      .plans-header {
+        .create-plan-button {
+          margin-right: 1rem !important; 
+        }
+      }
+  
+      .edit-plan-btn {
+        margin-left: 0 !important; 
+      }
+    }
+  }
+  

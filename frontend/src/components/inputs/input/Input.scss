@@ -1,0 +1,50 @@
+.custom-input {
+    border: 1px solid #10BAAC;
+    border-radius: 4px;
+}
+
+.custom-input:focus {
+    border-color: #10BAAC;
+}
+
+.custom-input:hover {
+    border-color: #10BAAC;
+}
+
+.radio-button {
+    height: 15px;
+    width: 15px;
+    background-color: white;
+    accent-color: rgb(16, 161, 172);
+}
+
+.ant-checkbox {
+    border-radius: 6px;
+    height: 20px;
+    width: 20px;
+}
+
+.ant-checkbox:hover {
+    border: #10BAAC;
+}
+
+:where(.css-dev-only-do-not-override-i0102m).ant-checkbox-checked .ant-checkbox-inner{
+    background-color: #10BAAC !important;
+    border-color: #10BAAC !important;
+}
+.ant-select-selector:hover {
+    border: 1px solid #10BAAC !important;
+}
+
+.ant-select-selector:focus {
+    border: 1px solid #10BAAC !important;
+}
+
+// .ant-select-selection-overflow 
+// .ant-select-selection-overflow .ant-checkbox-input {
+//     display: none;
+// }
+
+// .ant-select-selection-overflow .ant-checkbox-indeterminate {
+//     display: none;
+// }

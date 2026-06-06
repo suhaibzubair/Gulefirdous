@@ -1,0 +1,48 @@
+
+.create-question-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+
+    .select-button {
+        margin-top: 32px;
+        width: 123px;
+        height: 39px;
+        padding: 10px;
+        border-radius: 4px;
+        border: none;
+        background-color: white;
+
+        h4 {
+            margin: 0;
+        }
+    }
+
+    .selected-select-button {
+        background-color: #10BAAC;
+        color: white;
+    }
+}
+
+.select-blanks-container {
+    border: 1px solid #EBEAED;
+    border-radius: 6px;
+    height: 115px;
+
+    .token {
+        padding: 4px 10px 4px 10px;
+        border: 1px solid #EBEAED;
+        width: 174px;
+    }
+
+    .selected-token {
+        background-color: #F7F7F7;
+    }
+}
+
+.token-text {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: 0px;
+}

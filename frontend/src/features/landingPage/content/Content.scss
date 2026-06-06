@@ -1,0 +1,949 @@
+// content.scss
+
+.content {
+    width: 1170px;
+    height: 2750px;
+    top: 122px;
+    left: 375px;
+    position: absolute;
+    overflow: hidden;
+
+    .breadcrumbs {
+        width: 261px;
+        height: 30px;
+        top: 0;
+        left: 0;
+        position: absolute;
+        font-family: Jost;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 30px;
+        letter-spacing: 0em;
+        text-align: left;
+        color: #77838F;
+
+    }
+
+    .course-inset {
+        width: auto;
+        height: auto;
+        margin-top: 203px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+
+        .course-title {
+            width: 770px;
+            height: 273px;
+            top: 203px;
+            left: 375px;
+            
+
+            .title-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+
+                .title-text {
+                    width: 554px;
+                    height: 102px;
+                    font-family: Jost;
+                    font-size: 35px;
+                    font-weight: 500;
+                    line-height: 51px;
+                    letter-spacing: 0em;
+                    text-align: left;
+                    color: #2F2D51;
+                    margin: 3px 0px;
+
+                }
+            }
+
+            .course-description {
+                Width: 654px;
+                Height: 60px;
+                font-family: Jost;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 30px;
+                letter-spacing: 0em;
+                text-align: left;
+                color: #77838F;
+                ;
+                margin: 6px 0px;
+            }
+
+            .course-details {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .course-image {
+                    width: 85px;
+                    height: 85px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    .eclipseIcon {
+
+                        background: url('../../../assets/images/videobg.png');
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        background-size: cover;
+                        border-radius: 50%;
+                        width: 69px;
+                        height: 69px;
+                    }
+                }
+
+                .course-info {
+                    width: 496px;
+                    height: 54px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-evenly;
+
+
+                    p {
+                        width: 78px;
+                        height: 30px;
+                        font-family: Jost;
+                        font-size: 16px;
+                        font-weight: 500;
+                        line-height: 30px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #2F2D51;
+                        margin: 5px 0px;
+                    }
+
+                    span {
+                        width: 75px;
+                        height: 30px;
+                        font-family: Jost;
+                        font-size: 14px;
+                        font-weight: 400;
+                        line-height: 30px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color:
+                            #77838F
+                    }
+
+
+                }
+            }
+
+        }
+
+        .custom-tabs {
+            width: 770px;
+            height: 1640px;
+
+            .ant-tabs-nav {
+                width: 100%;
+                height: 44px;
+                justify-content: space-between;
+                flex-direction: row;
+                border-bottom:1px solid #E7E7EC;
+
+                .ant-tabs-nav-list {
+                    .ant-tabs-tab {
+                        width: auto; 
+                        margin-right: 0; 
+
+                        .ant-tabs-tab-btn {
+                            color: #77838F;
+                            font-family: Jost;
+                            font-size: 20px;
+                            font-weight: 500;
+                            line-height: 29px;
+                            letter-spacing: 0em;
+                            text-align: left;
+                            
+                            &.ant-tabs-tab-active {
+                                color: #10baac; 
+                            }
+                        }
+                    }
+                }
+            }
+
+            .ant-tabs-content {
+                width: 100%;
+            }
+        }
+
+
+        .overview-tab-content {
+
+            width: 770px;
+            height: 971px;
+
+            .course-description {
+
+
+                h3 {
+                    width: 186px;
+                    height: 32px;
+                    font-family: Jost;
+                    font-size: 22px;
+                    font-weight: 500;
+                    line-height: 32px;
+                    letter-spacing: 0em;
+                    text-align: left;
+                    color: #2F2D51;
+                }
+
+                p {
+                    width: 770px;
+                    height: 210px;
+                    font-family: Jost;
+                    font-size: 16px;
+                    font-weight: 400;
+                    line-height: 30px;
+                    letter-spacing: 0em;
+                    text-align: left;
+                    color: #77838F;
+                }
+
+                .read-more {
+                    width: 112px;
+                    height: 26px;
+                    color: #10baac;
+
+                    span {
+                        width: 11px;
+                        height: 23px;
+                        font-family: Jost;
+                        font-size: 16px;
+                        font-weight: 500;
+                        line-height: 23px;
+                        letter-spacing: 0em;
+                        text-align: left;
+
+
+                    }
+
+                    .icon {
+                        margin-left: 10px;
+                        background-color: #10baac;
+                        padding: 5px 8px;
+                        border-radius: 35px;
+                        color: white;
+                        font-size: 16px;
+                        font-weight: bold;
+                    }
+
+                }
+            }
+
+            .Learn-section {
+                width: 750px;
+                height: 269px;
+
+                h3 {
+                    width: 165px;
+                    height: 32px;
+                    font-family: Jost;
+                    font-size: 22px;
+                    font-weight: 500;
+                    line-height: 32px;
+                    letter-spacing: 0em;
+                    text-align: left;
+                    color: #2F2D51;
+                }
+
+                .learn-items {
+                    display: flex;
+
+                    .learn-items-left {
+                        width: 361px;
+                        height: 225px;
+                        font-family: Jost;
+                        font-size: 16px;
+                        font-weight: 400;
+                        line-height: 45px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #77838F;
+                    }
+
+                    .learn-items-right {
+                        width: 279px;
+                        height: 225px;
+                        font-family: Jost;
+                        font-size: 16px;
+                        font-weight: 400;
+                        line-height: 45px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #77838F;
+
+                    }
+                }
+
+
+            }
+
+            .requirements {
+                width: 751px;
+                height: 180px;
+                font-family: Jost;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 45px;
+                letter-spacing: 0em;
+                text-align: left;
+                color: #77838F;
+            }
+
+            h3 {
+                width: 132px;
+                height: 32px;
+                font-family: Jost;
+                font-size: 22px;
+                font-weight: 500;
+                line-height: 32px;
+                letter-spacing: 0em;
+                text-align: left;
+                color: #2F2D51;
+            }
+
+            ul {
+                width: 751px;
+                height: 180px;
+                font-family: Jost;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 45px;
+                letter-spacing: 0em;
+                text-align: left;
+            }
+
+        }
+
+        .tab-content {
+            width: 770px;
+            height: 507px;
+
+
+            h3 {
+                width: 192px;
+                height: 32px;
+                font-family: Jost;
+                font-size: 22px;
+                font-weight: 500;
+                line-height: 32px;
+                letter-spacing: 0em;
+                text-align: left;
+                color: #2F2D51;
+            }
+
+            .instructor-info {
+                display: flex;
+                align-items: center;
+
+                .instructor-image {
+                    width: 140px;
+                    height: 140px;
+                    margin-right: 30px;
+
+                    .outside-border {
+                        width: 140px;
+                        height: 140px;
+                        border: 1px solid #E7E7EC;
+                        border-radius: 50%;
+                        box-shadow: 0px 8px 15px 0px #8C98A41A;
+                    }
+
+                    .inside-bg {
+                        width: 120px;
+                        height: 120px;
+                        margin: 9px auto;
+                        background: url('../../../assets/images/videobg.png');
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        background-size: cover;
+                        border-radius: 50%;
+                    }
+
+                }
+
+                .instructor-details {
+                    width: 200px;
+                    height: 57px;
+
+                    .instructor-name {
+                        width: 162px;
+                        height: 29px;
+                        font-family: Jost;
+                        font-size: 20px;
+                        font-weight: 500;
+                        line-height: 29px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #2F2D51;
+
+
+
+                    }
+
+                    .instructor-description {
+                        width: 200px;
+                        height: 30px;
+                        font-family: Jost;
+                        font-size: 16px;
+                        font-weight: 400;
+                        line-height: 30px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #77838F;
+
+                    }
+                }
+            }
+
+            .instructor-icons {
+                width: 657px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-top: 60px;
+
+
+                .social-item span {
+                    font-family: Jost;
+                    font-size: 16px;
+                    font-weight: 400;
+                    line-height: 30px;
+                    letter-spacing: 0em;
+                    text-align: left;
+                    color: #77838F;
+                    margin-left: 15px;
+                }
+            }
+
+            .instructor-description {
+                width: 770px;
+                height: 210px;
+                margin-top: 30px;
+                font-family: Jost;
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 30px;
+                letter-spacing: 0em;
+                text-align: left;
+                color: #77838F;
+
+                span {
+                    margin-bottom: 10px;
+                }
+
+            }
+
+        }
+
+        .review-tab-content {
+            width: 770px;
+            height: 1467px;
+
+
+            .review-content {
+                width: 770px;
+                height: 295px;
+
+                h3 {
+                    width: 169px;
+                    height: 32px;
+                    font-family: Jost;
+                    font-size: 22px;
+                    font-weight: 500;
+                    line-height: 32px;
+                    letter-spacing: 0em;
+                    text-align: left;
+                    color: #2F2D51;
+                }
+
+                .feedback-box-inner {
+                    display: flex;
+
+
+                    .feedback-box-text {
+                        width: 270px;
+                        height: 240px;
+                        border-radius: 4px;
+                        background-color: linear-gradient(0deg, #E7E7EC, #E7E7EC),
+                            linear-gradient(0deg, #FFFFFF, #FFFFFF);
+                        border: 1px solid #E7E7EC;
+                        box-shadow: 0px 8px 15px 0px #8C98A41A;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+
+
+                        .rating-value {
+                            width: 128px;
+                            height: 87px;
+                            font-family: Jost;
+                            font-size: 60px;
+                            font-weight: 500;
+                            line-height: 87px;
+                            letter-spacing: 0em;
+                            text-align: left;
+                            color: #2F2D51;
+                        }
+
+                        .rating-text {
+                            width: 108px;
+                            height: 26px;
+                            font-family: Jost;
+                            font-size: 18px;
+                            font-weight: 500;
+                            line-height: 26px;
+                            letter-spacing: 0em;
+                            text-align: left;
+                            color: #2F2D51;
+
+
+
+                        }
+
+                        .stars {
+                            width: 91px;
+                            height: 12.72px;
+                        }
+
+
+
+                    }
+
+                    .feedback-box-star {
+                        width: 470px;
+                        height: 232px;
+                        border-radius: 10px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 0px 20px;
+
+                        .rating-progress {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                        }
+
+                        .progress-bar {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: flex-start;
+                            justify-content: space-between;
+                            width: 50%;
+                            height: 90%;
+
+                        }
+
+                        .star-rating {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: flex-start;
+                            justify-content: space-between;
+                            height: 90%;
+                        }
+
+                        .total-rating-value {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: flex-start;
+                            justify-content: space-between;
+                            height: 90%;
+                        }
+
+
+                    }
+
+                }
+            }
+
+            .reviews-section {
+                width: 760.96px;
+                margin-top: 50px;
+
+                .review-item {
+                    display: flex;
+                    align-items: self-end;
+                    margin-bottom: 12px;
+
+                    .reviewer-image {
+                        width: 80px;
+                        height: 80px;
+                        background: url('../../../assets/images/videobg.png');
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        background-size: cover;
+                        border-radius: 50%;
+                        margin-right: 30px;
+                    }
+
+                    .reviewer-details {
+
+
+                        .name-rating {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            width: 620px;
+
+                            h4 {
+                                width: 648px;
+                                height: 26px;
+                                font-family: Jost;
+                                font-size: 18px;
+                                font-weight: 500;
+                                line-height: 26px;
+                                letter-spacing: 0em;
+                                text-align: left;
+                                color: #2F2D51;
+
+                            }
+
+                            span {
+                                width: 98px;
+                                display: flex;
+                                height: 13px;
+
+
+                            }
+
+                            .review-text {
+                                width: 648px;
+                                height: 30px;
+                                font-family: Jost;
+                                font-size: 14px;
+                                font-style: italic;
+                                font-weight: 400;
+                                line-height: 30px;
+                                letter-spacing: 0em;
+                                text-align: left;
+                                color: #77838F;
+                            }
+                        }
+
+                    }
+                }
+
+                p {
+                    width: 648px;
+                    height: 120px;
+                    font-family: Jost;
+                    font-size: 16px;
+                    font-weight: 400;
+                    line-height: 30px;
+                    letter-spacing: 0em;
+                    text-align: left;
+                    color: #77838F;
+                    margin-left: 110px;
+
+
+                }
+
+
+
+            }
+
+            .add-review-section {
+                width: 770px;
+                height: 677px;
+                border-radius: 4px;
+                border: 1px solid #E7E7EC;
+                box-shadow: 0px 8px 15px 0px #8C98A41A;
+                background-color: linear-gradient(0deg, #E7E7EC, #E7E7EC),
+                    linear-gradient(0deg, #FFFFFF, #FFFFFF);
+
+                .text-wraper {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                    padding: 25px 0px 0px 60px;
+
+                    h3 {
+                        width: 196px;
+                        height: 32px;
+                        font-family: Jost;
+                        font-size: 22px;
+                        font-weight: 500;
+                        line-height: 32px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #2F2D51;
+                    }
+
+                    .review-text {
+                        width: 648px;
+                        height: 30px;
+                        font-family: Jost;
+                        font-size: 16px;
+                        font-weight: 400;
+                        line-height: 30px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #77838F;
+                    }
+                }
+
+                .review-form {
+                    width: 650px;
+                    height: 445px;
+                    border-radius: 4px;
+                    padding: 0px 60px;
+
+                    .input-wraper {
+                        h3 {
+                            width: 105px;
+                            height: 30px;
+                            font-family: Jost;
+                            font-size: 16px;
+                            font-weight: 400;
+                            line-height: 30px;
+                            letter-spacing: 0em;
+                            text-align: left;
+                            color: #2F2D51;
+                        }
+
+                        .review-input {
+                            width: 650px;
+                            height: 60px;
+                            border-radius: 4px;
+                            border: 1px solid #090761;
+                            box-shadow: 0px 8px 15px 0px #8C98A41A;
+                            background-color: linear-gradient(0deg, #090761, #090761),
+                                linear-gradient(0deg, #FFFFFF, #FFFFFF);
+                            outline: none;
+
+                            &::placeholder {
+                                width: 48px;
+                                height: 30px;
+                                font-family: Jost;
+                                font-size: 14px;
+                                font-weight: 400;
+                                line-height: 30px;
+                                letter-spacing: 0em;
+                                text-align: left;
+                                color: #77838F;
+                                padding-left: 20px;
+
+                            }
+                        }
+
+                        .review-textarea {
+                            width: 650px;
+                            height: 200px;
+                            border-radius: 4px;
+                            border: 1px solid #E7E7EC;
+                            color: black;
+                            outline: none;
+                        padding: 20px;
+
+                            &::placeholder {
+                                width: 48px;
+                                height: 30px;
+                                font-family: Jost;
+                                font-size: 14px;
+                                font-weight: 400;
+                                line-height: 30px;
+                                letter-spacing: 0em;
+                                text-align: left;
+                                color: #77838F;
+                                
+
+                            }
+                        }
+
+
+                    }
+
+                    .submit-review-btn {
+                        background-color: #10baac;
+                        color: white;
+                        width: 320px;
+                        height: 60px;
+                        margin-top: 15px;
+
+                    }
+
+
+
+                }
+
+
+            }
+
+
+        }
+    }
+
+    .featured-section {
+        width: auto;
+        height: 522px;
+        top: 5150px;
+        left: 375px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        .feature-heading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            h2 {
+                width: 250px;
+                height: 51px;
+                font-family: Jost;
+                font-size: 35px;
+                font-weight: 500;
+                line-height: 51px;
+                letter-spacing: 0em;
+                text-align: left;
+                color: #2F2D51;
+                margin: 0px;
+            }
+
+            span {
+                width: 359px;
+                height: 30px;
+                font-family: Jost;
+                font-size: 18px;
+                font-weight: 400;
+                line-height: 30px;
+                letter-spacing: 0em;
+                text-align: left;
+                color: #77838F;
+            }
+        }
+
+        .featured-courses {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            .courses {
+                width: 270px;
+                height: 338px;
+                border-radius: 4px;
+                border: 1px solid #E7E7EC;
+                background-color: linear-gradient(0deg, #E7E7EC, #E7E7EC),
+                    linear-gradient(0deg, #FFFFFF, #FFFFFF);
+                box-shadow: 0px 8px 15px 0px #8C98A41A;
+
+                .img-container {
+                    width: 250px;
+                    height: 180px;
+                    left: 10px;
+                    border-radius: 4px;
+                    background: url('../../../assets/images/videobg.png');
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    background-size: cover;
+                    margin: 10px auto;
+
+                    .course-price {
+                        width: 58px;
+                        height: 26px;
+                        font-family: Jost;
+                        font-size: 18px;
+                        font-weight: 500;
+                        line-height: 26px;
+                        letter-spacing: 0em;
+                        text-align: right;
+                        color: #FFFFFF;
+                        float: right;
+                        margin: 155px 8px 0px 0px;
+                    }
+
+                }
+
+                .course-content {
+                    width: 230px;
+                    height: 168px;
+                    margin: 0 auto;
+
+                    span {
+                        width: 89px;
+                        height: 30px;
+                        font-family: Jost;
+                        font-size: 16px;
+                        font-weight: 400;
+                        line-height: 30px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #77838F;
+                    }
+
+                    h4 {
+                        width: 224px;
+                        height: 52px;
+                        font-family: Jost;
+                        font-size: 18px;
+                        font-weight: 500;
+                        line-height: 26px;
+                        letter-spacing: 0em;
+                        text-align: left;
+                        color: #2F2D51;
+                        margin: 10px 0px;
+                    }
+
+                    .course-rating {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+
+                        .icon-text {
+                            display: flex;
+                            align-items: center;
+
+                            span {
+                                width: 58px;
+                                height: 30px;
+                                font-family: Jost;
+                                font-size: 14px;
+                                font-weight: 400;
+                                line-height: 30px;
+                                letter-spacing: 0em;
+                                text-align: left;
+                                color: #77838F;
+                            }
+                        }
+
+                        .featured-rating {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+
+
+                    }
+                }
+
+
+            }
+        }
+
+        .featured-bullets {
+
+            .bullets {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+    }
+
+
+}

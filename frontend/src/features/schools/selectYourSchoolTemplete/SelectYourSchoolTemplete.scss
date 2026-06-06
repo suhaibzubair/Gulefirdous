@@ -1,0 +1,140 @@
+* {
+  font-family: "Work Sans";
+}
+
+.SelectYourSchoolTemplete_home_container {
+  display: flex;
+  width: 100%;
+}
+
+.Card_box_shadow {
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 30px 15px;
+  height: 100%;
+}
+
+.SelectYourSchoolTemplete_home_image {
+  width: 35%;
+  height: 100vh;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.SelectYourSchoolTemplete_container {
+  width: 65%;
+  overflow: hidden;
+}
+
+.SelectYourSchoolTemplete_para {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 18px;
+  color: #818181;
+  margin: 20px;
+}
+
+.SelectYourSchoolTemplete_heading {
+  margin: 20px;
+
+  h1 {
+    font-family: "Work Sans";
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 28px;
+    letter-spacing: 0px;
+    text-align: left;
+  }
+}
+
+.SelectYourSchoolTemplete_images {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+
+  img {
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+
+    &:hover {
+      transform: scale(1.1);
+      &::after {
+        content: "Image Name";
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 5px;
+        border-radius: 5px;
+        font-size: 14px;
+        opacity: 1;
+        transition: opacity 0.3s ease-in-out;
+      }
+    }
+  }
+}
+
+.SelectYourSchoolTemplete_form_btn_div {
+  display: flex;
+  justify-content: right;
+  gap: 20px;
+  width: 100%;
+  margin-top: 5px;
+
+  input[type="submit"] {
+    padding: 10px 20px;
+    width: 20%;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1023px) {
+  .home_image {
+    display: none !important;
+  }
+
+  .w_100 {
+    width: 100%;
+    max-width: 720px;
+    margin: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .SelectYourSchoolTemplete_form_btn {
+    width: 50%;
+  }
+}
+
+@media (max-width: 375px) {
+  .SelectYourSchoolTemplete_heading {
+    font-size: 18px;
+  }
+
+  .SelectYourSchoolTemplete_form_btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 320px) {
+  .SelectYourSchoolTemplete_heading {
+    font-size: 16px;
+  }
+
+  .SelectYourSchoolTemplete_form_btn {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1025px) {
+  .SelectYourSchoolTemplete_form_btn {
+    width: 20%;
+  }
+}

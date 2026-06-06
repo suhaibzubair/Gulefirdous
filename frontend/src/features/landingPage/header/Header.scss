@@ -1,0 +1,158 @@
+.header {
+    min-width: 1920px;
+    height: 110px;
+    border: 1px solid #000;
+    display: flex;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: 0px 20px;
+    background-color: white;
+
+    .header__left {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .header__logo {
+
+            img {
+                width: 75px;
+                height: 82.5px;
+                max-height: 90px;
+            }
+        }
+
+        .header__text {
+            height: 23px;
+            width: 102px;
+            margin-left: 15px;
+            font-size: 25px;
+        }
+
+        .header__courses {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+
+            .courses-container {
+                display: flex;
+                flex-direction: column;
+
+
+                .course-list {
+                    position: absolute;
+                    top: 9%;
+                    left: 30;
+                    width: 148px;
+                    background-color: white;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    z-index: 1000;
+                }
+
+                .course-list ul {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                }
+
+                .course-list li {
+                    padding: 10px;
+                    border-bottom: 1px solid #ccc;
+                }
+            }
+
+            .header__button {
+
+                padding: 10px 15px;
+                background-color: #10baac;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                margin-right: 10px;
+                width: 149px;
+                height: 50px;
+                font-size: 16px;
+
+                i {
+                    margin-right: 5px;
+
+                }
+            }
+
+            .header__search {
+                width: 450px;
+                height: 50px;
+                border-radius: 4px;
+                font-size: 16px;
+                text-transform: capitalize;
+                text-align: center;
+                border: 1px solid #E7E7EC;
+            }
+
+            .header__search::placeholder {
+                color: gray;
+            }
+
+            .header__search:focus {
+
+                border: none;
+                outline: none;
+            }
+        }
+    }
+
+    .header__right {
+        display: flex;
+        align-items: center;
+
+        .header__nav {
+            display: flex;
+            width: 527px;
+            height: 23px;
+
+            .dropdown-link:active {
+                color: #10baac;
+            }
+
+            .dropdown-link:hover {
+                color: #10baac;
+            }
+
+            ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+
+                li {
+                    display: inline-block;
+                    margin-right: 20px;
+                    text-decoration: none;
+
+                    a {
+                        text-decoration: none;
+                        color: black;
+                        font-size: 16px;
+
+                        &:hover {
+                            color: #10baac;
+                        }
+
+                        &:active {
+                            color: #10baac;
+                        }
+                    }
+                }
+
+            }
+        }
+
+        .header__user,
+        .header__cart {
+            margin-right: 20px;
+            font-size: 24px;
+            height: 27px;
+        }
+    }
+}

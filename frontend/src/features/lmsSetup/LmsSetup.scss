@@ -1,0 +1,95 @@
+
+
+* {
+  font-family: Work Sans;
+}
+
+.m_t_20 {
+  margin-top: 25px;
+  padding: 3px;
+}
+
+.letter_spac_1_3 {
+  letter-spacing: 1.3px;
+}
+
+.AboutYourSchool_home_container {
+  display: flex;
+  width: 100%;
+}
+
+.Org_home_image {
+  width: 50%;
+}
+
+.w_100_Lms_container {
+  width: 50%;
+  box-sizing: border-box; 
+  padding: 0 20px; 
+}
+
+.AboutYourLMS_heading h1 {
+  font-size: 40px;
+  line-height: 38px;
+}
+
+
+.AboutYourLMS_para {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 18px;
+  color: #2e2c34;
+}
+
+.AboutYourLMS_input_label {
+  display: inline-block;
+  color: #504f54;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 18.4px;
+  margin-bottom: 10px;
+}
+
+.AboutYourLMS_form_btn_div {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.AboutYourLMS_form_btn {
+  margin-top: 25px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #10baac;
+  color: white;
+  width: 15%;
+}
+
+.AboutYourLMS_form_btn_1 {
+  color: #818181;
+  border-color: #818181;
+  width: 15%;
+  display: flex;
+  justify-content: center;
+
+  margin-right: 20px;
+  margin-top: 25px;
+  height: 40px;
+  border-radius: 6px;
+  background-color: transparent;
+}
+
+/* Add the media query for responsive design */
+@media (max-width: 1023px) {
+  .Org_home_image {
+    width: 100%;
+  }
+
+  .w_100_Lms_container {
+    width: 100%;
+    padding: 0; 
+  }
+}

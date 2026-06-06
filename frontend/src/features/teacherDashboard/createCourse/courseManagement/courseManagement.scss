@@ -1,0 +1,168 @@
+// CourseManagement.scss
+
+.course-management-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    padding: 20px;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
+    .course-management-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        height: 40px;
+
+        h2 {
+            margin: 0;
+            font-family: Work Sans;
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 38px;
+            letter-spacing: 0px;
+            text-align: left;
+
+        }
+
+        .filter-icons {
+            display: flex;
+            gap: 25px;
+
+            .single-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                background-color: #10baac;
+                opacity: 0.4;
+                border-radius: 10px;
+            }
+
+            .multiple-icons {
+                width: 152px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+                background-color: #10baac;
+                opacity: 0.4;
+                border-radius: 15px;
+            }
+
+        }
+    }
+
+    .course-management-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+
+        .search-bar {
+            width: 500px;
+
+            .ant-input-wrapper {
+
+                .ant-input {
+                    display: flex;
+                    align-items: center;
+                    width: 400px;
+                    height: 46px;
+                    padding: 10px, 20px, 10px, 20px;
+                    border-radius: 8px 0px 0px 8px;
+                    border: 1px;
+                    justify-content: space-between;
+                }
+
+                .ant-input-group-addon {
+                    height: 46px;
+                    padding: 3px 10px;
+                    background-color: white;
+
+                    .ant-btn {
+                        border: none;
+                        width: 40px;
+                        height: 40px;
+                    }
+
+                }
+
+            }
+
+        }
+
+        .filter-wraper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+
+            .sorting-filter {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 196px;
+                height: 46px;
+                padding: 0px 20px;
+                border-radius: 8px;
+                border: 1px;
+                background-color: white;
+
+                span {
+                    margin-right: 5px;
+                    font-family: Work Sans;
+                    font-size: 16px;
+                    font-weight: 400;
+                    line-height: 19px;
+                    letter-spacing: 0px;
+                    text-align: left;
+
+                }
+
+                .ant-dropdown-trigger {
+                    .ant-dropdown-link {
+                        cursor: pointer;
+                        font-family: Work Sans;
+                        font-size: 16px;
+                        font-weight: 400;
+                        line-height: 19px;
+                        letter-spacing: 0px;
+                        text-align: left;
+
+                    }
+                }
+
+
+            }
+
+            Button {
+                width: 127px;
+                height: 46px;
+                padding: 10px;
+                border-radius: 6px;
+                gap: 4px;
+                .btn-text {
+                    font-family: Work Sans;
+                    font-size: 14px;
+                    font-weight: 500;
+                    line-height: 16px;
+                    letter-spacing: 0px;
+                    text-align: left;
+                    
+                }
+
+            }
+        }
+    }
+
+    .courses-cards{
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+    
+    }
+}

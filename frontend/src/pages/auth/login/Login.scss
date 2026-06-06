@@ -1,0 +1,130 @@
+$Signup: url(../../../assets/images/signup.png);
+
+.home_container_Signin {
+  display: flex;
+  width: 100%;
+  margin: auto;
+
+  .home_image_Signin {
+    width: 50%;
+    height: 100vh;
+    margin-top: 5px;
+    // border: 2px solid red;
+    background: $Signup no-repeat;
+    background-size: cover;
+  }
+
+  .signup_container_Signin {
+    width: 50%;
+    max-width: 500px;
+    margin: auto;
+
+    .form_heading_Signin {
+      color: #101828;
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .form_heading_details_Signin {
+      color: #475467;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 18.4px;
+      margin-bottom: 30px;
+    }
+
+    .input_label_Signin {
+      display: inline-block;
+      color: #504f54;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 18.4px;
+      margin-bottom: 9px;
+    }
+
+    .input_field_Signin {
+      width: 100%;
+      color: black;
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 20px;
+      display: flex;
+      padding: 11px 12px;
+      align-items: flex-start;
+      gap: 10px;
+      flex: 1 0 0;
+      align-self: stretch;
+      border-radius: 4px;
+      border: 1px solid #ebeaed;
+      background: #f6f5ff;
+
+      &:is(:hover, :focus, :active) {
+        border: 1px solid #84818a;
+      }
+    }
+
+    .input_password_details_Signin {
+      color: #475467;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+
+    .home_checkbox_Signin {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      color: #0D9488;
+    }
+
+    .input_password_details_letter_spac_1_3_Signin {
+      margin-top: 8px;
+      color: #475467;
+    }
+
+    .form_btn_Signin {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 46px;
+      padding: 10px;
+      gap: 4px;
+      align-self: stretch;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background: #0D9488;
+      width: 100%;
+      margin-top: 30px;
+      color: white;
+    }
+
+    .ending_details_Signin {
+      margin-top: 32px;
+      text-align: center;
+      color: #475467;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 18.4px;
+      cursor: pointer;
+
+      .reset_btn_hover:is(:hover, :focus, :active) {
+        color: black !important;
+        border: 1px solid black !important;
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 1023px) {
+      .home_image_Signin {
+        display: none !important;
+      }
+
+      .w_100 {
+        width: 100%;
+        max-width: 720px;
+        margin: auto;
+      }
+    }
+  }
+}
