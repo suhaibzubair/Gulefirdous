@@ -5,7 +5,7 @@ import CourseDetail from '../courseDetail/CourseDetail';
 import IMG from '../../../../assets/images/Back.png';
 import './CreatedCourses.scss';
 import { Modal } from 'antd';
-import ReactHtmlParser from 'react-html-parser';
+import parse from 'html-react-parser';
 
 const CreatedCourses: React.FC<CreatedCoursesProps> = ({
   courses,
@@ -57,7 +57,7 @@ const CreatedCourses: React.FC<CreatedCoursesProps> = ({
               </div>
               <div className="course-description-wrapper">
                 <h3>Description:</h3>
-                {ReactHtmlParser(course.description)}
+                {parse(course.description)}
               </div>
             </div>
           </div>

@@ -7,7 +7,7 @@ import ChapterContent from '../chapterContent/ChapterContent';
 import Upload from '../upload/Upload';
 import { SMALL_MODAL, MEDIUM_MODAL, LARGE_MODAL } from '../../../../constants/ModalSizes';
 import { Modal } from 'antd';
-import ReactHtmlParser from 'react-html-parser';
+import parse from 'html-react-parser';
 import { ChapterDetailProps } from './ChapterDetail.d';
 import './ChapterDetail.scss';
 
@@ -54,7 +54,7 @@ const ChapterDetail: React.FC<ChapterDetailProps> = ({ title, description }) => 
                     <div className="chaptr-title">
                         <div className="title-detial">
                             <h4>{title}</h4>
-                            <p>{ReactHtmlParser(description)}</p>
+                            <p>{parse(description)}</p>
                         </div>
                         <Edit style={{ fontSize: '16px' }} />
                     </div>
