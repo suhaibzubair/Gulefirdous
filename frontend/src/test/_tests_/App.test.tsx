@@ -109,5 +109,5 @@ test("adds a product draft with a selected gallery picture", () => {
     "src",
     "blob:gallery-upload"
   );
-  expect(screen.getByText(/Gallery upload: upload.svg/i)).toBeInTheDocument();
+  expect(screen.getAllByText(/Gallery upload: upload.svg/i).length).toBeGreaterThan(1);
 });

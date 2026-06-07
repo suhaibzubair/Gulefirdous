@@ -294,9 +294,6 @@ function GulefirdousApp() {
     setProducts((current) => [product, ...current]);
     setSelectedProductId(product.id);
     setNewProduct({ name: "", price: "", stock: "" });
-    const resetOptions = createImageOptions("Gulefirdous Perfume");
-    setImageOptions(resetOptions);
-    setSelectedImage(resetOptions[0]);
   };
 
   const generateImageOptions = () => {
