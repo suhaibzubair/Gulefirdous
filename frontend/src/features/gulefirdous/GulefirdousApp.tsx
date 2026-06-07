@@ -312,6 +312,16 @@ function GulefirdousApp() {
       return;
     }
 
+    if (typeof URL !== "undefined" && URL.createObjectURL) {
+      setSelectedImage({
+        id: `gallery-${file.name}-${Date.now()}`,
+        label: file.name,
+        url: URL.createObjectURL(file),
+        source: "Gallery upload",
+      });
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
       const galleryImage: ProductImageOption = {
@@ -480,9 +490,17 @@ function GulefirdousApp() {
               <button type="button" onClick={generateImageOptions}>
                 Generate AI picture options
               </button>
-              <label className="gf-gallery-picker">
+              <label className="gf-gallery-picker" htmlFor="product-gallery-image">
                 Select from mobile gallery
-                <input type="file" accept="image/*" onChange={selectGalleryImage} />
+                <input
+                  id="product-gallery-image"
+                  type="file"
+                  accept="image/*"
+                  onClick={(event) => {
+                    event.currentTarget.value = "";
+                  }}
+                  onChange={selectGalleryImage}
+                />
               </label>
             </div>
             <div className="gf-image-options" aria-label="Generated perfume picture options">

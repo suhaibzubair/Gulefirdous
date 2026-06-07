@@ -63,9 +63,21 @@ test("adds a product draft with a selected AI generated picture", () => {
 
 test("offers mobile gallery image selection for product pictures", () => {
   render(<App />);
+  const createObjectUrl = jest.fn(() => "blob:gallery-upload");
+
+  Object.defineProperty(URL, "createObjectURL", {
+    configurable: true,
+    value: createObjectUrl,
+  });
 
   const galleryInput = screen.getByLabelText(/Select from mobile gallery/i);
+  const galleryFile = new File(["<svg />"], "upload.svg", { type: "image/svg+xml" });
 
   expect(galleryInput).toHaveAttribute("type", "file");
   expect(galleryInput).toHaveAttribute("accept", "image/*");
+
+  fireEvent.change(galleryInput, { target: { files: [galleryFile] } });
+
+  expect(createObjectUrl).toHaveBeenCalledWith(galleryFile);
+  expect(screen.getByText(/Gallery upload: upload.svg/i)).toBeInTheDocument();
 });
