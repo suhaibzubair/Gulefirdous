@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import App from "../../App";
 
 test("renders the Gulefirdous MVP dashboard", () => {
@@ -34,4 +34,38 @@ test("creates a customer COD order from the app storefront", () => {
 
   expect(screen.getAllByText(/Cash on Delivery/i)).toHaveLength(initialOrders + 1);
   expect(screen.getAllByText(/Demo Customer/i).length).toBeGreaterThan(0);
+});
+
+test("adds a product draft with a selected AI generated picture", () => {
+  render(<App />);
+
+  fireEvent.change(screen.getByPlaceholderText(/Example: Amber Musk Perfume/i), {
+    target: { value: "Amber Musk Perfume" },
+  });
+  fireEvent.change(screen.getByPlaceholderText("4500"), {
+    target: { value: "4500" },
+  });
+  fireEvent.change(screen.getByPlaceholderText("30"), {
+    target: { value: "30" },
+  });
+
+  fireEvent.click(screen.getByRole("button", { name: /Generate AI picture options/i }));
+  fireEvent.click(
+    within(screen.getByLabelText(/Generated perfume picture options/i)).getByRole("button", {
+      name: /Rose gold mist/i,
+    })
+  );
+  fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
+
+  expect(screen.getByRole("img", { name: /Amber Musk Perfume product visual/i })).toBeInTheDocument();
+  expect(screen.getAllByText(/AI generated: Rose gold mist/i).length).toBeGreaterThan(1);
+});
+
+test("offers mobile gallery image selection for product pictures", () => {
+  render(<App />);
+
+  const galleryInput = screen.getByLabelText(/Select from mobile gallery/i);
+
+  expect(galleryInput).toHaveAttribute("type", "file");
+  expect(galleryInput).toHaveAttribute("accept", "image/*");
 });

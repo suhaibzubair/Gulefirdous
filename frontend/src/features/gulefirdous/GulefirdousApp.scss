@@ -247,6 +247,8 @@
 }
 
 .gf-product-form button,
+.gf-image-actions button,
+.gf-gallery-picker,
 .gf-publish-actions button,
 .gf-product-card button,
 .gf-order-actions button {
@@ -262,11 +264,111 @@
 }
 
 .gf-product-form button:hover,
+.gf-image-actions button:hover,
+.gf-gallery-picker:hover,
 .gf-publish-actions button:hover,
 .gf-product-card button:hover,
 .gf-order-actions button:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 24px rgba(23, 48, 39, 0.16);
+}
+
+.gf-image-tools {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid #e2e8e2;
+  border-radius: 22px;
+  background: #f8f5ec;
+}
+
+.gf-image-tools .gf-panel-title {
+  margin-bottom: 0;
+}
+
+.gf-image-tools h3 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.gf-image-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.gf-gallery-picker {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  background: #bd8c34;
+  text-align: center;
+}
+
+.gf-gallery-picker input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gf-image-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.gf-image-options button {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 2px solid transparent;
+  border-radius: 18px;
+  background: #fff;
+  color: #173027;
+  cursor: pointer;
+  font-weight: 800;
+  text-align: left;
+}
+
+.gf-image-options button.active {
+  border-color: #bd8c34;
+  background: #fff8ea;
+}
+
+.gf-image-options img,
+.gf-selected-image img,
+.gf-product-list img,
+.gf-product-image {
+  width: 100%;
+  object-fit: cover;
+  background: #173027;
+}
+
+.gf-image-options img {
+  aspect-ratio: 1.12;
+  border-radius: 14px;
+}
+
+.gf-selected-image {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.gf-selected-image img {
+  aspect-ratio: 1.18;
+  border-radius: 16px;
+}
+
+.gf-selected-image p {
+  margin: 6px 0 0;
 }
 
 .gf-product-list {
@@ -285,6 +387,11 @@
   color: #173027;
   text-align: left;
   cursor: pointer;
+}
+
+.gf-product-list img {
+  aspect-ratio: 1.4;
+  border-radius: 14px;
 }
 
 .gf-product-list button.active {
@@ -373,10 +480,18 @@
   background: #fff;
 }
 
+.gf-product-image,
 .gf-bottle {
   height: 150px;
   margin-bottom: 16px;
   border-radius: 24px;
+}
+
+.gf-product-image {
+  display: block;
+}
+
+.gf-bottle {
   background:
     radial-gradient(circle at 50% 34%, rgba(231, 190, 111, 0.42), transparent 24%),
     linear-gradient(180deg, #244c3d 0%, #0f271f 100%);
@@ -554,6 +669,7 @@
 
   .gf-stats,
   .gf-checklist,
+  .gf-image-options,
   .gf-product-list,
   .gf-shop {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -578,6 +694,9 @@
   .gf-stats,
   .gf-checklist,
   .gf-product-form,
+  .gf-image-actions,
+  .gf-image-options,
+  .gf-selected-image,
   .gf-product-list,
   .gf-shop,
   .gf-publish-actions,

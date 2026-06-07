@@ -9,6 +9,7 @@ type OrderStatus =
   | "Processing"
   | "Shipped"
   | "Delivered";
+type ImageSource = "AI generated" | "Gallery upload";
 
 interface Product {
   id: number;
@@ -19,6 +20,9 @@ interface Product {
   description: string;
   link: string;
   sourceCode: string;
+  imageUrl: string;
+  imageSource: ImageSource;
+  imageLabel: string;
 }
 
 interface Order {
@@ -41,6 +45,13 @@ interface Engagement {
   time: string;
 }
 
+interface ProductImageOption {
+  id: string;
+  label: string;
+  url: string;
+  source: ImageSource;
+}
+
 const statusOrder: OrderStatus[] = [
   "Order Placed",
   "COD Confirmed",
@@ -48,6 +59,63 @@ const statusOrder: OrderStatus[] = [
   "Shipped",
   "Delivered",
 ];
+
+const imagePalettes = [
+  { name: "Emerald oud", background: "#12372d", accent: "#e7be6f", glow: "#f8e4ad" },
+  { name: "Rose gold mist", background: "#6f2d3f", accent: "#f4c2c2", glow: "#fff0d8" },
+  { name: "Midnight attar", background: "#172033", accent: "#9fc5e8", glow: "#d7ecff" },
+  { name: "Saffron bloom", background: "#8d4f18", accent: "#f6c453", glow: "#fff3c2" },
+];
+
+function escapeSvgText(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function createPerfumeImageDataUrl(name: string, palette = imagePalettes[0]) {
+  const title = escapeSvgText(name || "Gulefirdous Perfume");
+  const subtitle = escapeSvgText(palette.name);
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700" viewBox="0 0 900 700">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="32%" r="58%">
+      <stop offset="0%" stop-color="${palette.glow}" stop-opacity="0.9"/>
+      <stop offset="52%" stop-color="${palette.accent}" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="${palette.background}" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bottle" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${palette.accent}" stop-opacity="0.95"/>
+      <stop offset="50%" stop-color="#fff8e8" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="${palette.accent}" stop-opacity="0.78"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="700" rx="48" fill="${palette.background}"/>
+  <circle cx="450" cy="250" r="330" fill="url(#glow)"/>
+  <path d="M170 560 C270 460 268 310 170 220 C310 258 340 400 302 560 Z" fill="${palette.accent}" opacity="0.17"/>
+  <path d="M730 560 C630 460 632 310 730 220 C590 258 560 400 598 560 Z" fill="${palette.accent}" opacity="0.17"/>
+  <rect x="392" y="104" width="116" height="70" rx="18" fill="${palette.accent}"/>
+  <rect x="360" y="156" width="180" height="82" rx="26" fill="#fff4d8" opacity="0.95"/>
+  <rect x="300" y="218" width="300" height="360" rx="88" fill="url(#bottle)" stroke="#fff7d7" stroke-width="6"/>
+  <rect x="352" y="330" width="196" height="142" rx="32" fill="${palette.background}" opacity="0.88" stroke="${palette.accent}" stroke-width="4"/>
+  <text x="450" y="395" text-anchor="middle" font-family="Georgia, serif" font-size="54" fill="${palette.accent}" letter-spacing="8">GF</text>
+  <text x="450" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#fff8e8">${subtitle}</text>
+  <text x="450" y="630" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#fff8e8">${title}</text>
+</svg>`;
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function createImageOptions(productName: string): ProductImageOption[] {
+  return imagePalettes.map((palette, index) => ({
+    id: `${palette.name}-${index}`,
+    label: palette.name,
+    url: createPerfumeImageDataUrl(productName, palette),
+    source: "AI generated",
+  }));
+}
 
 const initialProducts: Product[] = [
   {
@@ -59,6 +127,9 @@ const initialProducts: Product[] = [
     description: "Warm oud, amber, and floral musk perfume for premium gifting.",
     link: "https://gulefirdous.com/product/gulefirdous-royal-oud/",
     sourceCode: "ROYAL-OUD",
+    imageUrl: createPerfumeImageDataUrl("Gulefirdous Royal Oud", imagePalettes[0]),
+    imageSource: "AI generated",
+    imageLabel: imagePalettes[0].name,
   },
   {
     id: 2,
@@ -69,6 +140,9 @@ const initialProducts: Product[] = [
     description: "Fresh rose, citrus, and soft musk fragrance for daily wear.",
     link: "https://gulefirdous.com/product/gulefirdous-bloom-mist/",
     sourceCode: "BLOOM-MIST",
+    imageUrl: createPerfumeImageDataUrl("Gulefirdous Bloom Mist", imagePalettes[1]),
+    imageSource: "AI generated",
+    imageLabel: imagePalettes[1].name,
   },
   {
     id: 3,
@@ -79,6 +153,9 @@ const initialProducts: Product[] = [
     description: "A luxury attar selection with premium packaging.",
     link: "https://gulefirdous.com/product/heritage-attar-gift-set/",
     sourceCode: "ATTAR-SET",
+    imageUrl: createPerfumeImageDataUrl("Heritage Attar Gift Set", imagePalettes[3]),
+    imageSource: "AI generated",
+    imageLabel: imagePalettes[3].name,
   },
 ];
 
@@ -149,6 +226,10 @@ function GulefirdousApp() {
     price: "",
     stock: "",
   });
+  const [imageOptions, setImageOptions] = useState<ProductImageOption[]>(
+    createImageOptions("Gulefirdous Perfume")
+  );
+  const [selectedImage, setSelectedImage] = useState<ProductImageOption>(imageOptions[0]);
 
   const selectedProduct = useMemo(
     () => products.find((product) => product.id === selectedProductId) || products[0],
@@ -205,11 +286,44 @@ function GulefirdousApp() {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "")}/`,
       sourceCode: newProduct.name.toUpperCase().replace(/[^A-Z0-9]+/g, "-"),
+      imageUrl: selectedImage.url,
+      imageSource: selectedImage.source,
+      imageLabel: selectedImage.label,
     };
 
     setProducts((current) => [product, ...current]);
     setSelectedProductId(product.id);
     setNewProduct({ name: "", price: "", stock: "" });
+    const resetOptions = createImageOptions("Gulefirdous Perfume");
+    setImageOptions(resetOptions);
+    setSelectedImage(resetOptions[0]);
+  };
+
+  const generateImageOptions = () => {
+    const options = createImageOptions(newProduct.name || "Gulefirdous Perfume");
+    setImageOptions(options);
+    setSelectedImage(options[0]);
+  };
+
+  const selectGalleryImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const galleryImage: ProductImageOption = {
+        id: `gallery-${file.name}-${Date.now()}`,
+        label: file.name,
+        url: String(reader.result),
+        source: "Gallery upload",
+      };
+
+      setSelectedImage(galleryImage);
+    };
+    reader.readAsDataURL(file);
   };
 
   const placeOrder = (product: Product, source: string) => {
@@ -355,6 +469,48 @@ function GulefirdousApp() {
             <button type="submit">Add product draft</button>
           </form>
 
+          <div className="gf-image-tools">
+            <div className="gf-panel-title">
+              <div>
+                <p className="gf-eyebrow">Product pictures</p>
+                <h3>Choose AI generated or mobile gallery image</h3>
+              </div>
+            </div>
+            <div className="gf-image-actions">
+              <button type="button" onClick={generateImageOptions}>
+                Generate AI picture options
+              </button>
+              <label className="gf-gallery-picker">
+                Select from mobile gallery
+                <input type="file" accept="image/*" onChange={selectGalleryImage} />
+              </label>
+            </div>
+            <div className="gf-image-options" aria-label="Generated perfume picture options">
+              {imageOptions.map((option) => (
+                <button
+                  type="button"
+                  key={option.id}
+                  className={selectedImage.id === option.id ? "active" : ""}
+                  onClick={() => setSelectedImage(option)}
+                  aria-pressed={selectedImage.id === option.id}
+                >
+                  <img src={option.url} alt={`${option.label} perfume concept`} />
+                  <span>{option.label}</span>
+                </button>
+              ))}
+            </div>
+            <div className="gf-selected-image">
+              <img src={selectedImage.url} alt="Selected perfume product visual" />
+              <div>
+                <strong>Selected image</strong>
+                <p>
+                  {selectedImage.source}: {selectedImage.label}. This image will be attached to
+                  the next product draft.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="gf-product-list">
             {products.map((product) => (
               <button
@@ -363,9 +519,13 @@ function GulefirdousApp() {
                 key={product.id}
                 onClick={() => setSelectedProductId(product.id)}
               >
+                <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
                 <span>{product.name}</span>
                 <small>
                   {formatPrice(product.price)} - {product.stock} in stock
+                </small>
+                <small>
+                  {product.imageSource}: {product.imageLabel}
                 </small>
               </button>
             ))}
@@ -441,7 +601,11 @@ function GulefirdousApp() {
           <div className="gf-shop">
             {products.map((product) => (
               <div className="gf-product-card" key={product.id}>
-                <div className="gf-bottle" />
+                <img
+                  className="gf-product-image"
+                  src={product.imageUrl}
+                  alt={`${product.name} product visual`}
+                />
                 <span>{product.category}</span>
                 <h3>{product.name}</h3>
                 <p>{product.description}</p>
