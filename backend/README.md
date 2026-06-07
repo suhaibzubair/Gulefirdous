@@ -21,6 +21,8 @@ order, and webhook endpoints.
 
    `npm start`
 
+   The server loads `backend/.env` automatically for local development.
+
 ## Endpoints
 
 - `GET /health`
