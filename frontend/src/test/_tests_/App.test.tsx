@@ -81,3 +81,33 @@ test("offers mobile gallery image selection for product pictures", () => {
   expect(createObjectUrl).toHaveBeenCalledWith(galleryFile);
   expect(screen.getByText(/Gallery upload: upload.svg/i)).toBeInTheDocument();
 });
+
+test("adds a product draft with a selected gallery picture", () => {
+  render(<App />);
+  const createObjectUrl = jest.fn(() => "blob:gallery-upload");
+
+  Object.defineProperty(URL, "createObjectURL", {
+    configurable: true,
+    value: createObjectUrl,
+  });
+
+  fireEvent.change(screen.getByPlaceholderText(/Example: Amber Musk Perfume/i), {
+    target: { value: "Amber Musk Perfume" },
+  });
+  fireEvent.change(screen.getByPlaceholderText("4500"), {
+    target: { value: "4500" },
+  });
+  fireEvent.change(screen.getByPlaceholderText("30"), {
+    target: { value: "30" },
+  });
+  fireEvent.change(screen.getByLabelText(/Select from mobile gallery/i), {
+    target: { files: [new File(["<svg />"], "upload.svg", { type: "image/svg+xml" })] },
+  });
+  fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
+
+  expect(screen.getByRole("img", { name: /Amber Musk Perfume product visual/i })).toHaveAttribute(
+    "src",
+    "blob:gallery-upload"
+  );
+  expect(screen.getByText(/Gallery upload: upload.svg/i)).toBeInTheDocument();
+});
