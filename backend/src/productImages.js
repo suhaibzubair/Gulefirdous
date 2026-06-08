@@ -19,19 +19,19 @@ const PERFUME_PHOTOS = [
   },
   {
     label: "Vintage glass parfum",
-    url: "https://images.unsplash.com/photo-1615634260167-c8cdede0be93?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.unsplash.com/photo-1731972206777-d9f796597a60?auto=format&fit=crop&w=900&h=700&q=80",
   },
   {
     label: "Amber studio flacon",
-    url: "https://images.unsplash.com/photo-1619994407353-a7934441ba96?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.unsplash.com/photo-1716978499366-d5a84bf1fe70?auto=format&fit=crop&w=900&h=700&q=80",
   },
   {
     label: "Soft pink perfume",
-    url: "https://images.unsplash.com/photo-1594035910387-fea477ed73fe?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.unsplash.com/photo-1595425959632-34f2822322ce?auto=format&fit=crop&w=900&h=700&q=80",
   },
   {
     label: "Classic square flacon",
-    url: "https://images.unsplash.com/photo-1523293182086-82c8e283b531?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.unsplash.com/photo-1739390346134-a9b564de5dfc?auto=format&fit=crop&w=900&h=700&q=80",
   },
   {
     label: "Pearl glass bottle",
@@ -39,7 +39,7 @@ const PERFUME_PHOTOS = [
   },
   {
     label: "Blush glass perfume",
-    url: "https://images.unsplash.com/photo-1557170331-0e5d046c770f?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.unsplash.com/photo-1585218334450-afcf929da36e?auto=format&fit=crop&w=900&h=700&q=80",
   },
 ];
 
@@ -62,7 +62,7 @@ const GIFT_SET_PHOTOS = [
   },
   {
     label: "Satin rose gift pair",
-    url: "https://images.unsplash.com/photo-1592945403240-b6ae04040493?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.unsplash.com/photo-1610113233329-1c73b6f7fe98?auto=format&fit=crop&w=900&h=700&q=80",
   },
   {
     label: "Clear luxury duo",
@@ -85,7 +85,7 @@ const ATTAR_PHOTOS = [
   },
   {
     label: "Dark oud decanter",
-    url: "https://images.unsplash.com/photo-1588400133328-18562b372bf1?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.pexels.com/photos/1037989/pexels-photo-1037989.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
   },
   {
     label: "Matte black attar",
@@ -101,7 +101,7 @@ const ATTAR_PHOTOS = [
   },
   {
     label: "Heritage oud bottle",
-    url: "https://images.unsplash.com/photo-1619994407353-a7934441ba96?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
   },
   {
     label: "Royal attar flask",
@@ -116,7 +116,7 @@ const ATTAR_PHOTOS = [
 const BODY_MIST_PHOTOS = [
   {
     label: "Frosted glass mist",
-    url: "https://images.pexels.com/photos/2982287/pexels-photo-2982287.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
+    url: "https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
   },
   {
     label: "Champagne mist bottle",
@@ -124,11 +124,11 @@ const BODY_MIST_PHOTOS = [
   },
   {
     label: "Minimal clear mist",
-    url: "https://images.unsplash.com/photo-1563170351-82e2fdf2495a?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.pexels.com/photos/4467687/pexels-photo-4467687.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
   },
   {
     label: "Soft pink body mist",
-    url: "https://images.unsplash.com/photo-1594035910387-fea477ed73fe?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.pexels.com/photos/6169656/pexels-photo-6169656.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
   },
   {
     label: "Sleek spray flacon",
@@ -136,7 +136,7 @@ const BODY_MIST_PHOTOS = [
   },
   {
     label: "Fresh citrus mist",
-    url: "https://images.unsplash.com/photo-1592945403240-b6ae04040493?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.pexels.com/photos/2733918/pexels-photo-2733918.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
   },
   {
     label: "Pearl mist bottle",
@@ -144,7 +144,7 @@ const BODY_MIST_PHOTOS = [
   },
   {
     label: "Blush daily mist",
-    url: "https://images.unsplash.com/photo-1557170331-0e5d046c770f?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.pexels.com/photos/2849742/pexels-photo-2849742.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
   },
 ];
 
@@ -159,7 +159,7 @@ const CANDLE_PHOTOS = [
   },
   {
     label: "Warm glow candle",
-    url: "https://images.unsplash.com/photo-1602607898194-469c2fdba013?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
   },
   {
     label: "Spa candle trio",
@@ -171,7 +171,7 @@ const CANDLE_PHOTOS = [
   },
   {
     label: "Evening scented candle",
-    url: "https://images.unsplash.com/photo-1572721331025-651f68a35549?auto=format&fit=crop&w=900&h=700&q=80",
+    url: "https://images.pexels.com/photos/5473184/pexels-photo-5473184.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
   },
   {
     label: "Rose wax candle",

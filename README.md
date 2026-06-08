@@ -3,6 +3,9 @@
 This repository contains the Gulefirdous MVP migrated from the SolsGate
 `cursor/gulefirdous-mvp-caad` branch.
 
+**Continuing development with Cursor?** Read the full agent onboarding guide:
+[`docs/CURSOR_AGENT_GUIDE.md`](docs/CURSOR_AGENT_GUIDE.md)
+
 - A React MVP dashboard for product drafts, Facebook/Instagram publishing actions,
   COD ordering, TCS tracking, referrals, and source analytics.
 - A Node backend proxy under `backend/` for secure WooCommerce product/order sync.
