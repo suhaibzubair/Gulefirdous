@@ -117,7 +117,7 @@ test("adds a product draft with a selected gallery picture", () => {
   expect(screen.getAllByText(/Gallery upload: upload.svg/i).length).toBeGreaterThan(1);
 });
 
-test("warns when adding a duplicate perfume name", () => {
+test("allows the same perfume name when volume, audience, or notes differ", () => {
   render(<App />);
 
   const royalOudCardsBefore = screen.getAllByRole("heading", {
@@ -127,8 +127,42 @@ test("warns when adding a duplicate perfume name", () => {
   fillProductDraftForm("Gulefirdous Royal Oud");
   fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
 
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(
+    screen.getAllByRole("heading", { name: /Gulefirdous Royal Oud/i })
+  ).toHaveLength(royalOudCardsBefore + 1);
+  expect(screen.getAllByText(/75 ml · Unisex/i).length).toBeGreaterThan(0);
+});
+
+test("warns when name, volume, audience, and notes all match an existing product", () => {
+  render(<App />);
+
+  const royalOudCardsBefore = screen.getAllByRole("heading", {
+    name: /Gulefirdous Royal Oud/i,
+  }).length;
+
+  fireEvent.change(screen.getByPlaceholderText(/Example: Amber Musk Perfume/i), {
+    target: { value: "Gulefirdous Royal Oud" },
+  });
+  fireEvent.change(screen.getByPlaceholderText("4500"), {
+    target: { value: "5200" },
+  });
+  fireEvent.change(screen.getByPlaceholderText("30"), {
+    target: { value: "28" },
+  });
+  fireEvent.change(screen.getByPlaceholderText("50"), {
+    target: { value: "100" },
+  });
+  fireEvent.change(screen.getByLabelText(/^For$/i), {
+    target: { value: "Men" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: /^Oud$/i }));
+  fireEvent.click(screen.getByRole("button", { name: /^Amber$/i }));
+  fireEvent.click(screen.getByRole("button", { name: /^Woody$/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
+
   expect(screen.getByRole("alert")).toHaveTextContent(
-    /"Gulefirdous Royal Oud" already exists as "Gulefirdous Royal Oud"/i
+    /"Gulefirdous Royal Oud" already exists with the same name, volume, audience, and fragrance notes/i
   );
   expect(
     screen.getAllByRole("heading", { name: /Gulefirdous Royal Oud/i })

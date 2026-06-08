@@ -192,13 +192,39 @@ function normalizeProductName(name: string) {
   return name.trim().toLowerCase();
 }
 
-function findDuplicateProduct(products: Product[], name: string, excludeId?: number) {
+function normalizeFragranceNotes(notes: string[]) {
+  return [...notes].sort().join("|");
+}
+
+function findDuplicateProduct(
+  products: Product[],
+  name: string,
+  volumeMl: number,
+  audience: ProductAudience,
+  notes: string[],
+  excludeId?: number
+) {
   const normalized = normalizeProductName(name);
+  const noteKey = normalizeFragranceNotes(notes);
 
   return products.find(
     (product) =>
-      product.id !== excludeId && normalizeProductName(product.name) === normalized
+      product.id !== excludeId &&
+      normalizeProductName(product.name) === normalized &&
+      product.volumeMl === volumeMl &&
+      product.audience === audience &&
+      normalizeFragranceNotes(product.notes) === noteKey
   );
+}
+
+function formatDuplicateDetails(product: Product) {
+  const noteText = product.notes.length ? product.notes.join(", ") : "no notes selected";
+
+  return `${product.volumeMl} ml, ${product.audience}, notes: ${noteText}`;
+}
+
+function buildProductSlug(name: string, volumeMl: number) {
+  return `${slugifyProductName(name)}-${volumeMl}ml`;
 }
 
 function buildProductDescription(volumeMl: number, audience: ProductAudience, notes: string[]) {
@@ -335,17 +361,26 @@ function GulefirdousApp() {
       return;
     }
 
-    const duplicate = findDuplicateProduct(products, trimmedName, editingProductId ?? undefined);
+    const duplicate = findDuplicateProduct(
+      products,
+      trimmedName,
+      volumeMl,
+      newProduct.audience,
+      newProduct.notes,
+      editingProductId ?? undefined
+    );
 
     if (duplicate) {
       setProductFormError(
-        `"${trimmedName}" already exists as "${duplicate.name}". Edit that product or choose a different name.`
+        `"${trimmedName}" already exists with the same name, volume, audience, and fragrance notes (${formatDuplicateDetails(
+          duplicate
+        )}). Edit that product or change one of these details.`
       );
       return;
     }
 
     const description = buildProductDescription(volumeMl, newProduct.audience, newProduct.notes);
-    const slug = slugifyProductName(trimmedName);
+    const slug = buildProductSlug(trimmedName, volumeMl);
 
     if (editingProductId) {
       setProducts((current) =>
@@ -361,7 +396,7 @@ function GulefirdousApp() {
                 notes: [...newProduct.notes],
                 description,
                 link: `https://gulefirdous.com/product/${slug}/`,
-                sourceCode: trimmedName.toUpperCase().replace(/[^A-Z0-9]+/g, "-"),
+                sourceCode: `${trimmedName.toUpperCase().replace(/[^A-Z0-9]+/g, "-")}-${volumeMl}ML`,
                 imageUrl: selectedImage.url,
                 imageSource: selectedImage.source,
                 imageLabel: selectedImage.label,
@@ -385,7 +420,7 @@ function GulefirdousApp() {
       notes: [...newProduct.notes],
       description,
       link: `https://gulefirdous.com/product/${slug}/`,
-      sourceCode: trimmedName.toUpperCase().replace(/[^A-Z0-9]+/g, "-"),
+      sourceCode: `${trimmedName.toUpperCase().replace(/[^A-Z0-9]+/g, "-")}-${volumeMl}ML`,
       imageUrl: selectedImage.url,
       imageSource: selectedImage.source,
       imageLabel: selectedImage.label,
