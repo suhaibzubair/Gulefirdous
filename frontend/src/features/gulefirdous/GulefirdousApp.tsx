@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import GulefirdousDashboard from "./GulefirdousDashboard";
 import GulefirdousLogin from "./GulefirdousLogin";
 import {
   ADMIN_NAV,
@@ -1094,57 +1095,12 @@ function GulefirdousApp() {
       switch (activePage) {
         case "dashboard":
           return (
-            <>
-              <section className="gf-hero gf-hero-compact">
-                <div className="gf-brand">
-                  <div>
-                    <p className="gf-eyebrow">Admin &amp; mobile commerce</p>
-                    <h1>Gulefirdous commerce and social publishing app</h1>
-                    <p>
-                      Manage WordPress products, publish posts to Facebook and Instagram, receive
-                      engagement notifications, and process COD orders with TCS tracking.
-                    </p>
-                  </div>
-                </div>
-                <div className="gf-hero-card">
-                  <span className="gf-hero-badge">Mobile first</span>
-                  <strong>Shop-ready dashboard for gulefirdous.com</strong>
-                  <p>
-                    WooCommerce sync, social ads, customer COD orders, and TCS tracking in one
-                    place.
-                  </p>
-                  <button
-                    type="button"
-                    className="gf-hero-cta"
-                    onClick={() => setActivePage("manage-products")}
-                  >
-                    Manage products
-                  </button>
-                </div>
-              </section>
-              <section className="gf-stats" aria-label="App readiness">
-                <article>
-                  <span>WooCommerce</span>
-                  <strong>Setup required</strong>
-                  <p>Install plugin, create API keys, then sync products.</p>
-                </article>
-                <article>
-                  <span>Meta channels</span>
-                  <strong>Facebook + Instagram</strong>
-                  <p>Separate publish buttons with per-platform status.</p>
-                </article>
-                <article>
-                  <span>Payments</span>
-                  <strong>COD first</strong>
-                  <p>JazzCash, Easypaisa, and bank gateways can follow.</p>
-                </article>
-                <article>
-                  <span>Delivery</span>
-                  <strong>TCS tracking</strong>
-                  <p>Admin adds tracking numbers for customer visibility.</p>
-                </article>
-              </section>
-            </>
+            <GulefirdousDashboard
+              orders={orders}
+              products={products}
+              totalRevenue={totalRevenue}
+              displayName={session.displayName}
+            />
           );
         case "product-catalog":
           return (

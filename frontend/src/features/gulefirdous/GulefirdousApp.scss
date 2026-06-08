@@ -405,6 +405,208 @@
   font-weight: 600;
 }
 
+.gf-dashboard {
+  display: grid;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.gf-dashboard-welcome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 28px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #2a1f2d 0%, #1a3d34 58%, #120f14 100%);
+  color: #f8f2ea;
+  box-shadow: var(--gf-shadow);
+}
+
+.gf-dashboard-welcome h2 {
+  margin: 0 0 8px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(28px, 4vw, 38px);
+  line-height: 1.05;
+}
+
+.gf-dashboard-welcome p {
+  margin: 0;
+  color: rgba(248, 242, 234, 0.76);
+  line-height: 1.55;
+}
+
+.gf-dashboard-year-pill {
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(232, 185, 138, 0.16);
+  border: 1px solid rgba(232, 185, 138, 0.28);
+  color: var(--gf-rose-gold);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.gf-dashboard-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.gf-kpi-card {
+  display: grid;
+  gap: 8px;
+  padding: 22px;
+  border-radius: 16px;
+  background: var(--gf-white);
+  border: 1px solid rgba(42, 31, 45, 0.08);
+  box-shadow: var(--gf-shadow);
+}
+
+.gf-kpi-card span {
+  color: var(--gf-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.gf-kpi-card strong {
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.1;
+  color: var(--gf-dark);
+}
+
+.gf-kpi-card small {
+  color: #8d7f89;
+  font-size: 12px;
+}
+
+.gf-kpi-orders {
+  background: linear-gradient(180deg, #fff 0%, #f7f2ff 100%);
+}
+
+.gf-kpi-revenue {
+  background: linear-gradient(180deg, #fff 0%, #f8f4ea 100%);
+}
+
+.gf-kpi-categories {
+  background: linear-gradient(180deg, #fff 0%, #eef7f3 100%);
+}
+
+.gf-kpi-social {
+  background: linear-gradient(180deg, #fff 0%, #fdeff2 100%);
+}
+
+.gf-dashboard-panel {
+  padding: 22px;
+  border-radius: 18px;
+  background: var(--gf-white);
+  border: 1px solid rgba(42, 31, 45, 0.08);
+  box-shadow: var(--gf-shadow);
+}
+
+.gf-dashboard-panel-wide {
+  min-width: 0;
+}
+
+.gf-dashboard-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.gf-dashboard-panel-head h3 {
+  margin: 0 0 4px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 28px;
+  color: var(--gf-dark);
+}
+
+.gf-dashboard-panel-head p {
+  margin: 0;
+  color: var(--gf-muted);
+  font-size: 13px;
+}
+
+.gf-dashboard-panel-head > strong {
+  color: var(--gf-gold);
+  font-size: 22px;
+}
+
+.gf-dashboard-chart {
+  position: relative;
+  width: 100%;
+}
+
+.gf-dashboard-chart-line {
+  height: 320px;
+}
+
+.gf-dashboard-chart-bar,
+.gf-dashboard-chart-doughnut {
+  height: 260px;
+}
+
+.gf-dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 20px;
+}
+
+.gf-dashboard-category-list,
+.gf-dashboard-social-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.gf-dashboard-category-item,
+.gf-dashboard-social-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8f2ea;
+}
+
+.gf-dashboard-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.gf-dashboard-category-item strong,
+.gf-dashboard-social-item span {
+  color: var(--gf-dark);
+  font-size: 14px;
+}
+
+.gf-dashboard-category-item em,
+.gf-dashboard-social-item strong {
+  color: var(--gf-plum);
+  font-style: normal;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.gf-dashboard-social-item {
+  grid-template-columns: 1fr auto auto;
+}
+
+.gf-dashboard-social-item small {
+  color: var(--gf-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
 .gf-topbar {
   display: flex;
   flex-wrap: wrap;
@@ -1447,6 +1649,11 @@
 }
 
 @media (max-width: 1180px) {
+  .gf-dashboard-kpis,
+  .gf-dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .gf-shell {
     grid-template-columns: 1fr;
   }
@@ -1481,6 +1688,15 @@
 }
 
 @media (max-width: 720px) {
+  .gf-dashboard-kpis,
+  .gf-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gf-dashboard-chart-line {
+    height: 260px;
+  }
+
   .gf-main-header,
   .gf-page-content {
     padding-left: 18px;

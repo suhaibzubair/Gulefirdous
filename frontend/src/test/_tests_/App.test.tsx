@@ -39,12 +39,11 @@ test("renders the Gulefirdous MVP dashboard", () => {
 
   signInAsAdmin();
 
-  expect(
-    screen.getByRole("heading", {
-      name: /gulefirdous commerce and social publishing app/i,
-    })
-  ).toBeInTheDocument();
-  expect(screen.getByText(/Shop-ready dashboard for gulefirdous.com/i)).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: /Admin dashboard/i })).toBeInTheDocument();
+  expect(screen.getByText(/Total orders/i)).toBeInTheDocument();
+  expect(screen.getByText(/Yearly sales/i)).toBeInTheDocument();
+  expect(screen.getByText(/Sales by category/i)).toBeInTheDocument();
+  expect(screen.getByText(/Social media users/i)).toBeInTheDocument();
 
   goToSidebarPage("Social ads");
   expect(screen.getByRole("button", { name: /Post to Facebook/i })).toBeInTheDocument();
