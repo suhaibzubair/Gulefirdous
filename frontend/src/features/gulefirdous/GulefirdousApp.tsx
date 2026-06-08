@@ -248,6 +248,14 @@ function slugifyProductName(name: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+function buildDefaultPostCaption(product: Product) {
+  const noteText = product.notes.length ? product.notes.join(", ") : "Signature blend";
+
+  return `${product.name}\n${product.description}\n${product.volumeMl} ml · ${product.audience} · ${noteText}\nPrice: ${formatPrice(
+    product.price
+  )}\nOrder now: ${withSource(product, "facebook")}`;
+}
+
 function GulefirdousApp() {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [selectedProductId, setSelectedProductId] = useState(initialProducts[0].id);
@@ -279,6 +287,9 @@ function GulefirdousApp() {
     label: string;
     source?: string;
   } | null>(null);
+  const [captionDrafts, setCaptionDrafts] = useState<Record<number, string>>(() =>
+    Object.fromEntries(initialProducts.map((product) => [product.id, buildDefaultPostCaption(product)]))
+  );
 
   useEffect(() => {
     if (!imagePreview) {
@@ -298,6 +309,25 @@ function GulefirdousApp() {
     };
   }, [imagePreview]);
 
+  useEffect(() => {
+    setCaptionDrafts((current) => {
+      if (current[selectedProductId]) {
+        return current;
+      }
+
+      const product = products.find((item) => item.id === selectedProductId);
+
+      if (!product) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [selectedProductId]: buildDefaultPostCaption(product),
+      };
+    });
+  }, [selectedProductId, products]);
+
   const selectedProduct = useMemo(
     () => products.find((product) => product.id === selectedProductId) || products[0],
     [products, selectedProductId]
@@ -306,21 +336,30 @@ function GulefirdousApp() {
   const latestOrderProduct =
     products.find((product) => product.id === latestOrder.productId) || products[0];
 
-  const postCaption = useMemo(() => {
-    const noteText = selectedProduct.notes.length
-      ? selectedProduct.notes.join(", ")
-      : "Signature blend";
-
-    return `${selectedProduct.name}\n${selectedProduct.description}\n${selectedProduct.volumeMl} ml · ${selectedProduct.audience} · ${noteText}\nPrice: ${formatPrice(
-      selectedProduct.price
-    )}\nOrder now: ${withSource(selectedProduct, "facebook")}`;
-  }, [selectedProduct]);
+  const editableCaption =
+    captionDrafts[selectedProductId] ?? buildDefaultPostCaption(selectedProduct);
 
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
   const instagramOrders = orders.filter((order) => order.source === "Instagram").length;
   const facebookOrders = orders.filter((order) => order.source === "Facebook").length;
 
+  const updateCaptionDraft = (value: string) => {
+    setCaptionDrafts((current) => ({
+      ...current,
+      [selectedProductId]: value,
+    }));
+  };
+
+  const resetCaptionDraft = () => {
+    setCaptionDrafts((current) => ({
+      ...current,
+      [selectedProductId]: buildDefaultPostCaption(selectedProduct),
+    }));
+  };
+
   const publishPost = (platform: Platform) => {
+    const captionPreview = editableCaption.trim().split("\n")[0] || selectedProduct.name;
+
     setPublishStatus((current) => ({ ...current, [platform]: "Published" }));
     setEngagements((current) => [
       {
@@ -330,8 +369,8 @@ function GulefirdousApp() {
         type: "Comment",
         message:
           platform === "facebook"
-            ? "Facebook post published. Comments and reactions will appear here."
-            : "Instagram post published. Link is included as tracked campaign text.",
+            ? `Facebook post published with caption: "${captionPreview}". Comments and reactions will appear here.`
+            : `Instagram post published with caption: "${captionPreview}". Link is included as tracked campaign text.`,
         time: "Just now",
       },
       ...current,
@@ -458,6 +497,10 @@ function GulefirdousApp() {
 
     setProducts((current) => [product, ...current]);
     setSelectedProductId(product.id);
+    setCaptionDrafts((current) => ({
+      ...current,
+      [product.id]: buildDefaultPostCaption(product),
+    }));
     resetProductForm();
   };
 
@@ -575,13 +618,33 @@ function GulefirdousApp() {
 
   return (
     <main className="gf-app">
-      <section className="gf-hero">
-        <div className="gf-brand">
+      <div className="gf-topbar">
+        <span>Fragrance of Humanity</span>
+        <span>Free shipping · COD across Pakistan · gulefirdous.com</span>
+      </div>
+
+      <header className="gf-site-header">
+        <div className="gf-site-brand">
           <div className="gf-logo" aria-label="Gulefirdous perfume logo">
             GF
           </div>
           <div>
-            <p className="gf-eyebrow">Fragrance of Humanity</p>
+            <strong>Gulefirdous</strong>
+            <span>Premium perfumes and attars</span>
+          </div>
+        </div>
+        <nav className="gf-site-nav" aria-label="Store highlights">
+          <span>Men</span>
+          <span>Women</span>
+          <span>Gifts</span>
+          <span className="gf-sale-pill">Sale</span>
+        </nav>
+      </header>
+
+      <section className="gf-hero">
+        <div className="gf-brand">
+          <div>
+            <p className="gf-eyebrow">Admin &amp; mobile commerce</p>
             <h1>Gulefirdous commerce and social publishing app</h1>
             <p>
               Manage WordPress products, publish posts to Facebook and Instagram, receive
@@ -590,9 +653,16 @@ function GulefirdousApp() {
           </div>
         </div>
         <div className="gf-hero-card">
-          <span>Version 1 focus</span>
-          <strong>WordPress + customer app + admin dashboard</strong>
-          <p>WooCommerce is not installed yet, so this build prepares the connection flow.</p>
+          <span className="gf-hero-badge">New season</span>
+          <strong>Shop-ready dashboard for gulefirdous.com</strong>
+          <p>WooCommerce sync, social ads, customer COD orders, and TCS tracking in one place.</p>
+          <button
+            type="button"
+            className="gf-hero-cta"
+            onClick={() => document.getElementById("gf-shop")?.scrollIntoView({ behavior: "smooth" })}
+          >
+            Explore storefront
+          </button>
         </div>
       </section>
 
@@ -893,7 +963,7 @@ function GulefirdousApp() {
           <div className="gf-panel-title">
             <div>
               <p className="gf-eyebrow">Post builder</p>
-              <h2>Auto-filled social ad</h2>
+              <h2>Editable social ad</h2>
             </div>
           </div>
           <label className="gf-select-label">
@@ -909,7 +979,24 @@ function GulefirdousApp() {
               ))}
             </select>
           </label>
-          <pre className="gf-caption">{postCaption}</pre>
+          <label className="gf-caption-label">
+            Ad description
+            <textarea
+              className="gf-caption"
+              value={editableCaption}
+              onChange={(event) => updateCaptionDraft(event.target.value)}
+              rows={11}
+              aria-label="Editable social ad description"
+              placeholder="Product details, coupon codes, vouchers, and order link..."
+            />
+          </label>
+          <p className="gf-caption-hint">
+            Auto-filled from the product. Add coupon codes (REF10, INSTA10), vouchers, or any
+            extra promo text before posting.
+          </p>
+          <button type="button" className="gf-reset-caption" onClick={resetCaptionDraft}>
+            Reset to auto-fill
+          </button>
           <div className="gf-publish-actions">
             <button type="button" onClick={() => publishPost("facebook")}>
               Post to Facebook
@@ -947,7 +1034,7 @@ function GulefirdousApp() {
       </section>
 
       <section className="gf-grid">
-        <article className="gf-panel gf-wide">
+        <article className="gf-panel gf-wide" id="gf-shop">
           <div className="gf-panel-title">
             <div>
               <p className="gf-eyebrow">Customer app</p>

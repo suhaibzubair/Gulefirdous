@@ -10,9 +10,29 @@ test("renders the Gulefirdous MVP dashboard", () => {
       name: /gulefirdous commerce and social publishing app/i,
     })
   ).toBeInTheDocument();
-  expect(screen.getByText(/WooCommerce is not installed yet/i)).toBeInTheDocument();
+  expect(screen.getByText(/Shop-ready dashboard for gulefirdous.com/i)).toBeInTheDocument();
+  expect(screen.getByText(/Fragrance of Humanity/i)).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Post to Facebook/i })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Post to Instagram/i })).toBeInTheDocument();
+});
+
+test("lets the user edit the social ad description before posting", () => {
+  render(<App />);
+
+  const caption = screen.getByRole("textbox", { name: /editable social ad description/i });
+  expect(caption.textContent || (caption as HTMLTextAreaElement).value).toContain(
+    "Gulefirdous Royal Oud"
+  );
+
+  fireEvent.change(caption, {
+    target: {
+      value: "Gulefirdous Royal Oud\nUse coupon REF10 for 10% off your first order.",
+    },
+  });
+
+  expect((caption as HTMLTextAreaElement).value).toContain("Use coupon REF10");
+  fireEvent.click(screen.getByRole("button", { name: /Post to Facebook/i }));
+  expect(screen.getByText(/Facebook post published with caption/i)).toBeInTheDocument();
 });
 
 test("publishes independently to Facebook and Instagram", () => {
