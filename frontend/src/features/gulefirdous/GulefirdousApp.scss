@@ -218,10 +218,15 @@
 
 .gf-product-form {
   display: grid;
-  grid-template-columns: 1fr 140px 120px auto;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.gf-product-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(4, minmax(110px, 0.7fr));
   gap: 12px;
   align-items: end;
-  margin-bottom: 18px;
 }
 
 .gf-product-form label,
@@ -234,6 +239,7 @@
 }
 
 .gf-product-form input,
+.gf-product-form select,
 .gf-select-label select {
   width: 100%;
   min-height: 46px;
@@ -246,12 +252,68 @@
   font: inherit;
 }
 
+.gf-note-picker {
+  margin: 0;
+  padding: 14px;
+  border: 1px solid #e2e8e2;
+  border-radius: 18px;
+  background: #f8f5ec;
+}
+
+.gf-note-picker legend {
+  padding: 0 6px;
+  color: #51625b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.gf-note-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gf-note-options button {
+  min-height: 36px;
+  border: 1px solid #d8dfd9;
+  border-radius: 999px;
+  padding: 0 14px;
+  background: #fff;
+  color: #173027;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.gf-note-options button.active {
+  border-color: #bd8c34;
+  background: #fff8ea;
+  color: #8d641f;
+}
+
+.gf-form-alert {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff0f0;
+  color: #8f2f2f;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.gf-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .gf-product-form button,
 .gf-image-actions button,
 .gf-gallery-picker,
 .gf-publish-actions button,
 .gf-product-card button,
-.gf-order-actions button {
+.gf-order-actions button,
+.gf-edit-product {
   min-height: 46px;
   border: 0;
   border-radius: 14px;
@@ -263,12 +325,17 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.gf-secondary-button {
+  background: #bd8c34 !important;
+}
+
 .gf-product-form button:hover,
 .gf-image-actions button:hover,
 .gf-gallery-picker:hover,
 .gf-publish-actions button:hover,
 .gf-product-card button:hover,
-.gf-order-actions button:hover {
+.gf-order-actions button:hover,
+.gf-edit-product:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 24px rgba(23, 48, 39, 0.16);
 }
@@ -386,13 +453,26 @@
   gap: 12px;
 }
 
-.gf-product-list button {
+.gf-product-list article {
   display: grid;
-  gap: 6px;
-  padding: 16px;
+  gap: 8px;
+  padding: 10px;
   border: 1px solid #dfe5df;
   border-radius: 18px;
   background: #fff;
+}
+
+.gf-product-list article.active {
+  border-color: #bd8c34;
+  background: #fff8ea;
+}
+
+.gf-product-select {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #173027;
   text-align: left;
   cursor: pointer;
@@ -404,9 +484,9 @@
   border-radius: 14px;
 }
 
-.gf-product-list button.active {
-  border-color: #bd8c34;
-  background: #fff8ea;
+.gf-edit-product {
+  min-height: 38px !important;
+  font-size: 13px;
 }
 
 .gf-product-list small,
@@ -536,6 +616,34 @@
 .gf-product-card h3,
 .gf-order-card h3 {
   margin: 8px 0;
+}
+
+.gf-product-meta {
+  margin: 0 0 8px;
+  color: #7c6a48;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.gf-note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.gf-note-tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #f4ead5;
+  color: #8d641f;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
 }
 
 .gf-product-card strong {
@@ -703,7 +811,7 @@
 
   .gf-stats,
   .gf-checklist,
-  .gf-product-form,
+  .gf-product-form-grid,
   .gf-image-actions,
   .gf-image-options,
   .gf-selected-image,

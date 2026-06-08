@@ -16,12 +16,17 @@ type OrderStatus =
   | "Processing"
   | "Shipped"
   | "Delivered";
+type ProductAudience = "Men" | "Women" | "Unisex";
+
 interface Product {
   id: number;
   name: string;
   category: string;
   price: number;
   stock: number;
+  volumeMl: number;
+  audience: ProductAudience;
+  notes: string[];
   description: string;
   link: string;
   sourceCode: string;
@@ -29,6 +34,27 @@ interface Product {
   imageSource: ImageSource;
   imageLabel: string;
 }
+
+const FRAGRANCE_NOTE_OPTIONS = [
+  "Floral",
+  "Citrus",
+  "Vanilla",
+  "Oud",
+  "Musk",
+  "Woody",
+  "Amber",
+  "Spicy",
+  "Fruity",
+] as const;
+
+const emptyProductForm = {
+  name: "",
+  price: "",
+  stock: "",
+  volumeMl: "50",
+  audience: "Unisex" as ProductAudience,
+  notes: [] as string[],
+};
 
 interface Order {
   id: string;
@@ -68,6 +94,9 @@ const initialProducts: Product[] = [
     description: "Warm oud, amber, and floral musk perfume for premium gifting.",
     link: "https://gulefirdous.com/product/gulefirdous-royal-oud/",
     sourceCode: "ROYAL-OUD",
+    volumeMl: 100,
+    audience: "Men",
+    notes: ["Oud", "Amber", "Woody"],
     imageUrl: defaultRealisticImageOptions[0].url,
     imageSource: "AI generated",
     imageLabel: defaultRealisticImageOptions[0].label,
@@ -81,6 +110,9 @@ const initialProducts: Product[] = [
     description: "Fresh rose, citrus, and soft musk fragrance for daily wear.",
     link: "https://gulefirdous.com/product/gulefirdous-bloom-mist/",
     sourceCode: "BLOOM-MIST",
+    volumeMl: 50,
+    audience: "Women",
+    notes: ["Floral", "Citrus", "Musk"],
     imageUrl: defaultRealisticImageOptions[1].url,
     imageSource: "AI generated",
     imageLabel: defaultRealisticImageOptions[1].label,
@@ -94,6 +126,9 @@ const initialProducts: Product[] = [
     description: "A luxury attar selection with premium packaging.",
     link: "https://gulefirdous.com/product/heritage-attar-gift-set/",
     sourceCode: "ATTAR-SET",
+    volumeMl: 30,
+    audience: "Unisex",
+    notes: ["Vanilla", "Spicy", "Amber"],
     imageUrl: defaultRealisticImageOptions[3].url,
     imageSource: "AI generated",
     imageLabel: defaultRealisticImageOptions[3].label,
@@ -153,6 +188,38 @@ function withSource(product: Product, platform: string) {
   return `${product.link}?utm_source=${platform.toLowerCase()}&utm_campaign=${product.sourceCode.toLowerCase()}`;
 }
 
+function normalizeProductName(name: string) {
+  return name.trim().toLowerCase();
+}
+
+function findDuplicateProduct(products: Product[], name: string, excludeId?: number) {
+  const normalized = normalizeProductName(name);
+
+  return products.find(
+    (product) =>
+      product.id !== excludeId && normalizeProductName(product.name) === normalized
+  );
+}
+
+function buildProductDescription(volumeMl: number, audience: ProductAudience, notes: string[]) {
+  const noteText = notes.length ? notes.join(", ") : "signature notes";
+
+  return `${volumeMl} ml ${audience.toLowerCase()} fragrance with ${noteText.toLowerCase()} notes.`;
+}
+
+function formatProductMeta(product: Product) {
+  const noteText = product.notes.length ? product.notes.join(", ") : "Signature blend";
+
+  return `${product.volumeMl} ml · ${product.audience} · ${noteText}`;
+}
+
+function slugifyProductName(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 function GulefirdousApp() {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [selectedProductId, setSelectedProductId] = useState(initialProducts[0].id);
@@ -162,11 +229,9 @@ function GulefirdousApp() {
   });
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [engagements, setEngagements] = useState<Engagement[]>(initialEngagement);
-  const [newProduct, setNewProduct] = useState({
-    name: "",
-    price: "",
-    stock: "",
-  });
+  const [newProduct, setNewProduct] = useState({ ...emptyProductForm });
+  const [editingProductId, setEditingProductId] = useState<number | null>(null);
+  const [productFormError, setProductFormError] = useState("");
   const [imageOptions, setImageOptions] =
     useState<ProductImageOption[]>(defaultRealisticImageOptions);
   const [selectedImage, setSelectedImage] = useState<ProductImageOption>(
@@ -174,7 +239,7 @@ function GulefirdousApp() {
   );
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const [imageGenerationNote, setImageGenerationNote] = useState(
-    "Luxury studio perfume photos. Click generate for a fresh realistic set."
+    "Glass perfume bottle photos only. Click generate for a fresh flacon set."
   );
 
   const selectedProduct = useMemo(
@@ -186,7 +251,11 @@ function GulefirdousApp() {
     products.find((product) => product.id === latestOrder.productId) || products[0];
 
   const postCaption = useMemo(() => {
-    return `${selectedProduct.name}\n${selectedProduct.description}\nPrice: ${formatPrice(
+    const noteText = selectedProduct.notes.length
+      ? selectedProduct.notes.join(", ")
+      : "Signature blend";
+
+    return `${selectedProduct.name}\n${selectedProduct.description}\n${selectedProduct.volumeMl} ml · ${selectedProduct.audience} · ${noteText}\nPrice: ${formatPrice(
       selectedProduct.price
     )}\nOrder now: ${withSource(selectedProduct, "facebook")}`;
   }, [selectedProduct]);
@@ -213,25 +282,110 @@ function GulefirdousApp() {
     ]);
   };
 
-  const addProduct = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const resetProductForm = () => {
+    setNewProduct({ ...emptyProductForm });
+    setEditingProductId(null);
+    setProductFormError("");
+  };
 
-    if (!newProduct.name || !newProduct.price || !newProduct.stock) {
+  const toggleFragranceNote = (note: string) => {
+    setNewProduct((current) => ({
+      ...current,
+      notes: current.notes.includes(note)
+        ? current.notes.filter((item) => item !== note)
+        : [...current.notes, note],
+    }));
+  };
+
+  const startEditingProduct = (product: Product) => {
+    setEditingProductId(product.id);
+    setSelectedProductId(product.id);
+    setProductFormError("");
+    setNewProduct({
+      name: product.name,
+      price: String(product.price),
+      stock: String(product.stock),
+      volumeMl: String(product.volumeMl),
+      audience: product.audience,
+      notes: [...product.notes],
+    });
+    setSelectedImage({
+      id: `existing-${product.id}`,
+      label: product.imageLabel,
+      url: product.imageUrl,
+      source: product.imageSource,
+    });
+  };
+
+  const saveProduct = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setProductFormError("");
+
+    const trimmedName = newProduct.name.trim();
+
+    if (!trimmedName || !newProduct.price || !newProduct.stock || !newProduct.volumeMl) {
+      setProductFormError("Product name, price, stock, and volume (ml) are required.");
+      return;
+    }
+
+    const volumeMl = Number(newProduct.volumeMl);
+
+    if (!Number.isFinite(volumeMl) || volumeMl <= 0) {
+      setProductFormError("Enter a valid volume in milliliters (for example 50 or 100).");
+      return;
+    }
+
+    const duplicate = findDuplicateProduct(products, trimmedName, editingProductId ?? undefined);
+
+    if (duplicate) {
+      setProductFormError(
+        `"${trimmedName}" already exists as "${duplicate.name}". Edit that product or choose a different name.`
+      );
+      return;
+    }
+
+    const description = buildProductDescription(volumeMl, newProduct.audience, newProduct.notes);
+    const slug = slugifyProductName(trimmedName);
+
+    if (editingProductId) {
+      setProducts((current) =>
+        current.map((product) =>
+          product.id === editingProductId
+            ? {
+                ...product,
+                name: trimmedName,
+                price: Number(newProduct.price),
+                stock: Number(newProduct.stock),
+                volumeMl,
+                audience: newProduct.audience,
+                notes: [...newProduct.notes],
+                description,
+                link: `https://gulefirdous.com/product/${slug}/`,
+                sourceCode: trimmedName.toUpperCase().replace(/[^A-Z0-9]+/g, "-"),
+                imageUrl: selectedImage.url,
+                imageSource: selectedImage.source,
+                imageLabel: selectedImage.label,
+              }
+            : product
+        )
+      );
+      setSelectedProductId(editingProductId);
+      resetProductForm();
       return;
     }
 
     const product: Product = {
       id: Date.now(),
-      name: newProduct.name,
+      name: trimmedName,
       category: "Perfume",
       price: Number(newProduct.price),
       stock: Number(newProduct.stock),
-      description: "New fragrance product ready to sync with WooCommerce.",
-      link: `https://gulefirdous.com/product/${newProduct.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")}/`,
-      sourceCode: newProduct.name.toUpperCase().replace(/[^A-Z0-9]+/g, "-"),
+      volumeMl,
+      audience: newProduct.audience,
+      notes: [...newProduct.notes],
+      description,
+      link: `https://gulefirdous.com/product/${slug}/`,
+      sourceCode: trimmedName.toUpperCase().replace(/[^A-Z0-9]+/g, "-"),
       imageUrl: selectedImage.url,
       imageSource: selectedImage.source,
       imageLabel: selectedImage.label,
@@ -239,7 +393,7 @@ function GulefirdousApp() {
 
     setProducts((current) => [product, ...current]);
     setSelectedProductId(product.id);
-    setNewProduct({ name: "", price: "", stock: "" });
+    resetProductForm();
   };
 
   const generateImageOptions = async () => {
@@ -253,13 +407,13 @@ function GulefirdousApp() {
       setImageOptions(result.images);
       setSelectedImage(result.images[0]);
       setImageGenerationNote(
-        result.message || "Fresh realistic perfume studio photos are ready."
+        result.message || "Fresh glass perfume bottle photos are ready."
       );
     } catch {
       const options = createRealisticImageOptions(productName, seed);
       setImageOptions(options);
       setSelectedImage(options[0]);
-      setImageGenerationNote("Showing realistic perfume studio photos.");
+      setImageGenerationNote("Showing glass perfume bottle photos only.");
     } finally {
       setIsGeneratingImages(false);
     }
@@ -403,40 +557,104 @@ function GulefirdousApp() {
             </div>
           </div>
 
-          <form className="gf-product-form" onSubmit={addProduct}>
-            <label>
-              Product name
-              <input
-                value={newProduct.name}
-                onChange={(event) =>
-                  setNewProduct((current) => ({ ...current, name: event.target.value }))
-                }
-                placeholder="Example: Amber Musk Perfume"
-              />
-            </label>
-            <label>
-              Price
-              <input
-                value={newProduct.price}
-                onChange={(event) =>
-                  setNewProduct((current) => ({ ...current, price: event.target.value }))
-                }
-                inputMode="numeric"
-                placeholder="4500"
-              />
-            </label>
-            <label>
-              Stock
-              <input
-                value={newProduct.stock}
-                onChange={(event) =>
-                  setNewProduct((current) => ({ ...current, stock: event.target.value }))
-                }
-                inputMode="numeric"
-                placeholder="30"
-              />
-            </label>
-            <button type="submit">Add product draft</button>
+          <form className="gf-product-form" onSubmit={saveProduct}>
+            <div className="gf-product-form-grid">
+              <label>
+                Product name
+                <input
+                  value={newProduct.name}
+                  onChange={(event) => {
+                    setProductFormError("");
+                    setNewProduct((current) => ({ ...current, name: event.target.value }));
+                  }}
+                  placeholder="Example: Amber Musk Perfume"
+                />
+              </label>
+              <label>
+                Price (PKR)
+                <input
+                  value={newProduct.price}
+                  onChange={(event) =>
+                    setNewProduct((current) => ({ ...current, price: event.target.value }))
+                  }
+                  inputMode="numeric"
+                  placeholder="4500"
+                />
+              </label>
+              <label>
+                Stock
+                <input
+                  value={newProduct.stock}
+                  onChange={(event) =>
+                    setNewProduct((current) => ({ ...current, stock: event.target.value }))
+                  }
+                  inputMode="numeric"
+                  placeholder="30"
+                />
+              </label>
+              <label>
+                Volume (ml)
+                <input
+                  value={newProduct.volumeMl}
+                  onChange={(event) =>
+                    setNewProduct((current) => ({ ...current, volumeMl: event.target.value }))
+                  }
+                  inputMode="numeric"
+                  placeholder="50"
+                  required
+                />
+              </label>
+              <label>
+                For
+                <select
+                  value={newProduct.audience}
+                  onChange={(event) =>
+                    setNewProduct((current) => ({
+                      ...current,
+                      audience: event.target.value as ProductAudience,
+                    }))
+                  }
+                >
+                  <option value="Men">Men</option>
+                  <option value="Women">Women</option>
+                  <option value="Unisex">Unisex</option>
+                </select>
+              </label>
+            </div>
+
+            <fieldset className="gf-note-picker">
+              <legend>Fragrance notes</legend>
+              <div className="gf-note-options">
+                {FRAGRANCE_NOTE_OPTIONS.map((note) => (
+                  <button
+                    key={note}
+                    type="button"
+                    className={newProduct.notes.includes(note) ? "active" : ""}
+                    aria-pressed={newProduct.notes.includes(note)}
+                    onClick={() => toggleFragranceNote(note)}
+                  >
+                    {note}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            {productFormError ? (
+              <p className="gf-form-alert" role="alert">
+                {productFormError}
+              </p>
+            ) : null}
+
+            <div className="gf-form-actions">
+              <button type="submit">
+                {editingProductId ? "Save product changes" : "Add product draft"}
+              </button>
+              {editingProductId ? (
+                <button type="button" className="gf-secondary-button" onClick={resetProductForm}>
+                  Cancel edit
+                </button>
+              ) : null}
+            </div>
           </form>
 
           <div className="gf-image-tools">
@@ -500,21 +718,33 @@ function GulefirdousApp() {
 
           <div className="gf-product-list">
             {products.map((product) => (
-              <button
-                type="button"
+              <article
                 className={product.id === selectedProductId ? "active" : ""}
                 key={product.id}
-                onClick={() => setSelectedProductId(product.id)}
               >
-                <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
-                <span>{product.name}</span>
-                <small>
-                  {formatPrice(product.price)} - {product.stock} in stock
-                </small>
-                <small>
-                  {product.imageSource}: {product.imageLabel}
-                </small>
-              </button>
+                <button
+                  type="button"
+                  className="gf-product-select"
+                  onClick={() => setSelectedProductId(product.id)}
+                >
+                  <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
+                  <span>{product.name}</span>
+                  <small>{formatProductMeta(product)}</small>
+                  <small>
+                    {formatPrice(product.price)} - {product.stock} in stock
+                  </small>
+                  <small>
+                    {product.imageSource}: {product.imageLabel}
+                  </small>
+                </button>
+                <button
+                  type="button"
+                  className="gf-edit-product"
+                  onClick={() => startEditingProduct(product)}
+                >
+                  Edit product
+                </button>
+              </article>
             ))}
           </div>
         </article>
@@ -593,9 +823,19 @@ function GulefirdousApp() {
                   src={product.imageUrl}
                   alt={`${product.name} product visual`}
                 />
-                <span>{product.category}</span>
+                <span>
+                  {product.category} · {product.audience}
+                </span>
                 <h3>{product.name}</h3>
+                <p className="gf-product-meta">{formatProductMeta(product)}</p>
                 <p>{product.description}</p>
+                {product.notes.length ? (
+                  <div className="gf-note-tags">
+                    {product.notes.map((note) => (
+                      <span key={note}>{note}</span>
+                    ))}
+                  </div>
+                ) : null}
                 <strong>{formatPrice(product.price)}</strong>
                 <button type="button" onClick={() => placeOrder(product, "App")}>
                   Order with COD
