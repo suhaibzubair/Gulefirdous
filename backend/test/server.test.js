@@ -146,6 +146,22 @@ test("order webhook accepts valid WooCommerce signatures", async () => {
   });
 });
 
+test("product image endpoint returns realistic photo concepts", async () => {
+  await withServer({}, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/product-images/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productName: "Amber Musk Perfume", seed: 42 }),
+    });
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.images.length, 4);
+    assert.match(body.images[0].url, /^https:\/\/images\.unsplash\.com\//);
+    assert.equal(body.mode, "realistic-studio-photos");
+  });
+});
+
 test("WooCommerce URL builder targets wc/v3 endpoints", () => {
   const url = buildWooUrl(
     "/products",

@@ -1,4 +1,5 @@
 const http = require("node:http");
+const { createRealisticImageOptions } = require("./productImages");
 const { createWooCommerceClient, verifyWooCommerceSignature } = require("./woocommerceClient");
 
 const jsonHeaders = {
@@ -86,6 +87,27 @@ function createServer(options = {}) {
         const product = sanitizeProduct(parseJson(await readBody(request)));
         const createdProduct = await client.createProduct(product);
         sendJson(response, 201, { product: createdProduct }, corsHeaders);
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/product-images/generate") {
+        const { productName, seed } = parseJson(await readBody(request));
+        const images = createRealisticImageOptions(
+          productName || "Gulefirdous Perfume",
+          seed || Date.now()
+        );
+
+        sendJson(
+          response,
+          200,
+          {
+            images,
+            mode: "realistic-studio-photos",
+            message:
+              "Returned luxury perfume studio photo concepts. Add OPENAI_API_KEY later for fully custom AI renders.",
+          },
+          corsHeaders
+        );
         return;
       }
 

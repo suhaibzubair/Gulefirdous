@@ -50,3 +50,21 @@ export function updateWooOrderStatus(orderId: string, status: string) {
     body: JSON.stringify({ status }),
   });
 }
+
+export interface GeneratedProductImage {
+  id: string;
+  label: string;
+  url: string;
+  source: "AI generated" | "Gallery upload";
+}
+
+export function generateProductImages(productName: string, seed?: number) {
+  return request<{
+    images: GeneratedProductImage[];
+    mode: string;
+    message?: string;
+  }>("/api/product-images/generate", {
+    method: "POST",
+    body: JSON.stringify({ productName, seed }),
+  });
+}

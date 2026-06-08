@@ -1,4 +1,11 @@
 import React, { useMemo, useState } from "react";
+import { generateProductImages } from "./gulefirdousApi";
+import {
+  createRealisticImageOptions,
+  defaultRealisticImageOptions,
+  type ImageSource,
+  type ProductImageOption,
+} from "./productImages";
 import "./GulefirdousApp.scss";
 
 type Platform = "facebook" | "instagram";
@@ -9,8 +16,6 @@ type OrderStatus =
   | "Processing"
   | "Shipped"
   | "Delivered";
-type ImageSource = "AI generated" | "Gallery upload";
-
 interface Product {
   id: number;
   name: string;
@@ -45,13 +50,6 @@ interface Engagement {
   time: string;
 }
 
-interface ProductImageOption {
-  id: string;
-  label: string;
-  url: string;
-  source: ImageSource;
-}
-
 const statusOrder: OrderStatus[] = [
   "Order Placed",
   "COD Confirmed",
@@ -59,63 +57,6 @@ const statusOrder: OrderStatus[] = [
   "Shipped",
   "Delivered",
 ];
-
-const imagePalettes = [
-  { name: "Emerald oud", background: "#12372d", accent: "#e7be6f", glow: "#f8e4ad" },
-  { name: "Rose gold mist", background: "#6f2d3f", accent: "#f4c2c2", glow: "#fff0d8" },
-  { name: "Midnight attar", background: "#172033", accent: "#9fc5e8", glow: "#d7ecff" },
-  { name: "Saffron bloom", background: "#8d4f18", accent: "#f6c453", glow: "#fff3c2" },
-];
-
-function escapeSvgText(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function createPerfumeImageDataUrl(name: string, palette = imagePalettes[0]) {
-  const title = escapeSvgText(name || "Gulefirdous Perfume");
-  const subtitle = escapeSvgText(palette.name);
-  const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700" viewBox="0 0 900 700">
-  <defs>
-    <radialGradient id="glow" cx="50%" cy="32%" r="58%">
-      <stop offset="0%" stop-color="${palette.glow}" stop-opacity="0.9"/>
-      <stop offset="52%" stop-color="${palette.accent}" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="${palette.background}" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="bottle" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="${palette.accent}" stop-opacity="0.95"/>
-      <stop offset="50%" stop-color="#fff8e8" stop-opacity="0.72"/>
-      <stop offset="100%" stop-color="${palette.accent}" stop-opacity="0.78"/>
-    </linearGradient>
-  </defs>
-  <rect width="900" height="700" rx="48" fill="${palette.background}"/>
-  <circle cx="450" cy="250" r="330" fill="url(#glow)"/>
-  <path d="M170 560 C270 460 268 310 170 220 C310 258 340 400 302 560 Z" fill="${palette.accent}" opacity="0.17"/>
-  <path d="M730 560 C630 460 632 310 730 220 C590 258 560 400 598 560 Z" fill="${palette.accent}" opacity="0.17"/>
-  <rect x="392" y="104" width="116" height="70" rx="18" fill="${palette.accent}"/>
-  <rect x="360" y="156" width="180" height="82" rx="26" fill="#fff4d8" opacity="0.95"/>
-  <rect x="300" y="218" width="300" height="360" rx="88" fill="url(#bottle)" stroke="#fff7d7" stroke-width="6"/>
-  <rect x="352" y="330" width="196" height="142" rx="32" fill="${palette.background}" opacity="0.88" stroke="${palette.accent}" stroke-width="4"/>
-  <text x="450" y="395" text-anchor="middle" font-family="Georgia, serif" font-size="54" fill="${palette.accent}" letter-spacing="8">GF</text>
-  <text x="450" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#fff8e8">${subtitle}</text>
-  <text x="450" y="630" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#fff8e8">${title}</text>
-</svg>`;
-
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-}
-
-function createImageOptions(productName: string): ProductImageOption[] {
-  return imagePalettes.map((palette, index) => ({
-    id: `${palette.name}-${index}`,
-    label: palette.name,
-    url: createPerfumeImageDataUrl(productName, palette),
-    source: "AI generated",
-  }));
-}
 
 const initialProducts: Product[] = [
   {
@@ -127,9 +68,9 @@ const initialProducts: Product[] = [
     description: "Warm oud, amber, and floral musk perfume for premium gifting.",
     link: "https://gulefirdous.com/product/gulefirdous-royal-oud/",
     sourceCode: "ROYAL-OUD",
-    imageUrl: createPerfumeImageDataUrl("Gulefirdous Royal Oud", imagePalettes[0]),
+    imageUrl: defaultRealisticImageOptions[0].url,
     imageSource: "AI generated",
-    imageLabel: imagePalettes[0].name,
+    imageLabel: defaultRealisticImageOptions[0].label,
   },
   {
     id: 2,
@@ -140,9 +81,9 @@ const initialProducts: Product[] = [
     description: "Fresh rose, citrus, and soft musk fragrance for daily wear.",
     link: "https://gulefirdous.com/product/gulefirdous-bloom-mist/",
     sourceCode: "BLOOM-MIST",
-    imageUrl: createPerfumeImageDataUrl("Gulefirdous Bloom Mist", imagePalettes[1]),
+    imageUrl: defaultRealisticImageOptions[1].url,
     imageSource: "AI generated",
-    imageLabel: imagePalettes[1].name,
+    imageLabel: defaultRealisticImageOptions[1].label,
   },
   {
     id: 3,
@@ -153,9 +94,9 @@ const initialProducts: Product[] = [
     description: "A luxury attar selection with premium packaging.",
     link: "https://gulefirdous.com/product/heritage-attar-gift-set/",
     sourceCode: "ATTAR-SET",
-    imageUrl: createPerfumeImageDataUrl("Heritage Attar Gift Set", imagePalettes[3]),
+    imageUrl: defaultRealisticImageOptions[3].url,
     imageSource: "AI generated",
-    imageLabel: imagePalettes[3].name,
+    imageLabel: defaultRealisticImageOptions[3].label,
   },
 ];
 
@@ -226,10 +167,15 @@ function GulefirdousApp() {
     price: "",
     stock: "",
   });
-  const [imageOptions, setImageOptions] = useState<ProductImageOption[]>(
-    createImageOptions("Gulefirdous Perfume")
+  const [imageOptions, setImageOptions] =
+    useState<ProductImageOption[]>(defaultRealisticImageOptions);
+  const [selectedImage, setSelectedImage] = useState<ProductImageOption>(
+    defaultRealisticImageOptions[0]
   );
-  const [selectedImage, setSelectedImage] = useState<ProductImageOption>(imageOptions[0]);
+  const [isGeneratingImages, setIsGeneratingImages] = useState(false);
+  const [imageGenerationNote, setImageGenerationNote] = useState(
+    "Luxury studio perfume photos. Click generate for a fresh realistic set."
+  );
 
   const selectedProduct = useMemo(
     () => products.find((product) => product.id === selectedProductId) || products[0],
@@ -296,10 +242,27 @@ function GulefirdousApp() {
     setNewProduct({ name: "", price: "", stock: "" });
   };
 
-  const generateImageOptions = () => {
-    const options = createImageOptions(newProduct.name || "Gulefirdous Perfume");
-    setImageOptions(options);
-    setSelectedImage(options[0]);
+  const generateImageOptions = async () => {
+    const productName = newProduct.name || "Gulefirdous Perfume";
+    const seed = Date.now();
+
+    setIsGeneratingImages(true);
+
+    try {
+      const result = await generateProductImages(productName, seed);
+      setImageOptions(result.images);
+      setSelectedImage(result.images[0]);
+      setImageGenerationNote(
+        result.message || "Fresh realistic perfume studio photos are ready."
+      );
+    } catch {
+      const options = createRealisticImageOptions(productName, seed);
+      setImageOptions(options);
+      setSelectedImage(options[0]);
+      setImageGenerationNote("Showing realistic perfume studio photos.");
+    } finally {
+      setIsGeneratingImages(false);
+    }
   };
 
   const selectGalleryImage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -483,9 +446,18 @@ function GulefirdousApp() {
                 <h3>Choose AI generated or mobile gallery image</h3>
               </div>
             </div>
+            <p className="gf-image-note">{imageGenerationNote}</p>
             <div className="gf-image-actions">
-              <button type="button" onClick={generateImageOptions}>
-                Generate AI picture options
+              <button
+                type="button"
+                onClick={() => {
+                  void generateImageOptions();
+                }}
+                disabled={isGeneratingImages}
+              >
+                {isGeneratingImages
+                  ? "Generating realistic photos..."
+                  : "Generate AI picture options"}
               </button>
               <label className="gf-gallery-picker" htmlFor="product-gallery-image">
                 Select from mobile gallery

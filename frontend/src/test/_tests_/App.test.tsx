@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "../../App";
 
 test("renders the Gulefirdous MVP dashboard", () => {
@@ -36,7 +36,7 @@ test("creates a customer COD order from the app storefront", () => {
   expect(screen.getAllByText(/Demo Customer/i).length).toBeGreaterThan(0);
 });
 
-test("adds a product draft with a selected AI generated picture", () => {
+test("adds a product draft with a selected AI generated picture", async () => {
   render(<App />);
 
   fireEvent.change(screen.getByPlaceholderText(/Example: Amber Musk Perfume/i), {
@@ -50,15 +50,19 @@ test("adds a product draft with a selected AI generated picture", () => {
   });
 
   fireEvent.click(screen.getByRole("button", { name: /Generate AI picture options/i }));
-  fireEvent.click(
-    within(screen.getByLabelText(/Generated perfume picture options/i)).getByRole("button", {
-      name: /Rose gold mist/i,
-    })
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: /Generate AI picture options/i })
+    ).not.toBeDisabled()
   );
+  const generatedOptions = within(
+    screen.getByLabelText(/Generated perfume picture options/i)
+  ).getAllByRole("button");
+  fireEvent.click(generatedOptions[1]);
   fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
 
   expect(screen.getByRole("img", { name: /Amber Musk Perfume product visual/i })).toBeInTheDocument();
-  expect(screen.getAllByText(/AI generated: Rose gold mist/i).length).toBeGreaterThan(1);
+  expect(screen.getAllByText(/AI generated:/i).length).toBeGreaterThan(1);
 });
 
 test("offers mobile gallery image selection for product pictures", () => {

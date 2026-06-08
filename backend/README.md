@@ -31,6 +31,7 @@ order, and webhook endpoints.
 - `GET /api/orders`
 - `PATCH /api/orders/:id/status`
 - `POST /api/webhooks/woocommerce/order`
+- `POST /api/product-images/generate`
 
 ## WordPress/WooCommerce setup
 
