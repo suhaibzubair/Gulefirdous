@@ -2,8 +2,42 @@ import "@testing-library/jest-dom";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "../../App";
 
+function signInAsAdmin(loginId = "admin@gulefirdous.com") {
+  fireEvent.change(screen.getByPlaceholderText(/admin@gulefirdous.com or 0300/i), {
+    target: { value: loginId },
+  });
+  fireEvent.click(screen.getByRole("button", { name: /Administrator/i }));
+  fireEvent.click(screen.getByRole("button", { name: /^Sign in$/i }));
+}
+
+async function signInAsClient(loginId = "client@gulefirdous.com") {
+  fireEvent.change(screen.getByPlaceholderText(/admin@gulefirdous.com or 0300/i), {
+    target: { value: loginId },
+  });
+  fireEvent.click(screen.getByRole("button", { name: /Client Order perfumes/i }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: /Client Order perfumes/i })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    )
+  );
+  fireEvent.click(screen.getByRole("button", { name: /^Sign in$/i }));
+}
+
+function goToSidebarPage(label: string) {
+  const sidebar = screen.getByLabelText(/app navigation/i);
+  fireEvent.click(
+    within(sidebar).getByRole("button", { name: new RegExp(`^${label}`, "i") })
+  );
+}
+
 test("renders the Gulefirdous MVP dashboard", () => {
   render(<App />);
+
+  expect(screen.getByRole("heading", { name: /Gulefirdous/i })).toBeInTheDocument();
+  expect(screen.getByText(/Fragrance of Humanity/i)).toBeInTheDocument();
+
+  signInAsAdmin();
 
   expect(
     screen.getByRole("heading", {
@@ -11,13 +45,16 @@ test("renders the Gulefirdous MVP dashboard", () => {
     })
   ).toBeInTheDocument();
   expect(screen.getByText(/Shop-ready dashboard for gulefirdous.com/i)).toBeInTheDocument();
-  expect(screen.getByText(/Fragrance of Humanity/i)).toBeInTheDocument();
+
+  goToSidebarPage("Social ads");
   expect(screen.getByRole("button", { name: /Post to Facebook/i })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Post to Instagram/i })).toBeInTheDocument();
 });
 
 test("lets the user edit the social ad description before posting", () => {
   render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Social ads");
 
   const caption = screen.getByRole("textbox", { name: /editable social ad description/i });
   expect(caption.textContent || (caption as HTMLTextAreaElement).value).toContain(
@@ -37,6 +74,8 @@ test("lets the user edit the social ad description before posting", () => {
 
 test("publishes independently to Facebook and Instagram", () => {
   render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Social ads");
 
   fireEvent.click(screen.getByRole("button", { name: /Post to Facebook/i }));
   expect(screen.getByText(/Facebook: Published/i)).toBeInTheDocument();
@@ -46,14 +85,26 @@ test("publishes independently to Facebook and Instagram", () => {
   expect(screen.getByText(/Instagram: Published/i)).toBeInTheDocument();
 });
 
-test("creates a customer COD order from the app storefront", () => {
+test("creates a customer COD order from the app storefront", async () => {
   render(<App />);
+  await signInAsClient();
+  await waitFor(() => expect(screen.getByText(/Client storefront/i)).toBeInTheDocument());
 
-  const initialOrders = screen.getAllByText(/Cash on Delivery/i).length;
-  fireEvent.click(screen.getAllByRole("button", { name: /Order with COD/i })[0]);
+  const firstProductCard = screen
+    .getByRole("heading", { name: /Gulefirdous Royal Oud/i })
+    .closest(".gf-product-card") as HTMLElement;
+  fireEvent.click(
+    within(firstProductCard).getByRole("button", { name: /Order with COD/i })
+  );
+  await waitFor(() => {
+    expect(screen.getByRole("status")).toHaveTextContent(/placed with Cash on Delivery/i);
+  });
+  goToSidebarPage("My orders");
 
-  expect(screen.getAllByText(/Cash on Delivery/i)).toHaveLength(initialOrders + 1);
-  expect(screen.getAllByText(/Demo Customer/i).length).toBeGreaterThan(0);
+  await waitFor(() => {
+    expect(screen.getByText(/Cash on Delivery/i)).toBeInTheDocument();
+  });
+  expect(screen.getAllByText(/Client/i).length).toBeGreaterThan(0);
 });
 
 function fillProductDraftForm(name: string) {
@@ -73,6 +124,8 @@ function fillProductDraftForm(name: string) {
 
 test("adds a product draft with perfume details and a selected AI generated picture", async () => {
   render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Manage products");
 
   fillProductDraftForm("Amber Musk Perfume");
   fireEvent.click(screen.getByRole("button", { name: /^Vanilla$/i }));
@@ -89,13 +142,16 @@ test("adds a product draft with perfume details and a selected AI generated pict
   fireEvent.click(generatedOptions[1]);
   fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
 
-  expect(screen.getByRole("img", { name: /Amber Musk Perfume product visual/i })).toBeInTheDocument();
+  expect(screen.getByRole("img", { name: /Amber Musk Perfume thumbnail/i })).toBeInTheDocument();
   expect(screen.getAllByText(/75 ml · Unisex · Vanilla/i).length).toBeGreaterThan(0);
   expect(screen.getAllByText(/AI generated:/i).length).toBeGreaterThan(1);
 });
 
 test("offers mobile gallery image selection for product pictures", () => {
   render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Manage products");
+
   const createObjectUrl = jest.fn(() => "blob:gallery-upload");
 
   Object.defineProperty(URL, "createObjectURL", {
@@ -117,6 +173,9 @@ test("offers mobile gallery image selection for product pictures", () => {
 
 test("adds a product draft with a selected gallery picture", () => {
   render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Manage products");
+
   const createObjectUrl = jest.fn(() => "blob:gallery-upload");
 
   Object.defineProperty(URL, "createObjectURL", {
@@ -130,7 +189,7 @@ test("adds a product draft with a selected gallery picture", () => {
   });
   fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
 
-  expect(screen.getByRole("img", { name: /Amber Musk Perfume product visual/i })).toHaveAttribute(
+  expect(screen.getByRole("img", { name: /Amber Musk Perfume thumbnail/i })).toHaveAttribute(
     "src",
     "blob:gallery-upload"
   );
@@ -139,27 +198,25 @@ test("adds a product draft with a selected gallery picture", () => {
 
 test("allows the same perfume name when volume, audience, or notes differ", () => {
   render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Manage products");
 
-  const royalOudCardsBefore = screen.getAllByRole("heading", {
-    name: /Gulefirdous Royal Oud/i,
-  }).length;
+  const royalOudCardsBefore = screen.getAllByText(/^Gulefirdous Royal Oud$/i).length;
 
   fillProductDraftForm("Gulefirdous Royal Oud");
   fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
 
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-  expect(
-    screen.getAllByRole("heading", { name: /Gulefirdous Royal Oud/i })
-  ).toHaveLength(royalOudCardsBefore + 1);
+  expect(screen.getAllByText(/^Gulefirdous Royal Oud$/i)).toHaveLength(royalOudCardsBefore + 1);
   expect(screen.getAllByText(/75 ml · Unisex/i).length).toBeGreaterThan(0);
 });
 
 test("warns when name, volume, audience, and notes all match an existing product", () => {
   render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Manage products");
 
-  const royalOudCardsBefore = screen.getAllByRole("heading", {
-    name: /Gulefirdous Royal Oud/i,
-  }).length;
+  const royalOudCardsBefore = screen.getAllByText(/^Gulefirdous Royal Oud$/i).length;
 
   fireEvent.change(screen.getByPlaceholderText(/Example: Amber Musk Perfume/i), {
     target: { value: "Gulefirdous Royal Oud" },
@@ -184,13 +241,13 @@ test("warns when name, volume, audience, and notes all match an existing product
   expect(screen.getByRole("alert")).toHaveTextContent(
     /"Gulefirdous Royal Oud" already exists with the same name, volume, audience, and fragrance notes/i
   );
-  expect(
-    screen.getAllByRole("heading", { name: /Gulefirdous Royal Oud/i })
-  ).toHaveLength(royalOudCardsBefore);
+  expect(screen.getAllByText(/^Gulefirdous Royal Oud$/i)).toHaveLength(royalOudCardsBefore);
 });
 
 test("keeps adding unique perfume images beyond the first eight", async () => {
   render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Manage products");
 
   const imageGrid = () =>
     within(screen.getByLabelText(/Generated perfume picture options/i)).getAllByRole("img");
@@ -219,6 +276,8 @@ test("keeps adding unique perfume images beyond the first eight", async () => {
 
 test("opens and closes a full perfume image preview", () => {
   render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Manage products");
 
   fireEvent.click(screen.getAllByRole("button", { name: /Preview full image/i })[0]);
 
@@ -232,6 +291,8 @@ test("opens and closes a full perfume image preview", () => {
 
 test("edits an existing product and shows updated details to customers", () => {
   render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Manage products");
 
   fireEvent.click(screen.getAllByRole("button", { name: /Edit product/i })[1]);
 

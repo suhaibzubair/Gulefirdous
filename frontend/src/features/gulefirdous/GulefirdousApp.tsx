@@ -1,4 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import GulefirdousLogin from "./GulefirdousLogin";
+import {
+  ADMIN_NAV,
+  CLIENT_NAV,
+  defaultPageForRole,
+  PAGE_TITLES,
+  type AppPage,
+  type UserRole,
+  type UserSession,
+} from "./gulefirdousNav";
 import {
   basePhotoKey,
   collectSeenPhotoKeys,
@@ -256,6 +266,19 @@ function buildDefaultPostCaption(product: Product) {
   )}\nOrder now: ${withSource(product, "facebook")}`;
 }
 
+function buildDisplayName(loginId: string, role: UserRole) {
+  if (loginId.includes("@")) {
+    const local = loginId.split("@")[0].replace(/[._-]+/g, " ").trim();
+    const formatted = local.replace(/\b\w/g, (char) => char.toUpperCase());
+
+    return role === "admin" ? `${formatted} (Admin)` : formatted;
+  }
+
+  const digits = loginId.replace(/\D/g, "");
+
+  return role === "admin" ? `Admin ${digits.slice(-4) || "User"}` : `Client ${digits.slice(-4) || "User"}`;
+}
+
 function GulefirdousApp() {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [selectedProductId, setSelectedProductId] = useState(initialProducts[0].id);
@@ -290,6 +313,14 @@ function GulefirdousApp() {
   const [captionDrafts, setCaptionDrafts] = useState<Record<number, string>>(() =>
     Object.fromEntries(initialProducts.map((product) => [product.id, buildDefaultPostCaption(product)]))
   );
+  const [session, setSession] = useState<UserSession | null>(null);
+  const [activePage, setActivePage] = useState<AppPage>("dashboard");
+  const [orderNotice, setOrderNotice] = useState("");
+  const sessionRef = useRef<UserSession | null>(null);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
 
   useEffect(() => {
     if (!imagePreview) {
@@ -342,6 +373,31 @@ function GulefirdousApp() {
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
   const instagramOrders = orders.filter((order) => order.source === "Instagram").length;
   const facebookOrders = orders.filter((order) => order.source === "Facebook").length;
+  const productsByCategory = useMemo(() => {
+    const grouped = new Map<string, Product[]>();
+
+    products.forEach((product) => {
+      const list = grouped.get(product.category) || [];
+      list.push(product);
+      grouped.set(product.category, list);
+    });
+
+    return Array.from(grouped.entries());
+  }, [products]);
+  const clientOrders = useMemo(() => {
+    if (!session || session.role !== "client") {
+      return [];
+    }
+
+    return orders.filter(
+      (order) => order.customer === session.displayName || order.source === "App"
+    );
+  }, [orders, session]);
+  const clientLatestOrder = clientOrders[0];
+  const clientLatestProduct =
+    clientLatestOrder &&
+    (products.find((product) => product.id === clientLatestOrder.productId) || products[0]);
+  const navItems = session?.role === "admin" ? ADMIN_NAV : CLIENT_NAV;
 
   const updateCaptionDraft = (value: string) => {
     setCaptionDrafts((current) => ({
@@ -576,10 +632,28 @@ function GulefirdousApp() {
     reader.readAsDataURL(file);
   };
 
-  const placeOrder = (product: Product, source: string) => {
+  const handleSignIn = (loginId: string, role: UserRole) => {
+    const nextSession = {
+      loginId,
+      role,
+      displayName: buildDisplayName(loginId, role),
+    };
+
+    sessionRef.current = nextSession;
+    setSession(nextSession);
+    setActivePage(defaultPageForRole(role));
+  };
+
+  const handleSignOut = () => {
+    sessionRef.current = null;
+    setSession(null);
+    setActivePage("dashboard");
+  };
+
+  const placeOrder = (product: Product, source: string, customerName?: string) => {
     const order: Order = {
       id: `GF-${Math.floor(1000 + Math.random() * 9000)}`,
-      customer: "Demo Customer",
+      customer: customerName || sessionRef.current?.displayName || "Demo Customer",
       productId: product.id,
       total: product.price,
       paymentMethod: "Cash on Delivery",
@@ -588,6 +662,7 @@ function GulefirdousApp() {
     };
 
     setOrders((current) => [order, ...current]);
+    setOrderNotice(`Order ${order.id} placed with ${order.paymentMethod}.`);
   };
 
   const openImagePreview = (preview: { url: string; label: string; source?: string }) => {
@@ -616,106 +691,24 @@ function GulefirdousApp() {
     );
   };
 
-  return (
-    <main className="gf-app">
-      <div className="gf-topbar">
-        <span>Fragrance of Humanity</span>
-        <span>Preview app · editable ads · updated theme · port 3000</span>
-        <span>Free shipping · COD across Pakistan · gulefirdous.com</span>
+  const renderManageProducts = () => (
+    <>
+      <div className="gf-checklist">
+        <div>
+          <strong>1. Install WooCommerce</strong>
+          <p>Required before the app can create products or read orders.</p>
+        </div>
+        <div>
+          <strong>2. Add COD and TCS shipping rules</strong>
+          <p>Pakistan COD first; international checkout needs an online payment option later.</p>
+        </div>
+        <div>
+          <strong>3. Create API credentials</strong>
+          <p>Use WooCommerce REST keys to sync catalog, inventory, and orders.</p>
+        </div>
       </div>
 
-      <header className="gf-site-header">
-        <div className="gf-site-brand">
-          <div className="gf-logo" aria-label="Gulefirdous perfume logo">
-            GF
-          </div>
-          <div>
-            <strong>Gulefirdous</strong>
-            <span>Premium perfumes and attars</span>
-          </div>
-        </div>
-        <nav className="gf-site-nav" aria-label="Store highlights">
-          <span>Men</span>
-          <span>Women</span>
-          <span>Gifts</span>
-          <span className="gf-sale-pill">Sale</span>
-        </nav>
-      </header>
-
-      <section className="gf-hero">
-        <div className="gf-brand">
-          <div>
-            <p className="gf-eyebrow">Admin &amp; mobile commerce</p>
-            <h1>Gulefirdous commerce and social publishing app</h1>
-            <p>
-              Manage WordPress products, publish posts to Facebook and Instagram, receive
-              engagement notifications, and process COD orders with TCS tracking.
-            </p>
-          </div>
-        </div>
-        <div className="gf-hero-card">
-          <span className="gf-hero-badge">New season</span>
-          <strong>Shop-ready dashboard for gulefirdous.com</strong>
-          <p>WooCommerce sync, social ads, customer COD orders, and TCS tracking in one place.</p>
-          <button
-            type="button"
-            className="gf-hero-cta"
-            onClick={() => document.getElementById("gf-shop")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            Explore storefront
-          </button>
-        </div>
-      </section>
-
-      <section className="gf-stats" aria-label="App readiness">
-        <article>
-          <span>WooCommerce</span>
-          <strong>Setup required</strong>
-          <p>Install plugin, create API keys, then sync products.</p>
-        </article>
-        <article>
-          <span>Meta channels</span>
-          <strong>Facebook + Instagram</strong>
-          <p>Separate publish buttons with per-platform status.</p>
-        </article>
-        <article>
-          <span>Payments</span>
-          <strong>COD first</strong>
-          <p>JazzCash, Easypaisa, and bank gateways can follow.</p>
-        </article>
-        <article>
-          <span>Delivery</span>
-          <strong>TCS tracking</strong>
-          <p>Admin adds tracking numbers for customer visibility.</p>
-        </article>
-      </section>
-
-      <section className="gf-grid">
-        <article className="gf-panel gf-wide">
-          <div className="gf-panel-title">
-            <div>
-              <p className="gf-eyebrow">Admin</p>
-              <h2>WordPress product upload and sync</h2>
-            </div>
-            <span className="gf-pill">gulefirdous.com</span>
-          </div>
-
-          <div className="gf-checklist">
-            <div>
-              <strong>1. Install WooCommerce</strong>
-              <p>Required before the app can create products or read orders.</p>
-            </div>
-            <div>
-              <strong>2. Add COD and TCS shipping rules</strong>
-              <p>Pakistan COD first; international checkout needs an online payment option later.</p>
-            </div>
-            <div>
-              <strong>3. Create API credentials</strong>
-              <p>Use WooCommerce REST keys to sync catalog, inventory, and orders.</p>
-            </div>
-          </div>
-
-          <form className="gf-product-form" onSubmit={saveProduct}>
+      <form className="gf-product-form" onSubmit={saveProduct}>
             <div className="gf-product-form-grid">
               <label>
                 Product name
@@ -958,228 +951,516 @@ function GulefirdousApp() {
               </article>
             ))}
           </div>
-        </article>
+    </>
+  );
 
-        <article className="gf-panel">
-          <div className="gf-panel-title">
-            <div>
-              <p className="gf-eyebrow">Post builder</p>
-              <h2>Editable social ad</h2>
-            </div>
-          </div>
-          <label className="gf-select-label">
-            Select product
-            <select
-              value={selectedProductId}
-              onChange={(event) => setSelectedProductId(Number(event.target.value))}
-            >
-              {products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="gf-caption-label">
-            Ad description
-            <textarea
-              className="gf-caption"
-              value={editableCaption}
-              onChange={(event) => updateCaptionDraft(event.target.value)}
-              rows={11}
-              aria-label="Editable social ad description"
-              placeholder="Product details, coupon codes, vouchers, and order link..."
-            />
-          </label>
-          <p className="gf-caption-hint">
-            Auto-filled from the product. Add coupon codes (REF10, INSTA10), vouchers, or any
-            extra promo text before posting.
-          </p>
-          <button type="button" className="gf-reset-caption" onClick={resetCaptionDraft}>
-            Reset to auto-fill
-          </button>
-          <div className="gf-publish-actions">
-            <button type="button" onClick={() => publishPost("facebook")}>
-              Post to Facebook
-            </button>
-            <button type="button" onClick={() => publishPost("instagram")}>
-              Post to Instagram
-            </button>
-          </div>
-          <div className="gf-platform-status">
-            <span>Facebook: {publishStatus.facebook}</span>
-            <span>Instagram: {publishStatus.instagram}</span>
-          </div>
-        </article>
-
-        <article className="gf-panel">
-          <div className="gf-panel-title">
-            <div>
-              <p className="gf-eyebrow">Engagement inbox</p>
-              <h2>Likes and comments</h2>
-            </div>
-          </div>
-          <div className="gf-feed">
-            {engagements.map((item) => (
-              <div key={item.id} className="gf-feed-item">
-                <span>{item.platform}</span>
-                <strong>{item.type}</strong>
-                <p>{item.message}</p>
-                <small>
-                  {item.product} - {item.time}
-                </small>
-              </div>
-            ))}
-          </div>
-        </article>
-      </section>
-
-      <section className="gf-grid">
-        <article className="gf-panel gf-wide" id="gf-shop">
-          <div className="gf-panel-title">
-            <div>
-              <p className="gf-eyebrow">Customer app</p>
-              <h2>Shop products and place COD orders</h2>
-            </div>
-            <span className="gf-pill">Android + iPhone ready UX</span>
-          </div>
-          <div className="gf-shop">
-            {products.map((product) => (
-              <div className="gf-product-card" key={product.id}>
-                <div className="gf-product-image-wrap">
-                  <div className="gf-image-frame gf-image-frame-shop">
-                    <img
-                      className="gf-product-image"
-                      src={product.imageUrl}
-                      alt={`${product.name} product visual`}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    className="gf-preview-button"
-                    onClick={() =>
-                      openImagePreview({
-                        url: product.imageUrl,
-                        label: product.name,
-                        source: product.imageSource,
-                      })
-                    }
-                  >
-                    Preview full image
-                  </button>
-                </div>
-                <span>
-                  {product.category} · {product.audience}
-                </span>
-                <h3>{product.name}</h3>
-                <p className="gf-product-meta">{formatProductMeta(product)}</p>
-                <p>{product.description}</p>
-                {product.notes.length ? (
-                  <div className="gf-note-tags">
-                    {product.notes.map((note) => (
-                      <span key={note}>{note}</span>
-                    ))}
-                  </div>
-                ) : null}
-                <strong>{formatPrice(product.price)}</strong>
-                <button type="button" onClick={() => placeOrder(product, "App")}>
-                  Order with COD
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="gf-inline-tracking">
-            <div>
-              <p className="gf-eyebrow">Latest customer order</p>
-              <h3>{latestOrder.id}</h3>
-              <p>
-                {latestOrder.customer} ordered {latestOrderProduct.name} through{" "}
-                {latestOrder.source}.
-              </p>
-              <strong>{latestOrder.paymentMethod}</strong>
-            </div>
-            <div className="gf-timeline">
-              {statusOrder.map((status, index) => (
-                <span
-                  key={status}
-                  className={index <= statusOrder.indexOf(latestOrder.status) ? "done" : ""}
-                >
-                  {status}
-                </span>
-              ))}
-            </div>
-            <div className="gf-order-actions">
-              <span>Tracking: {latestOrder.trackingNumber || "Waiting for shipment"}</span>
-              <button type="button" onClick={() => advanceOrder(latestOrder.id)}>
-                Move to next status
-              </button>
-            </div>
-          </div>
-        </article>
-
-        <article className="gf-panel">
-          <div className="gf-panel-title">
-            <div>
-              <p className="gf-eyebrow">Discounts</p>
-              <h2>Referral and source tracking</h2>
-            </div>
-          </div>
-          <div className="gf-coupons">
-            <div>
-              <strong>REF10</strong>
-              <span>10% first order referral discount</span>
-            </div>
-            <div>
-              <strong>INSTA10</strong>
-              <span>Instagram source campaign</span>
-            </div>
-            <div>
-              <strong>FB10</strong>
-              <span>Facebook source campaign</span>
-            </div>
-          </div>
-          <div className="gf-metrics">
-            <span>Total revenue</span>
-            <strong>{formatPrice(totalRevenue)}</strong>
-            <small>
-              Instagram orders: {instagramOrders} | Facebook orders: {facebookOrders}
-            </small>
-          </div>
-        </article>
-      </section>
-
-      <section className="gf-panel">
+  const renderSocialAds = () => (
+    <div className="gf-grid gf-grid-single">
+      <article className="gf-panel">
         <div className="gf-panel-title">
           <div>
-            <p className="gf-eyebrow">Admin and customer</p>
-            <h2>Order management and tracking</h2>
+            <p className="gf-eyebrow">Post builder</p>
+            <h2>Editable social ad</h2>
           </div>
-          <span className="gf-pill">Courier: TCS</span>
         </div>
-        <div className="gf-order-table">
-          {orders.map((order) => {
-            const product = products.find((item) => item.id === order.productId) || products[0];
+        <label className="gf-select-label">
+          Select product
+          <select
+            value={selectedProductId}
+            onChange={(event) => setSelectedProductId(Number(event.target.value))}
+          >
+            {products.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="gf-caption-label">
+          Ad description
+          <textarea
+            className="gf-caption"
+            value={editableCaption}
+            onChange={(event) => updateCaptionDraft(event.target.value)}
+            rows={11}
+            aria-label="Editable social ad description"
+            placeholder="Product details, coupon codes, vouchers, and order link..."
+          />
+        </label>
+        <p className="gf-caption-hint">
+          Auto-filled from the product. Add coupon codes (REF10, INSTA10), vouchers, or any extra
+          promo text before posting.
+        </p>
+        <button type="button" className="gf-reset-caption" onClick={resetCaptionDraft}>
+          Reset to auto-fill
+        </button>
+        <div className="gf-publish-actions">
+          <button type="button" onClick={() => publishPost("facebook")}>
+            Post to Facebook
+          </button>
+          <button type="button" onClick={() => publishPost("instagram")}>
+            Post to Instagram
+          </button>
+        </div>
+        <div className="gf-platform-status">
+          <span>Facebook: {publishStatus.facebook}</span>
+          <span>Instagram: {publishStatus.instagram}</span>
+        </div>
+      </article>
 
-            return (
-              <article key={order.id} className="gf-order-row">
-                <span>{order.id}</span>
-                <strong>{product.name}</strong>
-                <p>
-                  {order.customer} - {order.paymentMethod} - Source: {order.source}
-                </p>
-                <small>{formatPrice(order.total)}</small>
-                <em>{order.status}</em>
-                <div>
-                  <small>{order.trackingNumber || "Waiting for shipment"}</small>
-                  <button type="button" onClick={() => advanceOrder(order.id)}>
-                    Next status
+      <article className="gf-panel">
+        <div className="gf-panel-title">
+          <div>
+            <p className="gf-eyebrow">Engagement inbox</p>
+            <h2>Likes and comments</h2>
+          </div>
+        </div>
+        <div className="gf-feed">
+          {engagements.map((item) => (
+            <div key={item.id} className="gf-feed-item">
+              <span>{item.platform}</span>
+              <strong>{item.type}</strong>
+              <p>{item.message}</p>
+              <small>
+                {item.product} - {item.time}
+              </small>
+            </div>
+          ))}
+        </div>
+      </article>
+    </div>
+  );
+
+  const renderOrderTable = (showAdminActions: boolean) => (
+    <div className="gf-order-table">
+      {(showAdminActions ? orders : clientOrders).map((order) => {
+        const product = products.find((item) => item.id === order.productId) || products[0];
+
+        return (
+          <article key={order.id} className="gf-order-row">
+            <span>{order.id}</span>
+            <strong>{product.name}</strong>
+            <p>
+              {order.customer} - {order.paymentMethod} - Source: {order.source}
+            </p>
+            <small>{formatPrice(order.total)}</small>
+            <em>{order.status}</em>
+            <div>
+              <small>{order.trackingNumber || "Waiting for shipment"}</small>
+              {showAdminActions ? (
+                <button type="button" onClick={() => advanceOrder(order.id)}>
+                  Next status
+                </button>
+              ) : null}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+
+  const renderTrackingTimeline = (order: Order, productName: string) => (
+    <div className="gf-inline-tracking">
+      <div>
+        <p className="gf-eyebrow">Shipment status</p>
+        <h3>{order.id}</h3>
+        <p>
+          {order.customer} ordered {productName} through {order.source}.
+        </p>
+        <strong>{order.paymentMethod}</strong>
+      </div>
+      <div className="gf-timeline">
+        {statusOrder.map((status, index) => (
+          <span
+            key={status}
+            className={index <= statusOrder.indexOf(order.status) ? "done" : ""}
+          >
+            {status}
+          </span>
+        ))}
+      </div>
+      <div className="gf-order-actions">
+        <span>Tracking: {order.trackingNumber || "Waiting for shipment"}</span>
+      </div>
+    </div>
+  );
+
+  const renderPageContent = () => {
+    if (!session) {
+      return null;
+    }
+
+    if (session.role === "admin") {
+      switch (activePage) {
+        case "dashboard":
+          return (
+            <>
+              <section className="gf-hero gf-hero-compact">
+                <div className="gf-brand">
+                  <div>
+                    <p className="gf-eyebrow">Admin &amp; mobile commerce</p>
+                    <h1>Gulefirdous commerce and social publishing app</h1>
+                    <p>
+                      Manage WordPress products, publish posts to Facebook and Instagram, receive
+                      engagement notifications, and process COD orders with TCS tracking.
+                    </p>
+                  </div>
+                </div>
+                <div className="gf-hero-card">
+                  <span className="gf-hero-badge">Mobile first</span>
+                  <strong>Shop-ready dashboard for gulefirdous.com</strong>
+                  <p>
+                    WooCommerce sync, social ads, customer COD orders, and TCS tracking in one
+                    place.
+                  </p>
+                  <button
+                    type="button"
+                    className="gf-hero-cta"
+                    onClick={() => setActivePage("manage-products")}
+                  >
+                    Manage products
                   </button>
                 </div>
-              </article>
-            );
-          })}
+              </section>
+              <section className="gf-stats" aria-label="App readiness">
+                <article>
+                  <span>WooCommerce</span>
+                  <strong>Setup required</strong>
+                  <p>Install plugin, create API keys, then sync products.</p>
+                </article>
+                <article>
+                  <span>Meta channels</span>
+                  <strong>Facebook + Instagram</strong>
+                  <p>Separate publish buttons with per-platform status.</p>
+                </article>
+                <article>
+                  <span>Payments</span>
+                  <strong>COD first</strong>
+                  <p>JazzCash, Easypaisa, and bank gateways can follow.</p>
+                </article>
+                <article>
+                  <span>Delivery</span>
+                  <strong>TCS tracking</strong>
+                  <p>Admin adds tracking numbers for customer visibility.</p>
+                </article>
+              </section>
+            </>
+          );
+        case "product-catalog":
+          return (
+            <section className="gf-catalog">
+              {productsByCategory.map(([category, categoryProducts]) => (
+                <article className="gf-panel" key={category}>
+                  <div className="gf-panel-title">
+                    <div>
+                      <p className="gf-eyebrow">Category</p>
+                      <h2>{category}</h2>
+                    </div>
+                    <span className="gf-pill">{categoryProducts.length} products</span>
+                  </div>
+                  <div className="gf-catalog-list">
+                    {categoryProducts.map((product) => (
+                      <div className="gf-catalog-item" key={product.id}>
+                        <div className="gf-image-frame gf-image-frame-thumb">
+                          <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
+                        </div>
+                        <div>
+                          <strong>{product.name}</strong>
+                          <p>{formatProductMeta(product)}</p>
+                          <small>
+                            {formatPrice(product.price)} · {product.stock} in stock
+                          </small>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </section>
+          );
+        case "manage-products":
+          return (
+            <section className="gf-panel gf-wide">
+              <div className="gf-panel-title">
+                <div>
+                  <p className="gf-eyebrow">Admin</p>
+                  <h2>WordPress product upload and sync</h2>
+                </div>
+                <span className="gf-pill">gulefirdous.com</span>
+              </div>
+              {renderManageProducts()}
+            </section>
+          );
+        case "social-ads":
+          return renderSocialAds();
+        case "orders-delivery":
+          return (
+            <section className="gf-panel">
+              <div className="gf-panel-title">
+                <div>
+                  <p className="gf-eyebrow">Admin and customer</p>
+                  <h2>Order management and tracking</h2>
+                </div>
+                <span className="gf-pill">Courier: TCS</span>
+              </div>
+              {renderOrderTable(true)}
+              {renderTrackingTimeline(latestOrder, latestOrderProduct.name)}
+            </section>
+          );
+        case "payments":
+          return (
+            <section className="gf-panel">
+              <div className="gf-panel-title">
+                <div>
+                  <p className="gf-eyebrow">Discounts</p>
+                  <h2>Referral and source tracking</h2>
+                </div>
+              </div>
+              <div className="gf-coupons">
+                <div>
+                  <strong>REF10</strong>
+                  <span>10% first order referral discount</span>
+                </div>
+                <div>
+                  <strong>INSTA10</strong>
+                  <span>Instagram source campaign</span>
+                </div>
+                <div>
+                  <strong>FB10</strong>
+                  <span>Facebook source campaign</span>
+                </div>
+              </div>
+              <div className="gf-metrics">
+                <span>Total revenue</span>
+                <strong>{formatPrice(totalRevenue)}</strong>
+                <small>
+                  Instagram orders: {instagramOrders} | Facebook orders: {facebookOrders}
+                </small>
+              </div>
+            </section>
+          );
+        case "account-settings":
+          return (
+            <section className="gf-panel gf-account-panel">
+              <div className="gf-panel-title">
+                <div>
+                  <p className="gf-eyebrow">Administrator</p>
+                  <h2>Account settings</h2>
+                </div>
+              </div>
+              <div className="gf-account-card">
+                <strong>{session.displayName}</strong>
+                <p>{session.loginId}</p>
+                <span className="gf-role-badge">Administrator</span>
+                <p>
+                  Use the mobile app with this login to post ads, update products, and process
+                  delivery from anywhere.
+                </p>
+                <button type="button" className="gf-secondary-button" onClick={handleSignOut}>
+                  Sign out
+                </button>
+              </div>
+            </section>
+          );
+        default:
+          return null;
+      }
+    }
+
+    switch (activePage) {
+      case "shop":
+        return (
+          <section className="gf-panel gf-wide">
+            <div className="gf-panel-title">
+              <div>
+                <p className="gf-eyebrow">Customer app</p>
+                <h2>Shop products and place COD orders</h2>
+              </div>
+              <span className="gf-pill">Android + iPhone ready UX</span>
+            </div>
+            {orderNotice ? (
+              <p className="gf-order-notice" role="status">
+                {orderNotice}
+              </p>
+            ) : null}
+            <div className="gf-shop">
+              {products.map((product) => (
+                <div className="gf-product-card" key={product.id}>
+                  <div className="gf-product-image-wrap">
+                    <div className="gf-image-frame gf-image-frame-shop">
+                      <img
+                        className="gf-product-image"
+                        src={product.imageUrl}
+                        alt={`${product.name} product visual`}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="gf-preview-button"
+                      onClick={() =>
+                        openImagePreview({
+                          url: product.imageUrl,
+                          label: product.name,
+                          source: product.imageSource,
+                        })
+                      }
+                    >
+                      Preview full image
+                    </button>
+                  </div>
+                  <span>
+                    {product.category} · {product.audience}
+                  </span>
+                  <h3>{product.name}</h3>
+                  <p className="gf-product-meta">{formatProductMeta(product)}</p>
+                  <p>{product.description}</p>
+                  {product.notes.length ? (
+                    <div className="gf-note-tags">
+                      {product.notes.map((note) => (
+                        <span key={note}>{note}</span>
+                      ))}
+                    </div>
+                  ) : null}
+                  <strong>{formatPrice(product.price)}</strong>
+                  <button
+                    type="button"
+                    onClick={() => placeOrder(product, "App", session.displayName)}
+                  >
+                    Order with COD
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      case "my-orders":
+        return (
+          <section className="gf-panel">
+            <div className="gf-panel-title">
+              <div>
+                <p className="gf-eyebrow">Your orders</p>
+                <h2>Order history</h2>
+              </div>
+            </div>
+            {clientOrders.length ? (
+              renderOrderTable(false)
+            ) : (
+              <p className="gf-empty-state">
+                No orders yet. Browse perfumes and place your first COD order from the shop.
+              </p>
+            )}
+          </section>
+        );
+      case "track-delivery":
+        return (
+          <section className="gf-panel">
+            <div className="gf-panel-title">
+              <div>
+                <p className="gf-eyebrow">Delivery</p>
+                <h2>Track your shipment</h2>
+              </div>
+              <span className="gf-pill">Courier: TCS</span>
+            </div>
+            {clientLatestOrder && clientLatestProduct ? (
+              renderTrackingTimeline(clientLatestOrder, clientLatestProduct.name)
+            ) : (
+              <p className="gf-empty-state">
+                Place an order first, then return here to follow TCS delivery updates.
+              </p>
+            )}
+          </section>
+        );
+      case "account-settings":
+        return (
+          <section className="gf-panel gf-account-panel">
+            <div className="gf-panel-title">
+              <div>
+                <p className="gf-eyebrow">Client</p>
+                <h2>Account settings</h2>
+              </div>
+            </div>
+            <div className="gf-account-card">
+              <strong>{session.displayName}</strong>
+              <p>{session.loginId}</p>
+              <span className="gf-role-badge gf-role-badge-client">Client</span>
+              <p>Order perfumes and track delivery from the same login on your mobile app.</p>
+              <button type="button" className="gf-secondary-button" onClick={handleSignOut}>
+                Sign out
+              </button>
+            </div>
+          </section>
+        );
+      default:
+        return null;
+    }
+  };
+
+  if (!session) {
+    return (
+      <main className="gf-app gf-app-login">
+        <GulefirdousLogin onSignIn={handleSignIn} />
+      </main>
+    );
+  }
+
+  return (
+    <main className="gf-app">
+      <div className="gf-shell">
+        <aside className="gf-sidebar" aria-label="App navigation">
+          <div className="gf-sidebar-brand">
+            <div className="gf-logo" aria-hidden="true">
+              GF
+            </div>
+            <div>
+              <strong>Gulefirdous</strong>
+              <span>Fragrance of Humanity</span>
+            </div>
+          </div>
+
+          <p className="gf-sidebar-role">
+            {session.role === "admin" ? "Administrator" : "Client"} · {session.displayName}
+          </p>
+
+          <nav className="gf-sidebar-nav">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={activePage === item.id ? "active" : ""}
+                aria-current={activePage === item.id ? "page" : undefined}
+                onClick={() => setActivePage(item.id)}
+              >
+                <span>{item.label}</span>
+                <small>{item.hint}</small>
+              </button>
+            ))}
+          </nav>
+
+          <div className="gf-sidebar-footer">
+            <p>Mobile app controls this site — post ads, update products, and track orders.</p>
+            <button type="button" className="gf-sidebar-signout" onClick={handleSignOut}>
+              Sign out
+            </button>
+          </div>
+        </aside>
+
+        <div className="gf-main">
+          <header className="gf-main-header">
+            <div>
+              <p className="gf-eyebrow">
+                {session.role === "admin" ? "Admin control center" : "Client storefront"}
+              </p>
+              <h1>{PAGE_TITLES[activePage]}</h1>
+            </div>
+            <div className="gf-main-header-meta">
+              <span>Preview · port 3000</span>
+              <span>COD · TCS · gulefirdous.com</span>
+            </div>
+          </header>
+
+          <div className="gf-page-content">{renderPageContent()}</div>
         </div>
-      </section>
+      </div>
 
       {imagePreview ? (
         <div
