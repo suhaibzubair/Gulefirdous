@@ -1,38 +1,39 @@
+// Curated glass perfume flacon photos only (no skincare tubes or cream jars).
 const REALISTIC_PHOTO_SETS = [
   [
     {
-      label: "Emerald oud",
+      label: "Emerald glass oud",
       url: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=900&h=700&q=80",
     },
     {
-      label: "Rose gold mist",
-      url: "https://images.unsplash.com/photo-1592945403244-b31f22829c4f?auto=format&fit=crop&w=900&h=700&q=80",
+      label: "Rose gold flacon",
+      url: "https://images.unsplash.com/photo-1458538977777-0549b2370168?auto=format&fit=crop&w=900&h=700&q=80",
     },
     {
-      label: "Midnight attar",
+      label: "Midnight glass attar",
       url: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?auto=format&fit=crop&w=900&h=700&q=80",
     },
     {
-      label: "Saffron bloom",
-      url: "https://images.unsplash.com/photo-1594035910387-fea47794261b?auto=format&fit=crop&w=900&h=700&q=80",
+      label: "Crystal amber bottle",
+      url: "https://images.unsplash.com/photo-1543422655-ac1c6ca993ed?auto=format&fit=crop&w=900&h=700&q=80",
     },
   ],
   [
     {
-      label: "Velvet amber",
-      url: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&h=700&q=80",
+      label: "Twin glass flacons",
+      url: "https://images.unsplash.com/photo-1622618991746-fe6004db3a47?auto=format&fit=crop&w=900&h=700&q=80",
     },
     {
-      label: "Silk musk",
-      url: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=900&h=700&q=80",
+      label: "Clear luxury bottle",
+      url: "https://images.pexels.com/photos/965989/pexels-photo-965989.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
     },
     {
-      label: "Noir oud",
-      url: "https://images.unsplash.com/photo-1523293182086-67f61a7be9a3?auto=format&fit=crop&w=900&h=700&q=80",
+      label: "Golden cap flacon",
+      url: "https://images.pexels.com/photos/3360268/pexels-photo-3360268.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
     },
     {
-      label: "Desert rose",
-      url: "https://images.unsplash.com/photo-1631214524028-4cbd4b1a8e8e?auto=format&fit=crop&w=900&h=700&q=80",
+      label: "Noir glass perfume",
+      url: "https://images.pexels.com/photos/3785147/pexels-photo-3785147.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
     },
   ],
 ];

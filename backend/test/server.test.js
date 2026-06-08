@@ -157,7 +157,7 @@ test("product image endpoint returns realistic photo concepts", async () => {
 
     assert.equal(response.status, 200);
     assert.equal(body.images.length, 4);
-    assert.match(body.images[0].url, /^https:\/\/images\.unsplash\.com\//);
+    assert.match(body.images[0].url, /^https:\/\/images\.(unsplash|pexels)\.com\//);
     assert.equal(body.mode, "realistic-studio-photos");
   });
 });
