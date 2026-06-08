@@ -58,13 +58,33 @@ export interface GeneratedProductImage {
   source: "AI generated" | "Gallery upload";
 }
 
-export function generateProductImages(productName: string, seed?: number) {
+export function generateProductImages(
+  productName: string,
+  options?: {
+    seed?: number;
+    generationCount?: number;
+    previousSetKey?: string;
+  }
+) {
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), 10000);
+
   return request<{
     images: GeneratedProductImage[];
+    seed?: number;
+    setKey?: string;
     mode: string;
     message?: string;
   }>("/api/product-images/generate", {
     method: "POST",
-    body: JSON.stringify({ productName, seed }),
+    signal: controller.signal,
+    body: JSON.stringify({
+      productName,
+      seed: options?.seed,
+      generationCount: options?.generationCount,
+      previousSetKey: options?.previousSetKey,
+    }),
+  }).finally(() => {
+    globalThis.clearTimeout(timeoutId);
   });
 }

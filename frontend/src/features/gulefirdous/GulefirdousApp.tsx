@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { generateProductImages } from "./gulefirdousApi";
 import {
-  createRealisticImageOptions,
+  buildGenerationSeed,
+  createUniqueRealisticImageOptions,
   defaultRealisticImageOptions,
   type ImageSource,
   type ProductImageOption,
@@ -267,6 +268,8 @@ function GulefirdousApp() {
   const [imageGenerationNote, setImageGenerationNote] = useState(
     "Glass perfume bottle photos only. Click generate for a fresh flacon set."
   );
+  const [imageGenerationCount, setImageGenerationCount] = useState(0);
+  const [lastImageSetKey, setLastImageSetKey] = useState("");
   const [imagePreview, setImagePreview] = useState<{
     url: string;
     label: string;
@@ -456,22 +459,38 @@ function GulefirdousApp() {
 
   const generateImageOptions = async () => {
     const productName = newProduct.name || "Gulefirdous Perfume";
-    const seed = Date.now();
+    const nextGenerationCount = imageGenerationCount + 1;
+    const seed = buildGenerationSeed(productName, Date.now(), nextGenerationCount);
 
     setIsGeneratingImages(true);
 
     try {
-      const result = await generateProductImages(productName, seed);
+      const result = await generateProductImages(productName, {
+        seed,
+        generationCount: nextGenerationCount,
+        previousSetKey: lastImageSetKey,
+      });
       setImageOptions(result.images);
       setSelectedImage(result.images[0]);
+      setImageGenerationCount(nextGenerationCount);
+      setLastImageSetKey(result.setKey || "");
       setImageGenerationNote(
-        result.message || "Fresh glass perfume bottle photos are ready."
+        result.message ||
+          `Fresh set ${nextGenerationCount}: ${result.images.length} unique glass bottle photos are ready.`
       );
     } catch {
-      const options = createRealisticImageOptions(productName, seed);
-      setImageOptions(options);
-      setSelectedImage(options[0]);
-      setImageGenerationNote("Showing glass perfume bottle photos only.");
+      const fallback = createUniqueRealisticImageOptions(
+        productName,
+        seed,
+        lastImageSetKey
+      );
+      setImageOptions(fallback.images);
+      setSelectedImage(fallback.images[0]);
+      setImageGenerationCount(nextGenerationCount);
+      setLastImageSetKey(fallback.setKey);
+      setImageGenerationNote(
+        `Fresh set ${nextGenerationCount}: showing unique bottle photos from local gallery (API unavailable).`
+      );
     } finally {
       setIsGeneratingImages(false);
     }

@@ -1,5 +1,8 @@
 const http = require("node:http");
-const { createRealisticImageOptions } = require("./productImages");
+const {
+  buildGenerationSeed,
+  createUniqueRealisticImageOptions,
+} = require("./productImages");
 const { createWooCommerceClient, verifyWooCommerceSignature } = require("./woocommerceClient");
 
 const jsonHeaders = {
@@ -91,20 +94,31 @@ function createServer(options = {}) {
       }
 
       if (request.method === "POST" && url.pathname === "/api/product-images/generate") {
-        const { productName, seed } = parseJson(await readBody(request));
-        const images = createRealisticImageOptions(
+        const { productName, seed, generationCount, previousSetKey } = parseJson(
+          await readBody(request)
+        );
+        const generationSeed =
+          seed ||
+          buildGenerationSeed(
+            productName || "Gulefirdous Perfume",
+            Date.now(),
+            generationCount || 0
+          );
+        const result = createUniqueRealisticImageOptions(
           productName || "Gulefirdous Perfume",
-          seed || Date.now()
+          generationSeed,
+          previousSetKey || ""
         );
 
         sendJson(
           response,
           200,
           {
-            images,
+            images: result.images,
+            seed: result.seed,
+            setKey: result.setKey,
             mode: "realistic-studio-photos",
-            message:
-              "Returned luxury perfume studio photo concepts. Add OPENAI_API_KEY later for fully custom AI renders.",
+            message: `Fresh set ${(generationCount || 0) + 1}: ${result.images.length} unique glass bottle photos ready.`,
           },
           corsHeaders
         );
