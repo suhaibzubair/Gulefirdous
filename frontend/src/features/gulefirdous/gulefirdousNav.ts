@@ -3,6 +3,7 @@ export type UserRole = "admin" | "client";
 export type AdminPage =
   | "dashboard"
   | "product-catalog"
+  | "manage-categories"
   | "manage-products"
   | "social-ads"
   | "orders-delivery"
@@ -28,6 +29,7 @@ export interface NavItem {
 export const ADMIN_NAV: NavItem[] = [
   { id: "dashboard", label: "Dashboard", hint: "Overview and mobile sync" },
   { id: "product-catalog", label: "Product catalog", hint: "All products by category" },
+  { id: "manage-categories", label: "Categories", hint: "Add and manage product categories" },
   { id: "manage-products", label: "Manage products", hint: "Add, edit, and upload images" },
   { id: "social-ads", label: "Social ads", hint: "Facebook and Instagram posts" },
   { id: "orders-delivery", label: "Orders & delivery", hint: "COD orders and TCS tracking" },
@@ -45,6 +47,7 @@ export const CLIENT_NAV: NavItem[] = [
 export const PAGE_TITLES: Record<AppPage, string> = {
   dashboard: "Admin dashboard",
   "product-catalog": "Products by category",
+  "manage-categories": "Product categories",
   "manage-products": "Manage products",
   "social-ads": "Social ad publishing",
   "orders-delivery": "Orders and delivery",

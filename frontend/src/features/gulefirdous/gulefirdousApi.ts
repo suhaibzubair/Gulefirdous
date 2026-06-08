@@ -58,6 +58,26 @@ export interface GeneratedProductImage {
   source: "AI generated" | "Gallery upload";
 }
 
+export interface ProductCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  wooCommerceId?: number | null;
+  createdAt?: string;
+}
+
+export function fetchCategories() {
+  return request<{ categories: ProductCategory[] }>("/api/categories");
+}
+
+export function createCategory(name: string, description = "") {
+  return request<{ category: ProductCategory }>("/api/categories", {
+    method: "POST",
+    body: JSON.stringify({ name, description }),
+  });
+}
+
 export function generateProductImages(
   productName: string,
   options?: {

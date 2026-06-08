@@ -31,6 +31,20 @@ function goToSidebarPage(label: string) {
   );
 }
 
+test("shows category management and product category picker for admin", () => {
+  render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Categories");
+
+  expect(screen.getAllByRole("heading", { name: /Product categories/i }).length).toBeGreaterThan(0);
+  expect(screen.getByPlaceholderText(/Example: Candles, Hair Mist, Room Spray/i)).toBeInTheDocument();
+  expect(screen.getAllByText(/Perfume/i).length).toBeGreaterThan(0);
+  expect(screen.getAllByText(/Gift Set/i).length).toBeGreaterThan(0);
+
+  goToSidebarPage("Manage products");
+  expect(screen.getByLabelText(/Product category/i)).toBeInTheDocument();
+});
+
 test("renders the Gulefirdous MVP dashboard", () => {
   render(<App />);
 

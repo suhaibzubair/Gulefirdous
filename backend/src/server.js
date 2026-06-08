@@ -1,4 +1,6 @@
 const http = require("node:http");
+const path = require("node:path");
+const { createCategoryStore, slugifyCategoryName } = require("./categoryStore");
 const { createNextImageBatch, totalPhotoPoolSize } = require("./productImages");
 const { createWooCommerceClient, verifyWooCommerceSignature } = require("./woocommerceClient");
 
@@ -54,6 +56,11 @@ function sanitizeProduct(input) {
 function createServer(options = {}) {
   const env = options.env || process.env;
   const client = options.client || createWooCommerceClient(env);
+  const categoryStore =
+    options.categoryStore ||
+    createCategoryStore(
+      options.categoryDataFile || path.join(__dirname, "../data/categories.json")
+    );
 
   return http.createServer(async (request, response) => {
     const corsHeaders = getCorsHeaders(env);
@@ -69,6 +76,39 @@ function createServer(options = {}) {
     try {
       if (request.method === "GET" && url.pathname === "/health") {
         sendJson(response, 200, { ok: true, service: "gulefirdous-backend" }, corsHeaders);
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/categories") {
+        sendJson(response, 200, { categories: categoryStore.listCategories() }, corsHeaders);
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/categories") {
+        const { name, description } = parseJson(await readBody(request));
+        let wooCommerceId = null;
+
+        if (typeof client.createCategory === "function") {
+          try {
+            const wooCategory = await client.createCategory({
+              name: String(name || "").trim(),
+              slug: slugifyCategoryName(String(name || "").trim()),
+              description: String(description || "").trim(),
+            });
+            wooCommerceId = wooCategory?.id ?? null;
+          } catch (error) {
+            if (!env.ALLOW_LOCAL_CATEGORY_FALLBACK) {
+              throw error;
+            }
+          }
+        }
+
+        const category = categoryStore.createCategory({
+          name,
+          description,
+          wooCommerceId,
+        });
+        sendJson(response, 201, { category }, corsHeaders);
         return;
       }
 

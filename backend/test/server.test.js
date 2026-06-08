@@ -1,6 +1,10 @@
 const crypto = require("node:crypto");
 const assert = require("node:assert/strict");
 const { test } = require("node:test");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const { createCategoryStore } = require("../src/categoryStore");
 const { createServer } = require("../src/server");
 const { buildWooUrl, verifyWooCommerceSignature } = require("../src/woocommerceClient");
 
@@ -13,9 +17,10 @@ function listen(server) {
   });
 }
 
-async function withServer(client, callback, env = {}) {
+async function withServer(client, callback, env = {}, serverOptions = {}) {
   const server = createServer({
     client,
+    ...serverOptions,
     env: {
       FRONTEND_ORIGIN: "http://localhost:3000",
       WOOCOMMERCE_WEBHOOK_SECRET: "test-secret",
@@ -33,6 +38,94 @@ async function withServer(client, callback, env = {}) {
     server.close();
   }
 }
+
+test("category endpoint lists stored categories", async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "gf-categories-"));
+  const categoryStore = createCategoryStore(path.join(tempDir, "categories.json"));
+
+  await withServer({}, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/categories`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.ok(body.categories.length >= 4);
+    assert.equal(body.categories[0].name, "Perfume");
+  }, {}, { categoryStore });
+});
+
+test("category endpoint creates a new category", async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "gf-categories-"));
+  const categoryStore = createCategoryStore(path.join(tempDir, "categories.json"));
+  const client = {
+    async createCategory(category) {
+      assert.equal(category.name, "Candles");
+      return { id: 901, name: category.name };
+    },
+  };
+
+  const server = createServer({
+    client,
+    categoryStore,
+    env: {
+      FRONTEND_ORIGIN: "http://localhost:3000",
+      WOOCOMMERCE_SITE_URL: "https://gulefirdous.com",
+      WOOCOMMERCE_CONSUMER_KEY: "ck_test",
+      WOOCOMMERCE_CONSUMER_SECRET: "cs_test",
+    },
+  });
+  const address = await new Promise((resolve) => {
+    server.listen(0, () => resolve(`http://127.0.0.1:${server.address().port}`));
+  });
+
+  try {
+    const response = await fetch(`${address}/api/categories`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "Candles",
+        description: "Scented candles",
+      }),
+    });
+    const body = await response.json();
+
+    assert.equal(response.status, 201);
+    assert.equal(body.category.name, "Candles");
+    assert.equal(body.category.wooCommerceId, 901);
+    assert.equal(categoryStore.listCategories().some((item) => item.name === "Candles"), true);
+  } finally {
+    server.close();
+  }
+});
+
+test("category endpoint rejects duplicate names", async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "gf-categories-"));
+  const categoryStore = createCategoryStore(path.join(tempDir, "categories.json"));
+  const server = createServer({
+    categoryStore,
+    env: {
+      FRONTEND_ORIGIN: "http://localhost:3000",
+      ALLOW_LOCAL_CATEGORY_FALLBACK: "true",
+      WOOCOMMERCE_SITE_URL: "https://gulefirdous.com",
+      WOOCOMMERCE_CONSUMER_KEY: "ck_test",
+      WOOCOMMERCE_CONSUMER_SECRET: "cs_test",
+    },
+  });
+  const address = await new Promise((resolve) => {
+    server.listen(0, () => resolve(`http://127.0.0.1:${server.address().port}`));
+  });
+
+  try {
+    const response = await fetch(`${address}/api/categories`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Perfume" }),
+    });
+
+    assert.equal(response.status, 409);
+  } finally {
+    server.close();
+  }
+});
 
 test("health endpoint returns service status", async () => {
   await withServer({}, async (baseUrl) => {

@@ -1,4 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  createCategory,
+  fetchCategories,
+  type ProductCategory,
+} from "./gulefirdousApi";
 import GulefirdousDashboard from "./GulefirdousDashboard";
 import GulefirdousLogin from "./GulefirdousLogin";
 import {
@@ -60,6 +65,13 @@ const FRAGRANCE_NOTE_OPTIONS = [
   "Fruity",
 ] as const;
 
+const FALLBACK_CATEGORIES: ProductCategory[] = [
+  { id: 1, name: "Perfume", slug: "perfume", description: "Premium perfumes for men and women" },
+  { id: 2, name: "Gift Set", slug: "gift-set", description: "Curated fragrance gift boxes" },
+  { id: 3, name: "Attar", slug: "attar", description: "Traditional attars and oils" },
+  { id: 4, name: "Body Mist", slug: "body-mist", description: "Light daily body mists" },
+];
+
 const emptyProductForm = {
   name: "",
   price: "",
@@ -67,6 +79,7 @@ const emptyProductForm = {
   volumeMl: "50",
   audience: "Unisex" as ProductAudience,
   notes: [] as string[],
+  category: "",
 };
 
 interface Order {
@@ -317,11 +330,36 @@ function GulefirdousApp() {
   const [session, setSession] = useState<UserSession | null>(null);
   const [activePage, setActivePage] = useState<AppPage>("dashboard");
   const [orderNotice, setOrderNotice] = useState("");
+  const [categories, setCategories] = useState<ProductCategory[]>(FALLBACK_CATEGORIES);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDescription, setNewCategoryDescription] = useState("");
+  const [categoryFormError, setCategoryFormError] = useState("");
+  const [categoryNotice, setCategoryNotice] = useState("");
   const sessionRef = useRef<UserSession | null>(null);
 
   useEffect(() => {
     sessionRef.current = session;
   }, [session]);
+
+  useEffect(() => {
+    if (session?.role !== "admin") {
+      return;
+    }
+
+    fetchCategories()
+      .then((data) => setCategories(data.categories))
+      .catch(() => setCategories(FALLBACK_CATEGORIES));
+  }, [session?.role]);
+
+  useEffect(() => {
+    if (!categories.length) {
+      return;
+    }
+
+    setNewProduct((current) =>
+      current.category ? current : { ...current, category: categories[0].name }
+    );
+  }, [categories]);
 
   useEffect(() => {
     if (!imagePreview) {
@@ -377,6 +415,10 @@ function GulefirdousApp() {
   const productsByCategory = useMemo(() => {
     const grouped = new Map<string, Product[]>();
 
+    categories.forEach((category) => {
+      grouped.set(category.name, []);
+    });
+
     products.forEach((product) => {
       const list = grouped.get(product.category) || [];
       list.push(product);
@@ -384,7 +426,7 @@ function GulefirdousApp() {
     });
 
     return Array.from(grouped.entries());
-  }, [products]);
+  }, [products, categories]);
   const clientOrders = useMemo(() => {
     if (!session || session.role !== "client") {
       return [];
@@ -435,9 +477,38 @@ function GulefirdousApp() {
   };
 
   const resetProductForm = () => {
-    setNewProduct({ ...emptyProductForm });
+    setNewProduct({
+      ...emptyProductForm,
+      category: categories[0]?.name || "",
+    });
     setEditingProductId(null);
     setProductFormError("");
+  };
+
+  const saveCategory = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCategoryFormError("");
+    setCategoryNotice("");
+
+    const trimmedName = newCategoryName.trim();
+
+    if (!trimmedName) {
+      setCategoryFormError("Category name is required.");
+      return;
+    }
+
+    try {
+      const { category } = await createCategory(trimmedName, newCategoryDescription.trim());
+      setCategories((current) => [...current, category]);
+      setNewCategoryName("");
+      setNewCategoryDescription("");
+      setCategoryNotice(`Category "${category.name}" added. You can now assign products to it.`);
+      setNewProduct((current) => ({ ...current, category: category.name }));
+    } catch (error) {
+      setCategoryFormError(
+        error instanceof Error ? error.message : "Could not save category. Try again."
+      );
+    }
   };
 
   const toggleFragranceNote = (note: string) => {
@@ -460,6 +531,7 @@ function GulefirdousApp() {
       volumeMl: String(product.volumeMl),
       audience: product.audience,
       notes: [...product.notes],
+      category: product.category,
     });
     setSelectedImage({
       id: `existing-${product.id}`,
@@ -475,8 +547,14 @@ function GulefirdousApp() {
 
     const trimmedName = newProduct.name.trim();
 
-    if (!trimmedName || !newProduct.price || !newProduct.stock || !newProduct.volumeMl) {
-      setProductFormError("Product name, price, stock, and volume (ml) are required.");
+    if (
+      !trimmedName ||
+      !newProduct.price ||
+      !newProduct.stock ||
+      !newProduct.volumeMl ||
+      !newProduct.category
+    ) {
+      setProductFormError("Product name, category, price, stock, and volume (ml) are required.");
       return;
     }
 
@@ -520,6 +598,7 @@ function GulefirdousApp() {
                 volumeMl,
                 audience: newProduct.audience,
                 notes: [...newProduct.notes],
+                category: newProduct.category,
                 description,
                 link: `https://gulefirdous.com/product/${slug}/`,
                 sourceCode: `${trimmedName.toUpperCase().replace(/[^A-Z0-9]+/g, "-")}-${volumeMl}ML`,
@@ -538,7 +617,7 @@ function GulefirdousApp() {
     const product: Product = {
       id: Date.now(),
       name: trimmedName,
-      category: "Perfume",
+      category: newProduct.category,
       price: Number(newProduct.price),
       stock: Number(newProduct.stock),
       volumeMl,
@@ -755,6 +834,25 @@ function GulefirdousApp() {
                   placeholder="50"
                   required
                 />
+              </label>
+              <label>
+                Category
+                <select
+                  value={newProduct.category}
+                  onChange={(event) =>
+                    setNewProduct((current) => ({
+                      ...current,
+                      category: event.target.value,
+                    }))
+                  }
+                  aria-label="Product category"
+                >
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label>
                 For
@@ -1114,24 +1212,101 @@ function GulefirdousApp() {
                     </div>
                     <span className="gf-pill">{categoryProducts.length} products</span>
                   </div>
-                  <div className="gf-catalog-list">
-                    {categoryProducts.map((product) => (
-                      <div className="gf-catalog-item" key={product.id}>
-                        <div className="gf-image-frame gf-image-frame-thumb">
-                          <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
+                  {categoryProducts.length ? (
+                    <div className="gf-catalog-list">
+                      {categoryProducts.map((product) => (
+                        <div className="gf-catalog-item" key={product.id}>
+                          <div className="gf-image-frame gf-image-frame-thumb">
+                            <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
+                          </div>
+                          <div>
+                            <strong>{product.name}</strong>
+                            <p>{formatProductMeta(product)}</p>
+                            <small>
+                              {formatPrice(product.price)} · {product.stock} in stock
+                            </small>
+                          </div>
                         </div>
-                        <div>
-                          <strong>{product.name}</strong>
-                          <p>{formatProductMeta(product)}</p>
-                          <small>
-                            {formatPrice(product.price)} · {product.stock} in stock
-                          </small>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="gf-empty-state">
+                      No products in this category yet. Add a category product from Manage products.
+                    </p>
+                  )}
                 </article>
               ))}
+            </section>
+          );
+        case "manage-categories":
+          return (
+            <section className="gf-panel gf-wide">
+              <div className="gf-panel-title">
+                <div>
+                  <p className="gf-eyebrow">Catalog setup</p>
+                  <h2>Product categories</h2>
+                </div>
+                <span className="gf-pill">Backend + WooCommerce sync</span>
+              </div>
+
+              {categoryNotice ? (
+                <p className="gf-order-notice" role="status">
+                  {categoryNotice}
+                </p>
+              ) : null}
+
+              <form className="gf-category-form" onSubmit={saveCategory}>
+                <div className="gf-product-form-grid">
+                  <label>
+                    Category name
+                    <input
+                      value={newCategoryName}
+                      onChange={(event) => {
+                        setCategoryFormError("");
+                        setNewCategoryName(event.target.value);
+                      }}
+                      placeholder="Example: Candles, Hair Mist, Room Spray"
+                    />
+                  </label>
+                  <label>
+                    Short description
+                    <input
+                      value={newCategoryDescription}
+                      onChange={(event) => setNewCategoryDescription(event.target.value)}
+                      placeholder="Optional description for mobile app and website"
+                    />
+                  </label>
+                </div>
+
+                {categoryFormError ? (
+                  <p className="gf-form-alert" role="alert">
+                    {categoryFormError}
+                  </p>
+                ) : null}
+
+                <div className="gf-form-actions">
+                  <button type="submit">Add category</button>
+                </div>
+              </form>
+
+              <div className="gf-category-list">
+                {categories.map((category) => {
+                  const productCount = products.filter(
+                    (product) => product.category === category.name
+                  ).length;
+
+                  return (
+                    <article className="gf-category-card" key={category.id}>
+                      <div>
+                        <strong>{category.name}</strong>
+                        <p>{category.description || "No description yet"}</p>
+                        <small>{productCount} products assigned</small>
+                      </div>
+                      <span className="gf-pill">{category.slug}</span>
+                    </article>
+                  );
+                })}
+              </div>
             </section>
           );
         case "manage-products":
