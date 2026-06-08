@@ -31,6 +31,23 @@ function goToSidebarPage(label: string) {
   );
 }
 
+test("loads category-specific photos when the product category changes", async () => {
+  render(<App />);
+  signInAsAdmin();
+  goToSidebarPage("Manage products");
+
+  expect(screen.getByText(/Perfume product photos loaded/i)).toBeInTheDocument();
+
+  fireEvent.change(screen.getByLabelText(/Product category/i), {
+    target: { value: "Gift Set" },
+  });
+
+  await waitFor(() => {
+    expect(screen.getByText(/Gift Set product photos loaded/i)).toBeInTheDocument();
+  });
+  expect(screen.getAllByText(/Gift Set ·/i).length).toBeGreaterThan(0);
+});
+
 test("shows category management and product category picker for admin", () => {
   render(<App />);
   signInAsAdmin();
@@ -284,7 +301,7 @@ test("keeps adding unique perfume images beyond the first eight", async () => {
   fireEvent.click(screen.getByRole("button", { name: /Generate more picture options/i }));
   await waitFor(() => expect(imageGrid().length).toBe(initialCount + 12));
 
-  expect(screen.getByText(/Added 4 new unique photos/i)).toBeInTheDocument();
+  expect(screen.getByText(/Added 4 new unique Perfume photos/i)).toBeInTheDocument();
 });
 
 test("opens and closes a full perfume image preview", () => {

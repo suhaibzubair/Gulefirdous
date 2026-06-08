@@ -255,8 +255,30 @@ test("product image endpoint returns realistic photo concepts", async () => {
     assert.equal(response.status, 200);
     assert.equal(body.images.length, 4);
     assert.match(body.images[0].url, /^https:\/\/images\.(unsplash|pexels)\.com\//);
-    assert.equal(body.mode, "realistic-studio-photos");
+    assert.equal(body.mode, "category-studio-photos");
     assert.ok(body.seenPhotoKeys);
+  });
+});
+
+test("product image endpoint returns category-specific photo pools", async () => {
+  await withServer({}, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/product-images/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productName: "Heritage Gift Box",
+        generationCount: 1,
+        category: "Gift Set",
+        seenPhotoKeys: [],
+        nonce: 303,
+      }),
+    });
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.category, "Gift Set");
+    assert.equal(body.images.length, 4);
+    assert.match(body.images[0].label, /Gift Set ·/);
   });
 });
 

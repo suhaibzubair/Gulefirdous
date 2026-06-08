@@ -84,6 +84,7 @@ export function generateProductImages(
     seed?: number;
     generationCount?: number;
     previousSetKey?: string;
+    category?: string;
   }
 ) {
   const controller = new AbortController();
@@ -100,6 +101,7 @@ export function generateProductImages(
     signal: controller.signal,
     body: JSON.stringify({
       productName,
+      category: options?.category,
       seed: options?.seed,
       generationCount: options?.generationCount,
       previousSetKey: options?.previousSetKey,

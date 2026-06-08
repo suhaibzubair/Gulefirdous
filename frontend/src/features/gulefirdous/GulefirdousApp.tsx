@@ -20,7 +20,7 @@ import {
   collectSeenPhotoKeys,
   createNextImageBatch,
   defaultRealisticImageOptions,
-  totalPhotoPoolSize,
+  getPhotoPoolSize,
   type ImageSource,
   type ProductImageOption,
 } from "./productImages";
@@ -312,7 +312,7 @@ function GulefirdousApp() {
   );
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const [imageGenerationNote, setImageGenerationNote] = useState(
-    "Glass perfume bottle photos only. Click generate for a fresh flacon set."
+    "Perfume product photos loaded. Click generate for more perfume images."
   );
   const [imageGenerationCount, setImageGenerationCount] = useState(0);
   const seenPhotoKeysRef = useRef(
@@ -336,6 +336,7 @@ function GulefirdousApp() {
   const [categoryFormError, setCategoryFormError] = useState("");
   const [categoryNotice, setCategoryNotice] = useState("");
   const sessionRef = useRef<UserSession | null>(null);
+  const previousImageCategoryRef = useRef("");
 
   useEffect(() => {
     sessionRef.current = session;
@@ -360,6 +361,40 @@ function GulefirdousApp() {
       current.category ? current : { ...current, category: categories[0].name }
     );
   }, [categories]);
+
+  const loadCategoryImageOptions = (category: string, productName = "") => {
+    if (!category) {
+      return;
+    }
+
+    const seenKeys = new Set<string>();
+    const result = createNextImageBatch(
+      productName || `Gulefirdous ${category}`,
+      0,
+      seenKeys,
+      Date.now(),
+      undefined,
+      category
+    );
+
+    setImageOptions(result.images);
+    setSelectedImage(result.images[0] || defaultRealisticImageOptions[0]);
+    seenPhotoKeysRef.current = seenKeys;
+    seenImageIdsRef.current = collectSeenPhotoKeys(result.images);
+    setImageGenerationCount(0);
+    setImageGenerationNote(
+      `${category} product photos loaded. Click generate for more ${category.toLowerCase()} images.`
+    );
+  };
+
+  useEffect(() => {
+    if (!newProduct.category || newProduct.category === previousImageCategoryRef.current) {
+      return;
+    }
+
+    previousImageCategoryRef.current = newProduct.category;
+    loadCategoryImageOptions(newProduct.category, newProduct.name);
+  }, [newProduct.category]);
 
   useEffect(() => {
     if (!imagePreview) {
@@ -647,11 +682,14 @@ function GulefirdousApp() {
 
     setIsGeneratingImages(true);
 
+    const category = newProduct.category || "Perfume";
     const result = createNextImageBatch(
       productName,
       nextGenerationCount,
       seenPhotoKeysRef.current,
-      nonce
+      nonce,
+      undefined,
+      category
     );
 
     setImageOptions((current) => {
@@ -667,8 +705,8 @@ function GulefirdousApp() {
 
       setImageGenerationNote(
         freshImages.length > 0
-          ? `Added ${freshImages.length} new unique photos · ${mergedImages.length} total shown (${totalPhotoPoolSize} base bottles in library). Keep clicking for more.`
-          : "Could not find new photos. Try again for fresh style variations."
+          ? `Added ${freshImages.length} new unique ${category} photos · ${mergedImages.length} total shown (${getPhotoPoolSize(category)} base images in library). Keep clicking for more.`
+          : `Could not find new ${category} photos. Try again for fresh style variations.`
       );
 
       if (freshImages[0]) {
@@ -911,7 +949,10 @@ function GulefirdousApp() {
             <div className="gf-panel-title">
               <div>
                 <p className="gf-eyebrow">Product pictures</p>
-                <h3>Choose AI generated or mobile gallery image</h3>
+                <h3>
+                  Choose AI generated or mobile gallery image for{" "}
+                  {newProduct.category || "this category"}
+                </h3>
               </div>
             </div>
             <p className="gf-image-note">{imageGenerationNote}</p>

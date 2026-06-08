@@ -1,7 +1,7 @@
 const http = require("node:http");
 const path = require("node:path");
 const { createCategoryStore, slugifyCategoryName } = require("./categoryStore");
-const { createNextImageBatch, totalPhotoPoolSize } = require("./productImages");
+const { createNextImageBatch, getPhotoPoolSize } = require("./productImages");
 const { createWooCommerceClient, verifyWooCommerceSignature } = require("./woocommerceClient");
 
 const jsonHeaders = {
@@ -131,15 +131,18 @@ function createServer(options = {}) {
       }
 
       if (request.method === "POST" && url.pathname === "/api/product-images/generate") {
-        const { productName, generationCount, seenPhotoKeys, nonce } = parseJson(
+        const { productName, generationCount, seenPhotoKeys, nonce, category } = parseJson(
           await readBody(request)
         );
         const seenKeys = new Set(Array.isArray(seenPhotoKeys) ? seenPhotoKeys : []);
+        const resolvedCategory = category || "Perfume";
         const result = createNextImageBatch(
-          productName || "Gulefirdous Perfume",
+          productName || `Gulefirdous ${resolvedCategory}`,
           generationCount || 1,
           seenKeys,
-          nonce || Date.now()
+          nonce || Date.now(),
+          undefined,
+          resolvedCategory
         );
 
         sendJson(
@@ -148,8 +151,10 @@ function createServer(options = {}) {
           {
             images: result.images,
             seenPhotoKeys: [...seenKeys],
-            mode: "realistic-studio-photos",
-            message: `Added ${result.images.length} new unique photos · ${result.totalShown} shown from ${totalPhotoPoolSize} base bottles.`,
+            category: result.category,
+            poolSize: result.poolSize,
+            mode: "category-studio-photos",
+            message: `Added ${result.images.length} new unique ${resolvedCategory} photos · ${result.totalShown} shown from ${getPhotoPoolSize(resolvedCategory)} base images.`,
           },
           corsHeaders
         );
