@@ -1,6 +1,5 @@
 const BATCH_SIZE = 4;
 
-// Curated glass perfume flacon photos only (no skincare tubes or cream jars).
 const REALISTIC_PHOTO_POOL = [
   {
     label: "Emerald glass oud",
@@ -82,7 +81,26 @@ const REALISTIC_PHOTO_POOL = [
     label: "Sleek noir flacon",
     url: "https://images.pexels.com/photos/5316920/pexels-photo-5316920.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
   },
+  {
+    label: "Ivory boutique bottle",
+    url: "https://images.unsplash.com/photo-1615529328331-f8917597711f?auto=format&fit=crop&w=900&h=700&q=80",
+  },
+  {
+    label: "Champagne mist bottle",
+    url: "https://images.pexels.com/photos/4202325/pexels-photo-4202325.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
+  },
+  {
+    label: "Onyx studio flacon",
+    url: "https://images.pexels.com/photos/18946587/pexels-photo-18946587.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
+  },
+  {
+    label: "Blush glass perfume",
+    url: "https://images.unsplash.com/photo-1557170331-0e5d046c770f?auto=format&fit=crop&w=900&h=700&q=80",
+  },
 ];
+
+const CROP_WIDTHS = [760, 820, 860, 900, 940];
+const CROP_HEIGHTS = [620, 660, 700, 740, 780];
 
 function hashSeed(parts) {
   let hash = 2166136261;
@@ -99,30 +117,6 @@ function hashSeed(parts) {
   return Math.abs(hash);
 }
 
-function mulberry32(seed) {
-  let state = seed;
-
-  return function random() {
-    state += 0x6d2b79f5;
-    let value = state;
-    value = Math.imul(value ^ (value >>> 15), value | 1);
-    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function shuffleWithSeed(items, seed) {
-  const random = mulberry32(seed);
-  const copy = [...items];
-
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(random() * (index + 1));
-    [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
-  }
-
-  return copy;
-}
-
 function withGenerationToken(url, token) {
   const separator = url.includes("?") ? "&" : "?";
   return `${url}${separator}gen=${token}`;
@@ -132,90 +126,92 @@ function basePhotoKey(url) {
   return url.split("?")[0];
 }
 
-function buildGenerationSeed(productName, timestamp = Date.now(), generationCount = 0) {
-  return hashSeed([
-    (productName || "gulefirdous-perfume").trim().toLowerCase(),
-    timestamp,
-    generationCount,
-    Math.floor(Math.random() * 1_000_000),
-  ]);
+function applyCropVariant(url, variant, generationCount) {
+  const width = CROP_WIDTHS[(variant + generationCount) % CROP_WIDTHS.length];
+  const height = CROP_HEIGHTS[(variant + generationCount * 2) % CROP_HEIGHTS.length];
+
+  if (/w=\d+/.test(url)) {
+    return url.replace(/w=\d+/g, `w=${width}`).replace(/h=\d+/g, `h=${height}`);
+  }
+
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}w=${width}&h=${height}&fit=crop`;
 }
 
-function toImageOption(photo, token, index) {
+function toImageOption(photo, token, index, labelSuffix = "") {
   return {
     id: `${photo.label}-${token}-${index}`,
-    label: photo.label,
-    url: withGenerationToken(photo.url, `${token}-${index}`),
+    label: labelSuffix ? `${photo.label} · ${labelSuffix}` : photo.label,
+    url: withGenerationToken(photo.url, token),
     source: "AI generated",
   };
 }
 
 function createRealisticImageOptions(productName, seed = Date.now()) {
-  const normalizedSeed = hashSeed([
-    seed,
-    (productName || "gulefirdous-perfume").trim().toLowerCase(),
-  ]);
-  const shuffled = shuffleWithSeed(REALISTIC_PHOTO_POOL, normalizedSeed);
-
-  return shuffled.slice(0, BATCH_SIZE).map((photo, index) =>
-    toImageOption(photo, String(normalizedSeed), index)
-  );
+  const seenKeys = new Set();
+  return createNextImageBatch(productName, 0, seenKeys, seed, BATCH_SIZE).images;
 }
 
-function imageSetKey(images) {
-  return images
-    .map((image) => basePhotoKey(image.url))
-    .sort()
-    .join("|");
-}
-
-function createNextImageBatch(productName, seed, existingImages = [], batchSize = BATCH_SIZE) {
-  const existingKeys = new Set(existingImages.map((image) => basePhotoKey(image.url)));
-  const normalizedSeed = hashSeed([
-    seed,
-    (productName || "gulefirdous-perfume").trim().toLowerCase(),
-    existingKeys.size,
-  ]);
-  const shuffled = shuffleWithSeed(REALISTIC_PHOTO_POOL, normalizedSeed);
+function createNextImageBatch(
+  productName,
+  generationCount,
+  seenKeys,
+  nonce = Date.now(),
+  batchSize = BATCH_SIZE
+) {
   const batch = [];
+  const poolSize = REALISTIC_PHOTO_POOL.length;
+  const productKey = (productName || "gulefirdous-perfume").trim().toLowerCase();
+  const startOffset =
+    (hashSeed([productKey, generationCount, nonce]) + generationCount * batchSize) % poolSize;
 
-  for (const photo of shuffled) {
-    if (batch.length >= batchSize) {
-      break;
+  for (let step = 0; step < poolSize && batch.length < batchSize; step += 1) {
+    const photo = REALISTIC_PHOTO_POOL[(startOffset + step) % poolSize];
+    const key = basePhotoKey(photo.url);
+
+    if (seenKeys.has(key)) {
+      continue;
     }
 
-    if (!existingKeys.has(basePhotoKey(photo.url))) {
-      batch.push(toImageOption(photo, String(normalizedSeed), batch.length));
-      existingKeys.add(basePhotoKey(photo.url));
-    }
+    const token = `${generationCount}-${nonce}-${step}`;
+    batch.push(toImageOption(photo, token, batch.length));
+    seenKeys.add(key);
   }
 
   if (batch.length < batchSize) {
-    const refreshSeed = hashSeed([seed, "refresh", Date.now(), batch.length]);
-    const refreshed = shuffleWithSeed(REALISTIC_PHOTO_POOL, refreshSeed);
+    const variantPass = Math.max(1, Math.floor(seenKeys.size / poolSize));
 
-    for (const photo of refreshed) {
-      if (batch.length >= batchSize) {
-        break;
+    for (let step = 0; step < poolSize * 3 && batch.length < batchSize; step += 1) {
+      const photo = REALISTIC_PHOTO_POOL[(startOffset + step + generationCount) % poolSize];
+      const variantKey = `${basePhotoKey(photo.url)}-variant-${variantPass}-g${generationCount}`;
+
+      if (seenKeys.has(variantKey)) {
+        continue;
       }
 
-      batch.push(toImageOption(photo, `${refreshSeed}-${Date.now()}`, batch.length));
+      const token = `${generationCount}-variant-${variantPass}-${nonce}-${step}`;
+      const variantUrl = applyCropVariant(photo.url, variantPass, generationCount);
+
+      batch.push({
+        id: `${photo.label}-${token}`,
+        label: `${photo.label} · style ${variantPass}`,
+        url: withGenerationToken(variantUrl, token),
+        source: "AI generated",
+      });
+      seenKeys.add(variantKey);
     }
   }
 
   return {
     images: batch,
-    setKey: imageSetKey([...existingImages, ...batch]),
-    seed: normalizedSeed,
-    totalAvailable: REALISTIC_PHOTO_POOL.length,
+    generationCount,
+    totalShown: seenKeys.size,
   };
 }
 
 module.exports = {
   REALISTIC_PHOTO_POOL,
-  buildGenerationSeed,
   createRealisticImageOptions,
   createNextImageBatch,
-  imageSetKey,
   totalPhotoPoolSize: REALISTIC_PHOTO_POOL.length,
 };

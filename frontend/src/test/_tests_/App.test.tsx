@@ -169,23 +169,32 @@ test("warns when name, volume, audience, and notes all match an existing product
   ).toHaveLength(royalOudCardsBefore);
 });
 
-test("keeps adding more perfume images on each generate click", async () => {
+test("keeps adding unique perfume images beyond the first eight", async () => {
   render(<App />);
 
   const imageGrid = () =>
     within(screen.getByLabelText(/Generated perfume picture options/i)).getAllByRole("img");
 
+  const srcList = () => imageGrid().map((image) => image.getAttribute("src"));
+
   const initialCount = imageGrid().length;
 
   fireEvent.click(screen.getByRole("button", { name: /Generate more picture options/i }));
-  await waitFor(() => expect(imageGrid().length).toBeGreaterThan(initialCount));
+  await waitFor(() => expect(imageGrid().length).toBe(initialCount + 4));
 
-  const afterFirstClick = imageGrid().length;
+  const afterFirstClick = srcList();
 
   fireEvent.click(screen.getByRole("button", { name: /Generate more picture options/i }));
-  await waitFor(() => expect(imageGrid().length).toBeGreaterThan(afterFirstClick));
+  await waitFor(() => expect(imageGrid().length).toBe(initialCount + 8));
 
-  expect(screen.getByText(/Added 4 new photos/i)).toBeInTheDocument();
+  const afterSecondClick = srcList();
+  const newAfterSecondClick = afterSecondClick.filter((src) => !afterFirstClick.includes(src));
+  expect(newAfterSecondClick.length).toBeGreaterThanOrEqual(4);
+
+  fireEvent.click(screen.getByRole("button", { name: /Generate more picture options/i }));
+  await waitFor(() => expect(imageGrid().length).toBe(initialCount + 12));
+
+  expect(screen.getByText(/Added 4 new unique photos/i)).toBeInTheDocument();
 });
 
 test("opens and closes a full perfume image preview", () => {

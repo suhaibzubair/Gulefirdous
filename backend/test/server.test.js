@@ -163,20 +163,20 @@ test("product image endpoint returns realistic photo concepts", async () => {
     assert.equal(body.images.length, 4);
     assert.match(body.images[0].url, /^https:\/\/images\.(unsplash|pexels)\.com\//);
     assert.equal(body.mode, "realistic-studio-photos");
-    assert.ok(body.setKey);
+    assert.ok(body.seenPhotoKeys);
   });
 });
 
-test("product image endpoint appends new photos on each generation", async () => {
+test("product image endpoint appends unique photos on each generation", async () => {
   await withServer({}, async (baseUrl) => {
     const firstResponse = await fetch(`${baseUrl}/api/product-images/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         productName: "Amber Musk Perfume",
-        seed: 101,
         generationCount: 1,
-        existingImages: [],
+        seenPhotoKeys: [],
+        nonce: 101,
       }),
     });
     const firstBody = await firstResponse.json();
@@ -186,9 +186,9 @@ test("product image endpoint appends new photos on each generation", async () =>
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         productName: "Amber Musk Perfume",
-        seed: 202,
         generationCount: 2,
-        existingImages: firstBody.images,
+        seenPhotoKeys: firstBody.seenPhotoKeys,
+        nonce: 202,
       }),
     });
     const secondBody = await secondResponse.json();
@@ -197,10 +197,7 @@ test("product image endpoint appends new photos on each generation", async () =>
     assert.equal(secondResponse.status, 200);
     assert.equal(firstBody.images.length, 4);
     assert.equal(secondBody.images.length, 4);
-    assert.notEqual(
-      firstBody.images.map((image) => image.url).join("|"),
-      secondBody.images.map((image) => image.url).join("|")
-    );
+    assert.notEqual(firstBody.images[0].label, secondBody.images[0].label);
   });
 });
 

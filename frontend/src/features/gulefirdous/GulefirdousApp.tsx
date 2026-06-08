@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  buildGenerationSeed,
+  basePhotoKey,
+  collectSeenPhotoKeys,
   createNextImageBatch,
   defaultRealisticImageOptions,
   totalPhotoPoolSize,
@@ -269,6 +270,10 @@ function GulefirdousApp() {
     "Glass perfume bottle photos only. Click generate for a fresh flacon set."
   );
   const [imageGenerationCount, setImageGenerationCount] = useState(0);
+  const seenPhotoKeysRef = useRef(
+    new Set(defaultRealisticImageOptions.map((image) => basePhotoKey(image.url)))
+  );
+  const seenImageIdsRef = useRef(collectSeenPhotoKeys(defaultRealisticImageOptions));
   const [imagePreview, setImagePreview] = useState<{
     url: string;
     label: string;
@@ -459,19 +464,41 @@ function GulefirdousApp() {
   const generateImageOptions = () => {
     const productName = newProduct.name || "Gulefirdous Perfume";
     const nextGenerationCount = imageGenerationCount + 1;
-    const seed = buildGenerationSeed(productName, Date.now(), nextGenerationCount);
+    const nonce = Date.now();
 
     setIsGeneratingImages(true);
 
-    const result = createNextImageBatch(productName, seed, imageOptions);
-    const mergedImages = [...imageOptions, ...result.images];
-
-    setImageOptions(mergedImages);
-    setSelectedImage(result.images[0] || mergedImages[0]);
-    setImageGenerationCount(nextGenerationCount);
-    setImageGenerationNote(
-      `Added ${result.images.length} new photos · ${mergedImages.length} of ${totalPhotoPoolSize} bottle styles available. Click again to load more.`
+    const result = createNextImageBatch(
+      productName,
+      nextGenerationCount,
+      seenPhotoKeysRef.current,
+      nonce
     );
+
+    setImageOptions((current) => {
+      const freshImages = result.images.filter(
+        (image) => !seenImageIdsRef.current.has(image.id)
+      );
+
+      freshImages.forEach((image) => {
+        seenImageIdsRef.current.add(image.id);
+      });
+
+      const mergedImages = [...current, ...freshImages];
+
+      setImageGenerationNote(
+        freshImages.length > 0
+          ? `Added ${freshImages.length} new unique photos · ${mergedImages.length} total shown (${totalPhotoPoolSize} base bottles in library). Keep clicking for more.`
+          : "Could not find new photos. Try again for fresh style variations."
+      );
+
+      if (freshImages[0]) {
+        setSelectedImage(freshImages[0]);
+      }
+
+      return mergedImages;
+    });
+    setImageGenerationCount(nextGenerationCount);
     setIsGeneratingImages(false);
   };
 
