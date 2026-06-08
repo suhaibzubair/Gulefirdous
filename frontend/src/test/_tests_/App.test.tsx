@@ -65,7 +65,7 @@ test("adds a product draft with perfume details and a selected AI generated pict
   );
   const generatedOptions = within(
     screen.getByLabelText(/Generated perfume picture options/i)
-  ).getAllByRole("button");
+  ).getAllByRole("button", { name: /perfume concept/i });
   fireEvent.click(generatedOptions[1]);
   fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
 
@@ -167,6 +167,19 @@ test("warns when name, volume, audience, and notes all match an existing product
   expect(
     screen.getAllByRole("heading", { name: /Gulefirdous Royal Oud/i })
   ).toHaveLength(royalOudCardsBefore);
+});
+
+test("opens and closes a full perfume image preview", () => {
+  render(<App />);
+
+  fireEvent.click(screen.getAllByRole("button", { name: /Preview full image/i })[0]);
+
+  const previewDialog = screen.getByRole("dialog", { name: /full image preview/i });
+  expect(previewDialog).toBeInTheDocument();
+  expect(within(previewDialog).getByRole("img", { name: /full preview/i })).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole("button", { name: /Close preview/i }));
+  expect(screen.queryByRole("dialog", { name: /full image preview/i })).not.toBeInTheDocument();
 });
 
 test("edits an existing product and shows updated details to customers", () => {

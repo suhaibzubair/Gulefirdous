@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { generateProductImages } from "./gulefirdousApi";
 import {
   createRealisticImageOptions,
@@ -267,6 +267,29 @@ function GulefirdousApp() {
   const [imageGenerationNote, setImageGenerationNote] = useState(
     "Glass perfume bottle photos only. Click generate for a fresh flacon set."
   );
+  const [imagePreview, setImagePreview] = useState<{
+    url: string;
+    label: string;
+    source?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!imagePreview) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setImagePreview(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [imagePreview]);
 
   const selectedProduct = useMemo(
     () => products.find((product) => product.id === selectedProductId) || products[0],
@@ -499,6 +522,10 @@ function GulefirdousApp() {
     setOrders((current) => [order, ...current]);
   };
 
+  const openImagePreview = (preview: { url: string; label: string; source?: string }) => {
+    setImagePreview(preview);
+  };
+
   const advanceOrder = (orderId: string) => {
     setOrders((current) =>
       current.map((order) => {
@@ -727,26 +754,62 @@ function GulefirdousApp() {
             </div>
             <div className="gf-image-options" aria-label="Generated perfume picture options">
               {imageOptions.map((option) => (
-                <button
-                  type="button"
+                <article
                   key={option.id}
-                  className={selectedImage.id === option.id ? "active" : ""}
-                  onClick={() => setSelectedImage(option)}
-                  aria-pressed={selectedImage.id === option.id}
+                  className={`gf-image-option-card ${
+                    selectedImage.id === option.id ? "active" : ""
+                  }`}
                 >
-                  <img src={option.url} alt={`${option.label} perfume concept`} />
-                  <span>{option.label}</span>
-                </button>
+                  <button
+                    type="button"
+                    className="gf-image-option-select"
+                    onClick={() => setSelectedImage(option)}
+                    aria-pressed={selectedImage.id === option.id}
+                  >
+                    <div className="gf-image-frame gf-image-frame-option">
+                      <img src={option.url} alt={`${option.label} perfume concept`} />
+                    </div>
+                    <span>{option.label}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="gf-preview-button"
+                    onClick={() =>
+                      openImagePreview({
+                        url: option.url,
+                        label: option.label,
+                        source: option.source,
+                      })
+                    }
+                  >
+                    Preview
+                  </button>
+                </article>
               ))}
             </div>
             <div className="gf-selected-image">
-              <img src={selectedImage.url} alt="Selected perfume product visual" />
+              <div className="gf-image-frame gf-image-frame-selected">
+                <img src={selectedImage.url} alt="Selected perfume product visual" />
+              </div>
               <div>
                 <strong>Selected image</strong>
                 <p>
                   {selectedImage.source}: {selectedImage.label}. This image will be attached to
                   the next product draft.
                 </p>
+                <button
+                  type="button"
+                  className="gf-preview-button"
+                  onClick={() =>
+                    openImagePreview({
+                      url: selectedImage.url,
+                      label: selectedImage.label,
+                      source: selectedImage.source,
+                    })
+                  }
+                >
+                  Preview full image
+                </button>
               </div>
             </div>
           </div>
@@ -762,7 +825,9 @@ function GulefirdousApp() {
                   className="gf-product-select"
                   onClick={() => setSelectedProductId(product.id)}
                 >
-                  <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
+                  <div className="gf-image-frame gf-image-frame-thumb">
+                    <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
+                  </div>
                   <span>{product.name}</span>
                   <small>{formatProductMeta(product)}</small>
                   <small>
@@ -772,13 +837,28 @@ function GulefirdousApp() {
                     {product.imageSource}: {product.imageLabel}
                   </small>
                 </button>
-                <button
-                  type="button"
-                  className="gf-edit-product"
-                  onClick={() => startEditingProduct(product)}
-                >
-                  Edit product
-                </button>
+                <div className="gf-product-list-actions">
+                  <button
+                    type="button"
+                    className="gf-preview-button"
+                    onClick={() =>
+                      openImagePreview({
+                        url: product.imageUrl,
+                        label: product.name,
+                        source: product.imageSource,
+                      })
+                    }
+                  >
+                    Preview image
+                  </button>
+                  <button
+                    type="button"
+                    className="gf-edit-product"
+                    onClick={() => startEditingProduct(product)}
+                  >
+                    Edit product
+                  </button>
+                </div>
               </article>
             ))}
           </div>
@@ -853,11 +933,28 @@ function GulefirdousApp() {
           <div className="gf-shop">
             {products.map((product) => (
               <div className="gf-product-card" key={product.id}>
-                <img
-                  className="gf-product-image"
-                  src={product.imageUrl}
-                  alt={`${product.name} product visual`}
-                />
+                <div className="gf-product-image-wrap">
+                  <div className="gf-image-frame gf-image-frame-shop">
+                    <img
+                      className="gf-product-image"
+                      src={product.imageUrl}
+                      alt={`${product.name} product visual`}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="gf-preview-button"
+                    onClick={() =>
+                      openImagePreview({
+                        url: product.imageUrl,
+                        label: product.name,
+                        source: product.imageSource,
+                      })
+                    }
+                  >
+                    Preview full image
+                  </button>
+                </div>
                 <span>
                   {product.category} · {product.audience}
                 </span>
@@ -970,6 +1067,36 @@ function GulefirdousApp() {
           })}
         </div>
       </section>
+
+      {imagePreview ? (
+        <div
+          className="gf-image-preview-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Full image preview: ${imagePreview.label}`}
+          onClick={() => setImagePreview(null)}
+        >
+          <div
+            className="gf-image-preview-panel"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="gf-preview-close"
+              onClick={() => setImagePreview(null)}
+            >
+              Close preview
+            </button>
+            <div className="gf-image-frame gf-image-frame-preview">
+              <img src={imagePreview.url} alt={`${imagePreview.label} full preview`} />
+            </div>
+            <p className="gf-preview-caption">
+              <strong>{imagePreview.label}</strong>
+              {imagePreview.source ? <span>{imagePreview.source}</span> : null}
+            </p>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
