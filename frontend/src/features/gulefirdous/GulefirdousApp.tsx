@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { generateProductImages } from "./gulefirdousApi";
 import {
   buildGenerationSeed,
-  createUniqueRealisticImageOptions,
+  createNextImageBatch,
   defaultRealisticImageOptions,
+  totalPhotoPoolSize,
   type ImageSource,
   type ProductImageOption,
 } from "./productImages";
@@ -269,7 +269,6 @@ function GulefirdousApp() {
     "Glass perfume bottle photos only. Click generate for a fresh flacon set."
   );
   const [imageGenerationCount, setImageGenerationCount] = useState(0);
-  const [lastImageSetKey, setLastImageSetKey] = useState("");
   const [imagePreview, setImagePreview] = useState<{
     url: string;
     label: string;
@@ -457,43 +456,23 @@ function GulefirdousApp() {
     resetProductForm();
   };
 
-  const generateImageOptions = async () => {
+  const generateImageOptions = () => {
     const productName = newProduct.name || "Gulefirdous Perfume";
     const nextGenerationCount = imageGenerationCount + 1;
     const seed = buildGenerationSeed(productName, Date.now(), nextGenerationCount);
 
     setIsGeneratingImages(true);
 
-    try {
-      const result = await generateProductImages(productName, {
-        seed,
-        generationCount: nextGenerationCount,
-        previousSetKey: lastImageSetKey,
-      });
-      setImageOptions(result.images);
-      setSelectedImage(result.images[0]);
-      setImageGenerationCount(nextGenerationCount);
-      setLastImageSetKey(result.setKey || "");
-      setImageGenerationNote(
-        result.message ||
-          `Fresh set ${nextGenerationCount}: ${result.images.length} unique glass bottle photos are ready.`
-      );
-    } catch {
-      const fallback = createUniqueRealisticImageOptions(
-        productName,
-        seed,
-        lastImageSetKey
-      );
-      setImageOptions(fallback.images);
-      setSelectedImage(fallback.images[0]);
-      setImageGenerationCount(nextGenerationCount);
-      setLastImageSetKey(fallback.setKey);
-      setImageGenerationNote(
-        `Fresh set ${nextGenerationCount}: showing unique bottle photos from local gallery (API unavailable).`
-      );
-    } finally {
-      setIsGeneratingImages(false);
-    }
+    const result = createNextImageBatch(productName, seed, imageOptions);
+    const mergedImages = [...imageOptions, ...result.images];
+
+    setImageOptions(mergedImages);
+    setSelectedImage(result.images[0] || mergedImages[0]);
+    setImageGenerationCount(nextGenerationCount);
+    setImageGenerationNote(
+      `Added ${result.images.length} new photos · ${mergedImages.length} of ${totalPhotoPoolSize} bottle styles available. Click again to load more.`
+    );
+    setIsGeneratingImages(false);
   };
 
   const selectGalleryImage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -756,7 +735,7 @@ function GulefirdousApp() {
               >
                 {isGeneratingImages
                   ? "Generating realistic photos..."
-                  : "Generate AI picture options"}
+                  : "Generate more picture options"}
               </button>
               <label className="gf-gallery-picker" htmlFor="product-gallery-image">
                 Select from mobile gallery

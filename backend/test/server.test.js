@@ -167,7 +167,7 @@ test("product image endpoint returns realistic photo concepts", async () => {
   });
 });
 
-test("product image endpoint returns a different set on each generation", async () => {
+test("product image endpoint appends new photos on each generation", async () => {
   await withServer({}, async (baseUrl) => {
     const firstResponse = await fetch(`${baseUrl}/api/product-images/generate`, {
       method: "POST",
@@ -176,6 +176,7 @@ test("product image endpoint returns a different set on each generation", async 
         productName: "Amber Musk Perfume",
         seed: 101,
         generationCount: 1,
+        existingImages: [],
       }),
     });
     const firstBody = await firstResponse.json();
@@ -187,14 +188,19 @@ test("product image endpoint returns a different set on each generation", async 
         productName: "Amber Musk Perfume",
         seed: 202,
         generationCount: 2,
-        previousSetKey: firstBody.setKey,
+        existingImages: firstBody.images,
       }),
     });
     const secondBody = await secondResponse.json();
 
     assert.equal(firstResponse.status, 200);
     assert.equal(secondResponse.status, 200);
-    assert.notEqual(firstBody.setKey, secondBody.setKey);
+    assert.equal(firstBody.images.length, 4);
+    assert.equal(secondBody.images.length, 4);
+    assert.notEqual(
+      firstBody.images.map((image) => image.url).join("|"),
+      secondBody.images.map((image) => image.url).join("|")
+    );
   });
 });
 

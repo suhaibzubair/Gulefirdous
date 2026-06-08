@@ -434,6 +434,9 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .gf-image-option-card {

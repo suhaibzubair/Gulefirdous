@@ -1,7 +1,8 @@
 const http = require("node:http");
 const {
   buildGenerationSeed,
-  createUniqueRealisticImageOptions,
+  createNextImageBatch,
+  totalPhotoPoolSize,
 } = require("./productImages");
 const { createWooCommerceClient, verifyWooCommerceSignature } = require("./woocommerceClient");
 
@@ -94,7 +95,7 @@ function createServer(options = {}) {
       }
 
       if (request.method === "POST" && url.pathname === "/api/product-images/generate") {
-        const { productName, seed, generationCount, previousSetKey } = parseJson(
+        const { productName, seed, generationCount, existingImages } = parseJson(
           await readBody(request)
         );
         const generationSeed =
@@ -104,11 +105,13 @@ function createServer(options = {}) {
             Date.now(),
             generationCount || 0
           );
-        const result = createUniqueRealisticImageOptions(
+        const result = createNextImageBatch(
           productName || "Gulefirdous Perfume",
           generationSeed,
-          previousSetKey || ""
+          Array.isArray(existingImages) ? existingImages : []
         );
+        const totalCount = (Array.isArray(existingImages) ? existingImages.length : 0) +
+          result.images.length;
 
         sendJson(
           response,
@@ -118,7 +121,7 @@ function createServer(options = {}) {
             seed: result.seed,
             setKey: result.setKey,
             mode: "realistic-studio-photos",
-            message: `Fresh set ${(generationCount || 0) + 1}: ${result.images.length} unique glass bottle photos ready.`,
+            message: `Added ${result.images.length} new photos · ${totalCount} of ${totalPhotoPoolSize} bottle styles available.`,
           },
           corsHeaders
         );

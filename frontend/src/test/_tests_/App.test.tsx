@@ -57,10 +57,10 @@ test("adds a product draft with perfume details and a selected AI generated pict
   fillProductDraftForm("Amber Musk Perfume");
   fireEvent.click(screen.getByRole("button", { name: /^Vanilla$/i }));
 
-  fireEvent.click(screen.getByRole("button", { name: /Generate AI picture options/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Generate more picture options/i }));
   await waitFor(() =>
     expect(
-      screen.getByRole("button", { name: /Generate AI picture options/i })
+      screen.getByRole("button", { name: /Generate more picture options/i })
     ).not.toBeDisabled()
   );
   const generatedOptions = within(
@@ -169,35 +169,23 @@ test("warns when name, volume, audience, and notes all match an existing product
   ).toHaveLength(royalOudCardsBefore);
 });
 
-test("generates a different perfume image set on each click", async () => {
+test("keeps adding more perfume images on each generate click", async () => {
   render(<App />);
 
-  fireEvent.click(screen.getByRole("button", { name: /Generate AI picture options/i }));
-  await waitFor(() =>
-    expect(
-      screen.getByRole("button", { name: /Generate AI picture options/i })
-    ).not.toBeDisabled()
-  );
+  const imageGrid = () =>
+    within(screen.getByLabelText(/Generated perfume picture options/i)).getAllByRole("img");
 
-  const firstSetNote = screen.getByText(/Fresh set 1:/i).textContent;
-  const firstImages = within(screen.getByLabelText(/Generated perfume picture options/i))
-    .getAllByRole("img")
-    .map((image) => image.getAttribute("src"));
+  const initialCount = imageGrid().length;
 
-  fireEvent.click(screen.getByRole("button", { name: /Generate AI picture options/i }));
-  await waitFor(() =>
-    expect(
-      screen.getByRole("button", { name: /Generate AI picture options/i })
-    ).not.toBeDisabled()
-  );
+  fireEvent.click(screen.getByRole("button", { name: /Generate more picture options/i }));
+  await waitFor(() => expect(imageGrid().length).toBeGreaterThan(initialCount));
 
-  const secondSetNote = screen.getByText(/Fresh set 2:/i).textContent;
-  const secondImages = within(screen.getByLabelText(/Generated perfume picture options/i))
-    .getAllByRole("img")
-    .map((image) => image.getAttribute("src"));
+  const afterFirstClick = imageGrid().length;
 
-  expect(firstSetNote).not.toEqual(secondSetNote);
-  expect(secondImages.join("|")).not.toEqual(firstImages.join("|"));
+  fireEvent.click(screen.getByRole("button", { name: /Generate more picture options/i }));
+  await waitFor(() => expect(imageGrid().length).toBeGreaterThan(afterFirstClick));
+
+  expect(screen.getByText(/Added 4 new photos/i)).toBeInTheDocument();
 });
 
 test("opens and closes a full perfume image preview", () => {

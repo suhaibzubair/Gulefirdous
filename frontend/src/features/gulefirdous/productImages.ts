@@ -7,7 +7,7 @@ export interface ProductImageOption {
   source: ImageSource;
 }
 
-const OPTION_COUNT = 4;
+const BATCH_SIZE = 4;
 
 // Curated glass perfume flacon photos only (no skincare tubes or cream jars).
 const REALISTIC_PHOTO_POOL: Array<{ label: string; url: string }> = [
@@ -137,6 +137,10 @@ function withGenerationToken(url: string, token: string) {
   return `${url}${separator}gen=${token}`;
 }
 
+export function basePhotoKey(url: string) {
+  return url.split("?")[0];
+}
+
 export function buildGenerationSeed(
   productName: string,
   timestamp = Date.now(),
@@ -150,6 +154,19 @@ export function buildGenerationSeed(
   ]);
 }
 
+function toImageOption(
+  photo: { label: string; url: string },
+  token: string,
+  index: number
+): ProductImageOption {
+  return {
+    id: `${photo.label}-${token}-${index}`,
+    label: photo.label,
+    url: withGenerationToken(photo.url, `${token}-${index}`),
+    source: "AI generated",
+  };
+}
+
 export function createRealisticImageOptions(
   productName: string,
   seed = Date.now()
@@ -157,39 +174,66 @@ export function createRealisticImageOptions(
   const normalizedSeed = hashSeed([seed, productName.trim().toLowerCase() || "gulefirdous-perfume"]);
   const shuffled = shuffleWithSeed(REALISTIC_PHOTO_POOL, normalizedSeed);
 
-  return shuffled.slice(0, OPTION_COUNT).map((photo, index) => ({
-    id: `${photo.label}-${normalizedSeed}-${index}`,
-    label: photo.label,
-    url: withGenerationToken(photo.url, `${normalizedSeed}-${index}`),
-    source: "AI generated",
-  }));
+  return shuffled.slice(0, BATCH_SIZE).map((photo, index) =>
+    toImageOption(photo, String(normalizedSeed), index)
+  );
 }
 
 export function imageSetKey(images: ProductImageOption[]) {
   return images
-    .map((image) => image.url)
+    .map((image) => basePhotoKey(image.url))
     .sort()
     .join("|");
 }
 
-export function createUniqueRealisticImageOptions(
+export function createNextImageBatch(
   productName: string,
   seed: number,
-  previousSetKey = ""
+  existingImages: ProductImageOption[],
+  batchSize = BATCH_SIZE
 ) {
-  let attempt = 0;
-  let nextSeed = seed;
-  let images = createRealisticImageOptions(productName, nextSeed);
-  let setKey = imageSetKey(images);
+  const existingKeys = new Set(existingImages.map((image) => basePhotoKey(image.url)));
+  const normalizedSeed = hashSeed([
+    seed,
+    productName.trim().toLowerCase() || "gulefirdous-perfume",
+    existingKeys.size,
+  ]);
+  const shuffled = shuffleWithSeed(REALISTIC_PHOTO_POOL, normalizedSeed);
+  const batch: ProductImageOption[] = [];
 
-  while (setKey === previousSetKey && attempt < 12) {
-    attempt += 1;
-    nextSeed = hashSeed([seed, attempt, productName]);
-    images = createRealisticImageOptions(productName, nextSeed);
-    setKey = imageSetKey(images);
+  for (const photo of shuffled) {
+    if (batch.length >= batchSize) {
+      break;
+    }
+
+    if (!existingKeys.has(basePhotoKey(photo.url))) {
+      batch.push(toImageOption(photo, String(normalizedSeed), batch.length));
+      existingKeys.add(basePhotoKey(photo.url));
+    }
   }
 
-  return { images, setKey, seed: nextSeed };
+  if (batch.length < batchSize) {
+    const refreshSeed = hashSeed([seed, "refresh", Date.now(), batch.length]);
+    const refreshed = shuffleWithSeed(REALISTIC_PHOTO_POOL, refreshSeed);
+
+    for (const photo of refreshed) {
+      if (batch.length >= batchSize) {
+        break;
+      }
+
+      batch.push(
+        toImageOption(photo, `${refreshSeed}-${Date.now()}`, batch.length)
+      );
+    }
+  }
+
+  return {
+    images: batch,
+    setKey: imageSetKey([...existingImages, ...batch]),
+    seed: normalizedSeed,
+  };
 }
 
 export const defaultRealisticImageOptions = createRealisticImageOptions("Gulefirdous Perfume", 1);
+
+export const totalPhotoPoolSize = REALISTIC_PHOTO_POOL.length;
