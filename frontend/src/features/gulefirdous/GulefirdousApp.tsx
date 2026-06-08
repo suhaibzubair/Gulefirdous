@@ -620,6 +620,7 @@ function GulefirdousApp() {
     <main className="gf-app">
       <div className="gf-topbar">
         <span>Fragrance of Humanity</span>
+        <span>Preview app · editable ads · updated theme · port 3000</span>
         <span>Free shipping · COD across Pakistan · gulefirdous.com</span>
       </div>
 
