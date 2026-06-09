@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import App from "../../App";
 
 async function signInAsAdmin(loginId = "suhaibzubair@gmail.com") {
-  fireEvent.change(screen.getByPlaceholderText(/suhaibzubair@gmail.com or 0300/i), {
+  fireEvent.change(screen.getByPlaceholderText(/Email or mobile number/i), {
     target: { value: loginId },
   });
   fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
@@ -13,7 +13,7 @@ async function signInAsAdmin(loginId = "suhaibzubair@gmail.com") {
 }
 
 async function signInAsClient(loginId = "client@example.com") {
-  fireEvent.change(screen.getByPlaceholderText(/suhaibzubair@gmail.com or 0300/i), {
+  fireEvent.change(screen.getByPlaceholderText(/Email or mobile number/i), {
     target: { value: loginId },
   });
   fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
@@ -60,14 +60,14 @@ test("shows category management and product category picker for admin", async ()
   expect(screen.getByLabelText(/Product category/i)).toBeInTheDocument();
 });
 
-test("detects administrator email automatically without role buttons", () => {
+test("does not show administrator or client role buttons on login", () => {
   render(<App />);
 
-  fireEvent.change(screen.getByPlaceholderText(/suhaibzubair@gmail.com or 0300/i), {
+  fireEvent.change(screen.getByPlaceholderText(/Email or mobile number/i), {
     target: { value: "suhaibzubair@gmail.com" },
   });
 
-  expect(screen.getByText(/Administrator account detected/i)).toBeInTheDocument();
+  expect(screen.queryByText(/suhaibzubair@gmail.com/i)).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: /Administrator/i })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: /Client Order perfumes/i })).not.toBeInTheDocument();
 });

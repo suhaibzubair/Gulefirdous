@@ -192,7 +192,7 @@ export async function signInWithGoogle(expectedLoginId: string): Promise<Authent
 
   if (isAdminEmail(trimmed) && !isAdminEmail(email)) {
     await firebaseSignOut(authClient);
-    throw new Error(`Administrator access requires Google sign-in with ${ADMIN_EMAIL}.`);
+    throw new Error("This Google account is not authorized for administrator access.");
   }
 
   if (!isAdminEmail(trimmed) && isAdminEmail(email)) {

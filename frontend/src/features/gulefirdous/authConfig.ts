@@ -108,15 +108,10 @@ export function getLoginRoleHint(loginId: string) {
   }
 
   if (looksLikeEmail(trimmed)) {
-    return isAdminEmail(trimmed)
-      ? {
-          tone: "admin" as const,
-          message: "Administrator account detected. Sign in with Google using this email.",
-        }
-      : {
-          tone: "client" as const,
-          message: "Client account. Continue with Google or mobile OTP.",
-        };
+    return {
+      tone: "client" as const,
+      message: "Continue with Google or use your mobile number with OTP.",
+    };
   }
 
   if (looksLikePhone(trimmed)) {

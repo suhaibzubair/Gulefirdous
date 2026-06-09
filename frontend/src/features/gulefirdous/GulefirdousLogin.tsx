@@ -111,7 +111,7 @@ function GulefirdousLogin({ onSignIn }: GulefirdousLoginProps) {
                 setOtpCode("");
                 setLoginId(event.target.value);
               }}
-              placeholder="suhaibzubair@gmail.com or 0300 1234567"
+              placeholder="Email or mobile number"
               autoComplete="username"
               aria-label="Email or mobile number"
             />
@@ -194,11 +194,9 @@ function GulefirdousLogin({ onSignIn }: GulefirdousLoginProps) {
 
         <div id="gf-recaptcha-container" className="gf-recaptcha-container" />
 
-        <p className="gf-login-note">
-          Only <strong>suhaibzubair@gmail.com</strong> opens the administrator dashboard. Every
-          other email or mobile number signs in as a client.
-          {isMockAuth ? " Demo auth mode is active for local development and tests." : null}
-        </p>
+        {isMockAuth ? (
+          <p className="gf-login-note">Demo auth mode is active for local development and tests.</p>
+        ) : null}
       </div>
     </div>
   );
