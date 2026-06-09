@@ -1317,8 +1317,31 @@
 
 .gf-product-list-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 8px;
+}
+
+.gf-publish-product {
+  min-height: 38px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 12px;
+  background: #bd8c34;
+  color: #fffaf1;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.gf-publish-product:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(189, 140, 52, 0.28);
+}
+
+.gf-publish-product:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .gf-product-image-wrap {
@@ -1404,7 +1427,8 @@
 }
 
 
-.gf-edit-product {
+.gf-edit-product,
+.gf-publish-product {
   min-height: 38px !important;
   font-size: 13px;
 }

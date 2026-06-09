@@ -23,8 +23,10 @@ import {
   basePhotoKey,
   collectSeenPhotoKeys,
   createNextImageBatch,
+  createRealisticImageOptions,
   defaultRealisticImageOptions,
   getPhotoPoolSize,
+  handleProductImageError,
   type ImageSource,
   type ProductImageOption,
 } from "./productImages";
@@ -115,6 +117,12 @@ const statusOrder: OrderStatus[] = [
   "Delivered",
 ];
 
+const heritageAttarDefaultImage = createRealisticImageOptions(
+  "Heritage Attar Gift Set",
+  2,
+  "Gift Set"
+)[0];
+
 const initialProducts: Product[] = [
   {
     id: 1,
@@ -160,9 +168,9 @@ const initialProducts: Product[] = [
     volumeMl: 30,
     audience: "Unisex",
     notes: ["Vanilla", "Spicy", "Amber"],
-    imageUrl: defaultRealisticImageOptions[3].url,
+    imageUrl: heritageAttarDefaultImage.url,
     imageSource: "AI generated",
-    imageLabel: defaultRealisticImageOptions[3].label,
+    imageLabel: heritageAttarDefaultImage.label,
   },
 ];
 
@@ -1064,7 +1072,12 @@ function GulefirdousApp() {
                     aria-pressed={selectedImage.id === option.id}
                   >
                     <div className="gf-image-frame gf-image-frame-option">
-                      <img src={option.url} alt={`${option.label} perfume concept`} />
+                      <img
+                        src={option.url}
+                        alt={`${option.label} perfume concept`}
+                        referrerPolicy="no-referrer"
+                        onError={handleProductImageError}
+                      />
                     </div>
                     <span>{option.label}</span>
                   </button>
@@ -1086,7 +1099,12 @@ function GulefirdousApp() {
             </div>
             <div className="gf-selected-image">
               <div className="gf-image-frame gf-image-frame-selected">
-                <img src={selectedImage.url} alt="Selected perfume product visual" />
+                <img
+                  src={selectedImage.url}
+                  alt="Selected perfume product visual"
+                  referrerPolicy="no-referrer"
+                  onError={handleProductImageError}
+                />
               </div>
               <div>
                 <strong>Selected image</strong>
@@ -1123,7 +1141,12 @@ function GulefirdousApp() {
                   onClick={() => setSelectedProductId(product.id)}
                 >
                   <div className="gf-image-frame gf-image-frame-thumb">
-                    <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
+                    <img
+                      src={product.imageUrl}
+                      alt={`${product.name} thumbnail`}
+                      referrerPolicy="no-referrer"
+                      onError={handleProductImageError}
+                    />
                   </div>
                   <span>{product.name}</span>
                   <small>{formatProductMeta(product)}</small>
@@ -1348,7 +1371,12 @@ function GulefirdousApp() {
                       {categoryProducts.map((product) => (
                         <div className="gf-catalog-item" key={product.id}>
                           <div className="gf-image-frame gf-image-frame-thumb">
-                            <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
+                            <img
+                      src={product.imageUrl}
+                      alt={`${product.name} thumbnail`}
+                      referrerPolicy="no-referrer"
+                      onError={handleProductImageError}
+                    />
                           </div>
                           <div>
                             <strong>{product.name}</strong>
@@ -1738,7 +1766,12 @@ function GulefirdousApp() {
               Close preview
             </button>
             <div className="gf-image-frame gf-image-frame-preview">
-              <img src={imagePreview.url} alt={`${imagePreview.label} full preview`} />
+              <img
+                src={imagePreview.url}
+                alt={`${imagePreview.label} full preview`}
+                referrerPolicy="no-referrer"
+                onError={handleProductImageError}
+              />
             </div>
             <p className="gf-preview-caption">
               <strong>{imagePreview.label}</strong>
