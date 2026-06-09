@@ -40,6 +40,7 @@ beforeEach(() => {
             product: {
               id: 9001,
               name: body.name || 'Demo product',
+              status: 'publish',
               permalink: `https://gulefirdous.com/product/${slug}/`,
             },
           }),

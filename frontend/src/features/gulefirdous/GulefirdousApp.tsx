@@ -607,21 +607,25 @@ function GulefirdousApp() {
         categoryWooCommerceId: category?.wooCommerceId,
         imageUrl: product.imageUrl,
       });
-      const { product: created } = await publishWooProduct(payload);
+      const { product: published } = await publishWooProduct(payload, product.wooCommerceId);
+
+      if (published.status && published.status !== "publish") {
+        throw new Error(`WooCommerce saved the product as "${published.status}" instead of publish.`);
+      }
 
       setProducts((current) =>
         current.map((item) =>
           item.id === product.id
             ? {
                 ...item,
-                wooCommerceId: created.id,
-                link: created.permalink,
+                wooCommerceId: published.id,
+                link: published.permalink,
               }
             : item
         )
       );
       setProductSyncNotice(
-        `"${product.name}" is live on gulefirdous.com. View it at ${created.permalink}`
+        `"${product.name}" is published on gulefirdous.com. Customers can open it at ${published.permalink}`
       );
     } catch (error) {
       setProductSyncNotice(
@@ -702,30 +706,40 @@ function GulefirdousApp() {
     const slug = buildProductSlug(trimmedName, volumeMl);
 
     if (editingProductId) {
+      const existingProduct = products.find((product) => product.id === editingProductId);
+
+      if (!existingProduct) {
+        setProductFormError("Could not find the product you are editing.");
+        return;
+      }
+
+      const updatedProduct: Product = {
+        ...existingProduct,
+        name: trimmedName,
+        price: Number(newProduct.price),
+        stock: Number(newProduct.stock),
+        volumeMl,
+        audience: newProduct.audience,
+        notes: [...newProduct.notes],
+        category: newProduct.category,
+        description,
+        link: existingProduct.link || `https://gulefirdous.com/product/${slug}/`,
+        sourceCode: `${trimmedName.toUpperCase().replace(/[^A-Z0-9]+/g, "-")}-${volumeMl}ML`,
+        imageUrl: selectedImage.url,
+        imageSource: selectedImage.source,
+        imageLabel: selectedImage.label,
+      };
+
       setProducts((current) =>
-        current.map((product) =>
-          product.id === editingProductId
-            ? {
-                ...product,
-                name: trimmedName,
-                price: Number(newProduct.price),
-                stock: Number(newProduct.stock),
-                volumeMl,
-                audience: newProduct.audience,
-                notes: [...newProduct.notes],
-                category: newProduct.category,
-                description,
-                link: `https://gulefirdous.com/product/${slug}/`,
-                sourceCode: `${trimmedName.toUpperCase().replace(/[^A-Z0-9]+/g, "-")}-${volumeMl}ML`,
-                imageUrl: selectedImage.url,
-                imageSource: selectedImage.source,
-                imageLabel: selectedImage.label,
-              }
-            : product
-        )
+        current.map((product) => (product.id === editingProductId ? updatedProduct : product))
       );
       setSelectedProductId(editingProductId);
       resetProductForm();
+
+      if (updatedProduct.wooCommerceId) {
+        await publishProductToWordPress(updatedProduct);
+      }
+
       return;
     }
 
@@ -889,8 +903,12 @@ function GulefirdousApp() {
     <>
       <div className="gf-checklist">
         <div>
-          <strong>1. Install WooCommerce</strong>
-          <p>Required before the app can create products or read orders.</p>
+          <strong>1. Publish goes live on gulefirdous.com</strong>
+          <p>
+            Save &amp; publish creates a public product page on your website. The direct product
+            link opens for customers immediately. If /shop still shows a coming-soon page, update
+            that WordPress shop page to use the WooCommerce catalog.
+          </p>
         </div>
         <div>
           <strong>2. Add COD and TCS shipping rules</strong>

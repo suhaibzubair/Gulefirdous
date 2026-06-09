@@ -24,6 +24,9 @@ export interface WooProductPayload {
   price: number;
   description?: string;
   stock_quantity?: number;
+  status?: "publish" | "draft";
+  catalog_visibility?: "visible" | "catalog" | "search" | "hidden";
+  stock_status?: "instock" | "outofstock" | "onbackorder";
   categories?: Array<{ id: number }>;
   images?: Array<{ src: string }>;
 }
@@ -33,6 +36,7 @@ export interface WooCreatedProduct {
   name: string;
   permalink: string;
   slug?: string;
+  status?: string;
 }
 
 export function getPublishableImageUrl(url: string): string | undefined {
@@ -64,6 +68,9 @@ export function buildWooProductPayload(input: {
     price: input.price,
     description: input.description,
     stock_quantity: input.stock,
+    status: "publish",
+    catalog_visibility: "visible",
+    stock_status: input.stock > 0 ? "instock" : "outofstock",
   };
 
   if (input.categoryWooCommerceId) {
@@ -141,14 +148,29 @@ export function createWooProduct(product: WooProductPayload) {
   });
 }
 
-export async function publishWooProduct(product: WooProductPayload) {
+export function updateWooProduct(productId: number, product: WooProductPayload) {
+  return request<{ product: WooCreatedProduct }>(`/api/products/${productId}`, {
+    method: "PUT",
+    body: JSON.stringify(product),
+  });
+}
+
+async function publishWooProductPayload(product: WooProductPayload, existingProductId?: number) {
+  if (existingProductId) {
+    return updateWooProduct(existingProductId, product);
+  }
+
+  return createWooProduct(product);
+}
+
+export async function publishWooProduct(product: WooProductPayload, existingProductId?: number) {
   try {
-    return await createWooProduct(product);
+    return await publishWooProductPayload(product, existingProductId);
   } catch (error) {
     const message = error instanceof Error ? error.message.toLowerCase() : "";
     if (product.images?.length && message.includes("image")) {
       const { images, ...rest } = product;
-      return createWooProduct(rest);
+      return publishWooProductPayload(rest, existingProductId);
     }
 
     throw error;

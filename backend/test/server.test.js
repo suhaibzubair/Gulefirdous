@@ -160,9 +160,12 @@ test("product creation sanitizes payload before proxying", async () => {
     async createProduct(product) {
       assert.equal(product.name, "Saffron Rose Perfume");
       assert.equal(product.regular_price, "6100");
+      assert.equal(product.status, "publish");
+      assert.equal(product.catalog_visibility, "visible");
+      assert.equal(product.stock_status, "instock");
       assert.equal(product.manage_stock, true);
       assert.equal(product.stock_quantity, 22);
-      return { id: 44, ...product };
+      return { id: 44, status: "publish", permalink: "https://gulefirdous.com/product/saffron-rose-perfume/", ...product };
     },
   };
 
@@ -180,6 +183,41 @@ test("product creation sanitizes payload before proxying", async () => {
 
     assert.equal(response.status, 201);
     assert.equal(body.product.id, 44);
+  });
+});
+
+test("product update endpoint re-publishes an existing WooCommerce product", async () => {
+  const client = {
+    async updateProduct(productId, product) {
+      assert.equal(productId, "6128");
+      assert.equal(product.name, "Gulefirdous Royal Oud");
+      assert.equal(product.status, "publish");
+      assert.equal(product.catalog_visibility, "visible");
+      return {
+        id: 6128,
+        status: "publish",
+        permalink: "https://gulefirdous.com/product/gulefirdous-royal-oud/",
+        ...product,
+      };
+    },
+  };
+
+  await withServer(client, async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/products/6128`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "Gulefirdous Royal Oud",
+        price: 5200,
+        stock_quantity: 28,
+        description: "Updated from app",
+      }),
+    });
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.product.id, 6128);
+    assert.equal(body.product.status, "publish");
   });
 });
 

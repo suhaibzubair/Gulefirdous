@@ -34,22 +34,30 @@ function parseJson(rawBody) {
 function getCorsHeaders(env = process.env) {
   return {
     "Access-Control-Allow-Origin": env.FRONTEND_ORIGIN || "http://localhost:3000",
-    "Access-Control-Allow-Methods": "GET,POST,PATCH,OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type,X-WC-Webhook-Signature",
   };
 }
 
 function sanitizeProduct(input) {
+  const stockQuantity = input.stock_quantity ?? input.stock;
+  const hasStockQuantity = stockQuantity !== undefined && stockQuantity !== null && stockQuantity !== "";
+
   return {
     name: input.name,
     type: input.type || "simple",
+    status: input.status || "publish",
+    catalog_visibility: input.catalog_visibility || "visible",
     regular_price: String(input.regular_price || input.price || ""),
     description: input.description || "",
     short_description: input.short_description || input.description || "",
     categories: input.categories || [],
     images: input.images || [],
-    stock_quantity: input.stock_quantity,
-    manage_stock: input.stock_quantity !== undefined,
+    stock_quantity: hasStockQuantity ? Number(stockQuantity) : undefined,
+    manage_stock: hasStockQuantity,
+    stock_status:
+      input.stock_status ||
+      (hasStockQuantity && Number(stockQuantity) > 0 ? "instock" : hasStockQuantity ? "outofstock" : "instock"),
   };
 }
 
@@ -127,6 +135,14 @@ function createServer(options = {}) {
         const product = sanitizeProduct(parseJson(await readBody(request)));
         const createdProduct = await client.createProduct(product);
         sendJson(response, 201, { product: createdProduct }, corsHeaders);
+        return;
+      }
+
+      const productUpdateMatch = url.pathname.match(/^\/api\/products\/([^/]+)$/);
+      if (request.method === "PUT" && productUpdateMatch) {
+        const product = sanitizeProduct(parseJson(await readBody(request)));
+        const updatedProduct = await client.updateProduct(productUpdateMatch[1], product);
+        sendJson(response, 200, { product: updatedProduct }, corsHeaders);
         return;
       }
 

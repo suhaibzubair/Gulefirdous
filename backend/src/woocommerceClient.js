@@ -86,6 +86,17 @@ function createWooCommerceClient(env = process.env) {
       );
     },
 
+    updateProduct(productId, product) {
+      return wooFetch(
+        `/products/${encodeURIComponent(productId)}`,
+        {
+          method: "PUT",
+          body: product,
+        },
+        env
+      );
+    },
+
     listCategories(params = {}) {
       return wooFetch(
         "/products/categories",
