@@ -5,7 +5,7 @@ interface GulefirdousLogoProps {
   className?: string;
 }
 
-function GulefirdousLogo({ variant = "login", className = "" }: GulefirdousLogoProps) {
+export function GulefirdousLogo({ variant = "login", className = "" }: GulefirdousLogoProps) {
   return (
     <img
       src={logoUrl}

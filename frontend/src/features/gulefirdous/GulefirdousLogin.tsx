@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getLoginRoleHint, looksLikeEmail, looksLikePhone, toUserSession } from "./authConfig";
-import GulefirdousLogo from "./GulefirdousLogo";
+import { GulefirdousLogo } from "./GulefirdousLogo";
 import {
   sendPhoneOtp,
   setupRecaptcha,
