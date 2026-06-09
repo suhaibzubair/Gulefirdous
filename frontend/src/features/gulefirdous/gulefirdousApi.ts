@@ -24,19 +24,84 @@ export interface WooProductPayload {
   price: number;
   description?: string;
   stock_quantity?: number;
+  categories?: Array<{ id: number }>;
   images?: Array<{ src: string }>;
+}
+
+export interface WooCreatedProduct {
+  id: number;
+  name: string;
+  permalink: string;
+  slug?: string;
+}
+
+export function getPublishableImageUrl(url: string): string | undefined {
+  if (!url || url.startsWith("blob:") || !/^https?:\/\//i.test(url)) {
+    return undefined;
+  }
+
+  if (/pexels\.com/i.test(url)) {
+    return url;
+  }
+
+  if (/\.(jpe?g|png|webp)(\?|$)/i.test(url)) {
+    return url;
+  }
+
+  return undefined;
+}
+
+export function buildWooProductPayload(input: {
+  name: string;
+  price: number;
+  description: string;
+  stock: number;
+  categoryWooCommerceId?: number | null;
+  imageUrl?: string;
+}): WooProductPayload {
+  const payload: WooProductPayload = {
+    name: input.name,
+    price: input.price,
+    description: input.description,
+    stock_quantity: input.stock,
+  };
+
+  if (input.categoryWooCommerceId) {
+    payload.categories = [{ id: input.categoryWooCommerceId }];
+  }
+
+  const imageSrc = input.imageUrl ? getPublishableImageUrl(input.imageUrl) : undefined;
+  if (imageSrc) {
+    payload.images = [{ src: imageSrc }];
+  }
+
+  return payload;
 }
 
 export function fetchWooProducts(search?: string) {
   const query = search ? `?search=${encodeURIComponent(search)}` : "";
-  return request<{ products: unknown[] }>(`/api/products${query}`);
+  return request<{ products: WooCreatedProduct[] }>(`/api/products${query}`);
 }
 
 export function createWooProduct(product: WooProductPayload) {
-  return request<{ product: unknown }>("/api/products", {
+  return request<{ product: WooCreatedProduct }>("/api/products", {
     method: "POST",
     body: JSON.stringify(product),
   });
+}
+
+export async function publishWooProduct(product: WooProductPayload) {
+  try {
+    return await createWooProduct(product);
+  } catch (error) {
+    const message = error instanceof Error ? error.message.toLowerCase() : "";
+    if (product.images?.length && message.includes("image")) {
+      const { images, ...rest } = product;
+      return createWooProduct(rest);
+    }
+
+    throw error;
+  }
 }
 
 export function fetchWooOrders(status?: string) {

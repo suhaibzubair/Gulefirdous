@@ -179,7 +179,7 @@ test("adds a product draft with perfume details and a selected AI generated pict
     screen.getByLabelText(/Generated perfume picture options/i)
   ).getAllByRole("button", { name: /perfume concept/i });
   fireEvent.click(generatedOptions[1]);
-  fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Save & publish to WordPress/i }));
 
   expect(screen.getByRole("img", { name: /Amber Musk Perfume thumbnail/i })).toBeInTheDocument();
   expect(screen.getAllByText(/75 ml · Unisex · Vanilla/i).length).toBeGreaterThan(0);
@@ -226,7 +226,7 @@ test("adds a product draft with a selected gallery picture", async () => {
   fireEvent.change(screen.getByLabelText(/Select from mobile gallery/i), {
     target: { files: [new File(["<svg />"], "upload.svg", { type: "image/svg+xml" })] },
   });
-  fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Save & publish to WordPress/i }));
 
   expect(screen.getByRole("img", { name: /Amber Musk Perfume thumbnail/i })).toHaveAttribute(
     "src",
@@ -243,7 +243,7 @@ test("allows the same perfume name when volume, audience, or notes differ", asyn
   const royalOudCardsBefore = screen.getAllByText(/^Gulefirdous Royal Oud$/i).length;
 
   fillProductDraftForm("Gulefirdous Royal Oud");
-  fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Save & publish to WordPress/i }));
 
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   expect(screen.getAllByText(/^Gulefirdous Royal Oud$/i)).toHaveLength(royalOudCardsBefore + 1);
@@ -275,7 +275,7 @@ test("warns when name, volume, audience, and notes all match an existing product
   fireEvent.click(screen.getByRole("button", { name: /^Oud$/i }));
   fireEvent.click(screen.getByRole("button", { name: /^Amber$/i }));
   fireEvent.click(screen.getByRole("button", { name: /^Woody$/i }));
-  fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Save & publish to WordPress/i }));
 
   expect(screen.getByRole("alert")).toHaveTextContent(
     /"Gulefirdous Royal Oud" already exists with the same name, volume, audience, and fragrance notes/i

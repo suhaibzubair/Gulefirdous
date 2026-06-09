@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  buildWooProductPayload,
   createCategory,
   fetchCategories,
+  publishWooProduct,
   type ProductCategory,
 } from "./gulefirdousApi";
 import GulefirdousDashboard from "./GulefirdousDashboard";
@@ -53,6 +55,7 @@ interface Product {
   imageUrl: string;
   imageSource: ImageSource;
   imageLabel: string;
+  wooCommerceId?: number;
 }
 
 const FRAGRANCE_NOTE_OPTIONS = [
@@ -337,6 +340,8 @@ function GulefirdousApp() {
   const [newCategoryDescription, setNewCategoryDescription] = useState("");
   const [categoryFormError, setCategoryFormError] = useState("");
   const [categoryNotice, setCategoryNotice] = useState("");
+  const [productSyncNotice, setProductSyncNotice] = useState("");
+  const [isPublishingProduct, setIsPublishingProduct] = useState(false);
   const sessionRef = useRef<UserSession | null>(null);
   const previousImageCategoryRef = useRef("");
 
@@ -569,6 +574,48 @@ function GulefirdousApp() {
     }));
   };
 
+  const publishProductToWordPress = async (product: Product) => {
+    const category = categories.find((item) => item.name === product.category);
+
+    setIsPublishingProduct(true);
+    setProductSyncNotice("");
+
+    try {
+      const payload = buildWooProductPayload({
+        name: product.name,
+        price: product.price,
+        description: product.description,
+        stock: product.stock,
+        categoryWooCommerceId: category?.wooCommerceId,
+        imageUrl: product.imageUrl,
+      });
+      const { product: created } = await publishWooProduct(payload);
+
+      setProducts((current) =>
+        current.map((item) =>
+          item.id === product.id
+            ? {
+                ...item,
+                wooCommerceId: created.id,
+                link: created.permalink,
+              }
+            : item
+        )
+      );
+      setProductSyncNotice(
+        `"${product.name}" is live on gulefirdous.com. View it at ${created.permalink}`
+      );
+    } catch (error) {
+      setProductSyncNotice(
+        error instanceof Error
+          ? `Could not publish "${product.name}" to WordPress: ${error.message}`
+          : `Could not publish "${product.name}" to WordPress. Check backend credentials and try again.`
+      );
+    } finally {
+      setIsPublishingProduct(false);
+    }
+  };
+
   const startEditingProduct = (product: Product) => {
     setEditingProductId(product.id);
     setSelectedProductId(product.id);
@@ -590,9 +637,10 @@ function GulefirdousApp() {
     });
   };
 
-  const saveProduct = (event: React.FormEvent<HTMLFormElement>) => {
+  const saveProduct = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setProductFormError("");
+    setProductSyncNotice("");
 
     const trimmedName = newProduct.name.trim();
 
@@ -687,6 +735,7 @@ function GulefirdousApp() {
       [product.id]: buildDefaultPostCaption(product),
     }));
     resetProductForm();
+    await publishProductToWordPress(product);
   };
 
   const generateImageOptions = () => {
@@ -942,9 +991,19 @@ function GulefirdousApp() {
               </p>
             ) : null}
 
+            {productSyncNotice ? (
+              <p className="gf-form-notice" role="status">
+                {productSyncNotice}
+              </p>
+            ) : null}
+
             <div className="gf-form-actions">
-              <button type="submit">
-                {editingProductId ? "Save product changes" : "Add product draft"}
+              <button type="submit" disabled={isPublishingProduct}>
+                {editingProductId
+                  ? "Save product changes"
+                  : isPublishingProduct
+                    ? "Publishing to WordPress..."
+                    : "Save & publish to WordPress"}
               </button>
               {editingProductId ? (
                 <button type="button" className="gf-secondary-button" onClick={resetProductForm}>
@@ -1074,6 +1133,16 @@ function GulefirdousApp() {
                   <small>
                     {product.imageSource}: {product.imageLabel}
                   </small>
+                  {product.wooCommerceId ? (
+                    <small>
+                      Live on{" "}
+                      <a href={product.link} target="_blank" rel="noreferrer">
+                        gulefirdous.com
+                      </a>
+                    </small>
+                  ) : (
+                    <small>Not published to WordPress yet</small>
+                  )}
                 </button>
                 <div className="gf-product-list-actions">
                   <button
@@ -1089,6 +1158,18 @@ function GulefirdousApp() {
                   >
                     Preview image
                   </button>
+                  {!product.wooCommerceId ? (
+                    <button
+                      type="button"
+                      className="gf-publish-product"
+                      disabled={isPublishingProduct}
+                      onClick={() => {
+                        void publishProductToWordPress(product);
+                      }}
+                    >
+                      Publish to WordPress
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className="gf-edit-product"
