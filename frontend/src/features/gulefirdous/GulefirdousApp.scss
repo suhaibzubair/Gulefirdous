@@ -81,6 +81,69 @@
   font-size: 15px;
 }
 
+.gf-login-role-hint {
+  margin: -8px 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.gf-login-role-hint-admin {
+  background: #eef7f3;
+  color: #1a3d34;
+  border: 1px solid rgba(26, 61, 52, 0.12);
+}
+
+.gf-login-role-hint-client {
+  background: #fff8ea;
+  color: #7a5d1d;
+  border: 1px solid rgba(189, 140, 52, 0.18);
+}
+
+.gf-google-button {
+  width: 100%;
+  min-height: 50px;
+  margin-bottom: 14px;
+  border: 1px solid #d8dfd9;
+  border-radius: 12px;
+  background: #fff;
+  color: #173027;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.gf-google-button:hover {
+  background: #f8f2ea;
+}
+
+.gf-otp-panel {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.gf-otp-form {
+  display: grid;
+  gap: 12px;
+}
+
+.gf-login-notice {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #eef7f3;
+  color: #1a3d34;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.gf-recaptcha-container {
+  min-height: 0;
+}
+
 .gf-role-picker {
   margin: 0 0 18px;
   padding: 0;

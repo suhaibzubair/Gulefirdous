@@ -14,10 +14,15 @@ export type ClientPage = "shop" | "my-orders" | "track-delivery" | "account-sett
 
 export type AppPage = AdminPage | ClientPage;
 
+export type AuthMethod = "google" | "phone";
+
 export interface UserSession {
   loginId: string;
   role: UserRole;
   displayName: string;
+  authMethod?: AuthMethod;
+  email?: string;
+  phone?: string;
 }
 
 export interface NavItem {

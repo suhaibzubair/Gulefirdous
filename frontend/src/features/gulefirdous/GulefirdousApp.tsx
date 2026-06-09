@@ -6,6 +6,7 @@ import {
 } from "./gulefirdousApi";
 import GulefirdousDashboard from "./GulefirdousDashboard";
 import GulefirdousLogin from "./GulefirdousLogin";
+import { signOutUser, subscribeToAuthSession } from "./authService";
 import {
   ADMIN_NAV,
   CLIENT_NAV,
@@ -341,6 +342,18 @@ function GulefirdousApp() {
   useEffect(() => {
     sessionRef.current = session;
   }, [session]);
+
+  useEffect(() => {
+    return subscribeToAuthSession((nextSession) => {
+      if (!nextSession) {
+        return;
+      }
+
+      sessionRef.current = nextSession;
+      setSession(nextSession);
+      setActivePage(defaultPageForRole(nextSession.role));
+    });
+  }, []);
 
   useEffect(() => {
     if (session?.role !== "admin") {
@@ -750,19 +763,14 @@ function GulefirdousApp() {
     reader.readAsDataURL(file);
   };
 
-  const handleSignIn = (loginId: string, role: UserRole) => {
-    const nextSession = {
-      loginId,
-      role,
-      displayName: buildDisplayName(loginId, role),
-    };
-
+  const handleSignIn = (nextSession: UserSession) => {
     sessionRef.current = nextSession;
     setSession(nextSession);
-    setActivePage(defaultPageForRole(role));
+    setActivePage(defaultPageForRole(nextSession.role));
   };
 
   const handleSignOut = () => {
+    void signOutUser();
     sessionRef.current = null;
     setSession(null);
     setActivePage("dashboard");

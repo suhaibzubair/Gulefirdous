@@ -2,26 +2,24 @@ import "@testing-library/jest-dom";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "../../App";
 
-function signInAsAdmin(loginId = "admin@gulefirdous.com") {
-  fireEvent.change(screen.getByPlaceholderText(/admin@gulefirdous.com or 0300/i), {
+async function signInAsAdmin(loginId = "suhaibzubair@gmail.com") {
+  fireEvent.change(screen.getByPlaceholderText(/suhaibzubair@gmail.com or 0300/i), {
     target: { value: loginId },
   });
-  fireEvent.click(screen.getByRole("button", { name: /Administrator/i }));
-  fireEvent.click(screen.getByRole("button", { name: /^Sign in$/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
+  await waitFor(() =>
+    expect(screen.getByRole("heading", { name: /Admin dashboard/i })).toBeInTheDocument()
+  );
 }
 
-async function signInAsClient(loginId = "client@gulefirdous.com") {
-  fireEvent.change(screen.getByPlaceholderText(/admin@gulefirdous.com or 0300/i), {
+async function signInAsClient(loginId = "client@example.com") {
+  fireEvent.change(screen.getByPlaceholderText(/suhaibzubair@gmail.com or 0300/i), {
     target: { value: loginId },
   });
-  fireEvent.click(screen.getByRole("button", { name: /Client Order perfumes/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
   await waitFor(() =>
-    expect(screen.getByRole("button", { name: /Client Order perfumes/i })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    )
+    expect(screen.getByRole("heading", { name: /Shop perfumes/i })).toBeInTheDocument()
   );
-  fireEvent.click(screen.getByRole("button", { name: /^Sign in$/i }));
 }
 
 function goToSidebarPage(label: string) {
@@ -33,7 +31,7 @@ function goToSidebarPage(label: string) {
 
 test("loads category-specific photos when the product category changes", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Manage products");
 
   expect(screen.getByText(/Perfume product photos loaded/i)).toBeInTheDocument();
@@ -48,9 +46,9 @@ test("loads category-specific photos when the product category changes", async (
   expect(screen.getAllByText(/Gift Set ·/i).length).toBeGreaterThan(0);
 });
 
-test("shows category management and product category picker for admin", () => {
+test("shows category management and product category picker for admin", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Categories");
 
   expect(screen.getAllByRole("heading", { name: /Product categories/i }).length).toBeGreaterThan(0);
@@ -62,13 +60,25 @@ test("shows category management and product category picker for admin", () => {
   expect(screen.getByLabelText(/Product category/i)).toBeInTheDocument();
 });
 
-test("renders the Gulefirdous MVP dashboard", () => {
+test("detects administrator email automatically without role buttons", () => {
+  render(<App />);
+
+  fireEvent.change(screen.getByPlaceholderText(/suhaibzubair@gmail.com or 0300/i), {
+    target: { value: "suhaibzubair@gmail.com" },
+  });
+
+  expect(screen.getByText(/Administrator account detected/i)).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /Administrator/i })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /Client Order perfumes/i })).not.toBeInTheDocument();
+});
+
+test("renders the Gulefirdous MVP dashboard", async () => {
   render(<App />);
 
   expect(screen.getByRole("heading", { name: /Gulefirdous/i })).toBeInTheDocument();
   expect(screen.getByText(/Fragrance of Humanity/i)).toBeInTheDocument();
 
-  signInAsAdmin();
+  await signInAsAdmin();
 
   expect(screen.getByRole("heading", { name: /Admin dashboard/i })).toBeInTheDocument();
   expect(screen.getByText(/Total orders/i)).toBeInTheDocument();
@@ -81,9 +91,9 @@ test("renders the Gulefirdous MVP dashboard", () => {
   expect(screen.getByRole("button", { name: /Post to Instagram/i })).toBeInTheDocument();
 });
 
-test("lets the user edit the social ad description before posting", () => {
+test("lets the user edit the social ad description before posting", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Social ads");
 
   const caption = screen.getByRole("textbox", { name: /editable social ad description/i });
@@ -102,9 +112,9 @@ test("lets the user edit the social ad description before posting", () => {
   expect(screen.getByText(/Facebook post published with caption/i)).toBeInTheDocument();
 });
 
-test("publishes independently to Facebook and Instagram", () => {
+test("publishes independently to Facebook and Instagram", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Social ads");
 
   fireEvent.click(screen.getByRole("button", { name: /Post to Facebook/i }));
@@ -154,7 +164,7 @@ function fillProductDraftForm(name: string) {
 
 test("adds a product draft with perfume details and a selected AI generated picture", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Manage products");
 
   fillProductDraftForm("Amber Musk Perfume");
@@ -177,9 +187,9 @@ test("adds a product draft with perfume details and a selected AI generated pict
   expect(screen.getAllByText(/AI generated:/i).length).toBeGreaterThan(1);
 });
 
-test("offers mobile gallery image selection for product pictures", () => {
+test("offers mobile gallery image selection for product pictures", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Manage products");
 
   const createObjectUrl = jest.fn(() => "blob:gallery-upload");
@@ -201,9 +211,9 @@ test("offers mobile gallery image selection for product pictures", () => {
   expect(screen.getByText(/Gallery upload: upload.svg/i)).toBeInTheDocument();
 });
 
-test("adds a product draft with a selected gallery picture", () => {
+test("adds a product draft with a selected gallery picture", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Manage products");
 
   const createObjectUrl = jest.fn(() => "blob:gallery-upload");
@@ -226,9 +236,9 @@ test("adds a product draft with a selected gallery picture", () => {
   expect(screen.getAllByText(/Gallery upload: upload.svg/i).length).toBeGreaterThan(1);
 });
 
-test("allows the same perfume name when volume, audience, or notes differ", () => {
+test("allows the same perfume name when volume, audience, or notes differ", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Manage products");
 
   const royalOudCardsBefore = screen.getAllByText(/^Gulefirdous Royal Oud$/i).length;
@@ -241,9 +251,9 @@ test("allows the same perfume name when volume, audience, or notes differ", () =
   expect(screen.getAllByText(/75 ml · Unisex/i).length).toBeGreaterThan(0);
 });
 
-test("warns when name, volume, audience, and notes all match an existing product", () => {
+test("warns when name, volume, audience, and notes all match an existing product", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Manage products");
 
   const royalOudCardsBefore = screen.getAllByText(/^Gulefirdous Royal Oud$/i).length;
@@ -276,7 +286,7 @@ test("warns when name, volume, audience, and notes all match an existing product
 
 test("keeps adding unique perfume images beyond the first eight", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Manage products");
 
   const imageGrid = () =>
@@ -304,9 +314,9 @@ test("keeps adding unique perfume images beyond the first eight", async () => {
   expect(screen.getByText(/Added 4 new unique Perfume photos/i)).toBeInTheDocument();
 });
 
-test("opens and closes a full perfume image preview", () => {
+test("opens and closes a full perfume image preview", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Manage products");
 
   fireEvent.click(screen.getAllByRole("button", { name: /Preview full image/i })[0]);
@@ -319,9 +329,9 @@ test("opens and closes a full perfume image preview", () => {
   expect(screen.queryByRole("dialog", { name: /full image preview/i })).not.toBeInTheDocument();
 });
 
-test("edits an existing product and shows updated details to customers", () => {
+test("edits an existing product and shows updated details to customers", async () => {
   render(<App />);
-  signInAsAdmin();
+  await signInAsAdmin();
   goToSidebarPage("Manage products");
 
   fireEvent.click(screen.getAllByRole("button", { name: /Edit product/i })[1]);

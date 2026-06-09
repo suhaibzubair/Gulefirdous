@@ -1,26 +1,88 @@
-import React, { useState } from "react";
-import type { UserRole } from "./gulefirdousNav";
+import React, { useEffect, useMemo, useState } from "react";
+import { getLoginRoleHint, looksLikeEmail, looksLikePhone, toUserSession } from "./authConfig";
+import {
+  sendPhoneOtp,
+  setupRecaptcha,
+  signInWithGoogle,
+  usesMockAuth,
+  verifyPhoneOtp,
+} from "./authService";
+import type { UserSession } from "./gulefirdousNav";
 
 interface GulefirdousLoginProps {
-  onSignIn: (loginId: string, role: UserRole) => void;
+  onSignIn: (session: UserSession) => void;
 }
 
 function GulefirdousLogin({ onSignIn }: GulefirdousLoginProps) {
   const [loginId, setLoginId] = useState("");
-  const [role, setRole] = useState<UserRole>("admin");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [busyAction, setBusyAction] = useState<"google" | "otp-send" | "otp-verify" | null>(null);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
-  const submit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmed = loginId.trim();
+  const roleHint = useMemo(() => getLoginRoleHint(loginId), [loginId]);
+  const showPhoneOtp = looksLikePhone(loginId);
+  const showGoogle = looksLikeEmail(loginId);
+  const isMockAuth = usesMockAuth();
 
-    if (!trimmed) {
-      setError("Enter your email address or phone number to continue.");
+  useEffect(() => {
+    if (isMockAuth || !showPhoneOtp) {
       return;
     }
 
+    setupRecaptcha("gf-recaptcha-container");
+  }, [isMockAuth, showPhoneOtp]);
+
+  const handleGoogleSignIn = async () => {
+    setBusyAction("google");
     setError("");
-    onSignIn(trimmed, role);
+    setNotice("");
+
+    try {
+      const user = await signInWithGoogle(loginId);
+      onSignIn(toUserSession(user));
+    } catch (signInError) {
+      setError(signInError instanceof Error ? signInError.message : "Google sign-in failed.");
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    setBusyAction("otp-send");
+    setError("");
+    setNotice("");
+
+    try {
+      await sendPhoneOtp(loginId);
+      setOtpSent(true);
+      setNotice(
+        isMockAuth
+          ? "Demo OTP sent. Enter any 6-digit code to continue."
+          : "OTP sent to your mobile number."
+      );
+    } catch (otpError) {
+      setError(otpError instanceof Error ? otpError.message : "Could not send OTP.");
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const handleVerifyOtp = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setBusyAction("otp-verify");
+    setError("");
+    setNotice("");
+
+    try {
+      const user = await verifyPhoneOtp(loginId, otpCode);
+      onSignIn(toUserSession(user));
+    } catch (verifyError) {
+      setError(verifyError instanceof Error ? verifyError.message : "OTP verification failed.");
+    } finally {
+      setBusyAction(null);
+    }
   };
 
   return (
@@ -33,47 +95,89 @@ function GulefirdousLogin({ onSignIn }: GulefirdousLoginProps) {
           <div>
             <p className="gf-eyebrow">Fragrance of Humanity</p>
             <h1>Gulefirdous</h1>
-            <p>Mobile app and web control center for perfumes, orders, and social ads.</p>
+            <p>Sign in with Google or mobile OTP. Your role is detected automatically.</p>
           </div>
         </div>
 
-        <form className="gf-login-form" onSubmit={submit}>
+        <div className="gf-login-form">
           <label>
-            Email or phone number
+            Email or mobile number
             <input
               value={loginId}
               onChange={(event) => {
                 setError("");
+                setNotice("");
+                setOtpSent(false);
+                setOtpCode("");
                 setLoginId(event.target.value);
               }}
-              placeholder="admin@gulefirdous.com or 0300 1234567"
+              placeholder="suhaibzubair@gmail.com or 0300 1234567"
               autoComplete="username"
+              aria-label="Email or mobile number"
             />
           </label>
 
-          <fieldset className="gf-role-picker">
-            <legend>Sign in as</legend>
-            <div className="gf-role-options">
+          {roleHint ? (
+            <p className={`gf-login-role-hint gf-login-role-hint-${roleHint.tone}`} role="status">
+              {roleHint.message}
+            </p>
+          ) : null}
+
+          {showGoogle ? (
+            <button
+              type="button"
+              className="gf-google-button"
+              onClick={() => {
+                void handleGoogleSignIn();
+              }}
+              disabled={busyAction !== null}
+            >
+              {busyAction === "google" ? "Signing in with Google..." : "Continue with Google"}
+            </button>
+          ) : null}
+
+          {showPhoneOtp ? (
+            <div className="gf-otp-panel">
               <button
                 type="button"
-                className={role === "admin" ? "active" : ""}
-                aria-pressed={role === "admin"}
-                onClick={() => setRole("admin")}
+                className="gf-secondary-button"
+                onClick={() => {
+                  void handleSendOtp();
+                }}
+                disabled={busyAction !== null}
               >
-                Administrator
-                <small>Post ads, update products, process delivery</small>
+                {busyAction === "otp-send" ? "Sending OTP..." : "Send OTP"}
               </button>
-              <button
-                type="button"
-                className={role === "client" ? "active" : ""}
-                aria-pressed={role === "client"}
-                onClick={() => setRole("client")}
-              >
-                Client
-                <small>Order perfumes and track shipment</small>
-              </button>
+
+              {otpSent ? (
+                <form className="gf-otp-form" onSubmit={handleVerifyOtp}>
+                  <label>
+                    OTP code
+                    <input
+                      value={otpCode}
+                      onChange={(event) => {
+                        setError("");
+                        setOtpCode(event.target.value);
+                      }}
+                      placeholder="6-digit code"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      aria-label="OTP code"
+                    />
+                  </label>
+                  <button type="submit" className="gf-login-submit" disabled={busyAction !== null}>
+                    {busyAction === "otp-verify" ? "Verifying..." : "Verify and sign in"}
+                  </button>
+                </form>
+              ) : null}
             </div>
-          </fieldset>
+          ) : null}
+
+          {!showGoogle && !showPhoneOtp && loginId.trim() ? (
+            <p className="gf-form-alert" role="alert">
+              Enter a valid email address or mobile number.
+            </p>
+          ) : null}
 
           {error ? (
             <p className="gf-form-alert" role="alert">
@@ -81,14 +185,19 @@ function GulefirdousLogin({ onSignIn }: GulefirdousLoginProps) {
             </p>
           ) : null}
 
-          <button type="submit" className="gf-login-submit">
-            Sign in
-          </button>
-        </form>
+          {notice ? (
+            <p className="gf-login-notice" role="status">
+              {notice}
+            </p>
+          ) : null}
+        </div>
+
+        <div id="gf-recaptcha-container" className="gf-recaptcha-container" />
 
         <p className="gf-login-note">
-          The Android and iPhone app uses the same login. Administrators manage the store from
-          mobile; clients shop and track orders from mobile.
+          Only <strong>suhaibzubair@gmail.com</strong> opens the administrator dashboard. Every
+          other email or mobile number signs in as a client.
+          {isMockAuth ? " Demo auth mode is active for local development and tests." : null}
         </p>
       </div>
     </div>
