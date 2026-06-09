@@ -2,22 +2,116 @@ import "@testing-library/jest-dom";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "../../App";
 
-test("renders the Gulefirdous MVP dashboard", () => {
+async function signInAsAdmin(loginId = "suhaibzubair@gmail.com") {
+  fireEvent.change(screen.getByPlaceholderText(/Email or mobile number/i), {
+    target: { value: loginId },
+  });
+  fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
+  await waitFor(() =>
+    expect(screen.getByRole("heading", { name: /Admin dashboard/i })).toBeInTheDocument()
+  );
+}
+
+async function signInAsClient(loginId = "client@example.com") {
+  fireEvent.change(screen.getByPlaceholderText(/Email or mobile number/i), {
+    target: { value: loginId },
+  });
+  fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
+  await waitFor(() =>
+    expect(screen.getByRole("heading", { name: /Shop perfumes/i })).toBeInTheDocument()
+  );
+}
+
+function goToSidebarPage(label: string) {
+  const sidebar = screen.getByLabelText(/app navigation/i);
+  fireEvent.click(
+    within(sidebar).getByRole("button", { name: new RegExp(`^${label}`, "i") })
+  );
+}
+
+test("loads category-specific photos when the product category changes", async () => {
   render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Manage products");
+
+  expect(screen.getByText(/Perfume product photos loaded/i)).toBeInTheDocument();
+
+  fireEvent.change(screen.getByLabelText(/Product category/i), {
+    target: { value: "Gift Set" },
+  });
+
+  await waitFor(() => {
+    expect(screen.getByText(/Gift Set product photos loaded/i)).toBeInTheDocument();
+  });
+  expect(screen.getAllByText(/Gift Set ·/i).length).toBeGreaterThan(0);
+});
+
+test("shows category management and product category picker for admin", async () => {
+  render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Categories");
+
+  expect(screen.getAllByRole("heading", { name: /Product categories/i }).length).toBeGreaterThan(0);
+  expect(screen.getByPlaceholderText(/Example: Candles, Hair Mist, Room Spray/i)).toBeInTheDocument();
+  expect(screen.getAllByText(/Perfume/i).length).toBeGreaterThan(0);
+  expect(screen.getAllByText(/Gift Set/i).length).toBeGreaterThan(0);
+
+  goToSidebarPage("Manage products");
+  expect(screen.getByLabelText(/Product category/i)).toBeInTheDocument();
+});
+
+test("shows live WordPress links after syncing products from WooCommerce on admin login", async () => {
+  render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Manage products");
 
   expect(
-    screen.getByRole("heading", {
-      name: /gulefirdous commerce and social publishing app/i,
+    await screen.findByRole("link", {
+      name: "https://gulefirdous.com/product/gulefirdous-bloom-mist/",
     })
   ).toBeInTheDocument();
-  expect(screen.getByText(/Shop-ready dashboard for gulefirdous.com/i)).toBeInTheDocument();
-  expect(screen.getByText(/Fragrance of Humanity/i)).toBeInTheDocument();
+  expect(
+    screen.getByRole("link", {
+      name: "https://gulefirdous.com/product/gulefirdous-royal-oud/",
+    })
+  ).toBeInTheDocument();
+  expect(screen.getByText(/Not published to WordPress yet/i)).toBeInTheDocument();
+});
+
+test("does not show administrator or client role buttons on login", () => {
+  render(<App />);
+
+  fireEvent.change(screen.getByPlaceholderText(/Email or mobile number/i), {
+    target: { value: "suhaibzubair@gmail.com" },
+  });
+
+  expect(screen.queryByText(/suhaibzubair@gmail.com/i)).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /Administrator/i })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /Client Order perfumes/i })).not.toBeInTheDocument();
+});
+
+test("renders the Gulefirdous MVP dashboard", async () => {
+  render(<App />);
+
+  expect(screen.getByAltText(/Gul-e-FIRDOUS Curated Elegance/i)).toBeInTheDocument();
+
+  await signInAsAdmin();
+
+  expect(screen.getByRole("heading", { name: /Admin dashboard/i })).toBeInTheDocument();
+  expect(screen.getByText(/Total orders/i)).toBeInTheDocument();
+  expect(screen.getByText(/Yearly sales/i)).toBeInTheDocument();
+  expect(screen.getByText(/Sales by category/i)).toBeInTheDocument();
+  expect(screen.getByText(/Social media users/i)).toBeInTheDocument();
+
+  goToSidebarPage("Social ads");
   expect(screen.getByRole("button", { name: /Post to Facebook/i })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /Post to Instagram/i })).toBeInTheDocument();
 });
 
-test("lets the user edit the social ad description before posting", () => {
+test("lets the user edit the social ad description before posting", async () => {
   render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Social ads");
 
   const caption = screen.getByRole("textbox", { name: /editable social ad description/i });
   expect(caption.textContent || (caption as HTMLTextAreaElement).value).toContain(
@@ -35,8 +129,10 @@ test("lets the user edit the social ad description before posting", () => {
   expect(screen.getByText(/Facebook post published with caption/i)).toBeInTheDocument();
 });
 
-test("publishes independently to Facebook and Instagram", () => {
+test("publishes independently to Facebook and Instagram", async () => {
   render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Social ads");
 
   fireEvent.click(screen.getByRole("button", { name: /Post to Facebook/i }));
   expect(screen.getByText(/Facebook: Published/i)).toBeInTheDocument();
@@ -46,14 +142,26 @@ test("publishes independently to Facebook and Instagram", () => {
   expect(screen.getByText(/Instagram: Published/i)).toBeInTheDocument();
 });
 
-test("creates a customer COD order from the app storefront", () => {
+test("creates a customer COD order from the app storefront", async () => {
   render(<App />);
+  await signInAsClient();
+  await waitFor(() => expect(screen.getByText(/Client storefront/i)).toBeInTheDocument());
 
-  const initialOrders = screen.getAllByText(/Cash on Delivery/i).length;
-  fireEvent.click(screen.getAllByRole("button", { name: /Order with COD/i })[0]);
+  const firstProductCard = screen
+    .getByRole("heading", { name: /Gulefirdous Royal Oud/i })
+    .closest(".gf-product-card") as HTMLElement;
+  fireEvent.click(
+    within(firstProductCard).getByRole("button", { name: /Order with COD/i })
+  );
+  await waitFor(() => {
+    expect(screen.getByRole("status")).toHaveTextContent(/placed with Cash on Delivery/i);
+  });
+  goToSidebarPage("My orders");
 
-  expect(screen.getAllByText(/Cash on Delivery/i)).toHaveLength(initialOrders + 1);
-  expect(screen.getAllByText(/Demo Customer/i).length).toBeGreaterThan(0);
+  await waitFor(() => {
+    expect(screen.getByText(/Cash on Delivery/i)).toBeInTheDocument();
+  });
+  expect(screen.getAllByText(/Client/i).length).toBeGreaterThan(0);
 });
 
 function fillProductDraftForm(name: string) {
@@ -73,6 +181,8 @@ function fillProductDraftForm(name: string) {
 
 test("adds a product draft with perfume details and a selected AI generated picture", async () => {
   render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Manage products");
 
   fillProductDraftForm("Amber Musk Perfume");
   fireEvent.click(screen.getByRole("button", { name: /^Vanilla$/i }));
@@ -87,15 +197,18 @@ test("adds a product draft with perfume details and a selected AI generated pict
     screen.getByLabelText(/Generated perfume picture options/i)
   ).getAllByRole("button", { name: /perfume concept/i });
   fireEvent.click(generatedOptions[1]);
-  fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Save & publish to WordPress/i }));
 
-  expect(screen.getByRole("img", { name: /Amber Musk Perfume product visual/i })).toBeInTheDocument();
+  expect(screen.getByRole("img", { name: /Amber Musk Perfume thumbnail/i })).toBeInTheDocument();
   expect(screen.getAllByText(/75 ml · Unisex · Vanilla/i).length).toBeGreaterThan(0);
   expect(screen.getAllByText(/AI generated:/i).length).toBeGreaterThan(1);
 });
 
-test("offers mobile gallery image selection for product pictures", () => {
+test("offers mobile gallery image selection for product pictures", async () => {
   render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Manage products");
+
   const createObjectUrl = jest.fn(() => "blob:gallery-upload");
 
   Object.defineProperty(URL, "createObjectURL", {
@@ -115,8 +228,11 @@ test("offers mobile gallery image selection for product pictures", () => {
   expect(screen.getByText(/Gallery upload: upload.svg/i)).toBeInTheDocument();
 });
 
-test("adds a product draft with a selected gallery picture", () => {
+test("adds a product draft with a selected gallery picture", async () => {
   render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Manage products");
+
   const createObjectUrl = jest.fn(() => "blob:gallery-upload");
 
   Object.defineProperty(URL, "createObjectURL", {
@@ -128,38 +244,36 @@ test("adds a product draft with a selected gallery picture", () => {
   fireEvent.change(screen.getByLabelText(/Select from mobile gallery/i), {
     target: { files: [new File(["<svg />"], "upload.svg", { type: "image/svg+xml" })] },
   });
-  fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Save & publish to WordPress/i }));
 
-  expect(screen.getByRole("img", { name: /Amber Musk Perfume product visual/i })).toHaveAttribute(
+  expect(screen.getByRole("img", { name: /Amber Musk Perfume thumbnail/i })).toHaveAttribute(
     "src",
     "blob:gallery-upload"
   );
   expect(screen.getAllByText(/Gallery upload: upload.svg/i).length).toBeGreaterThan(1);
 });
 
-test("allows the same perfume name when volume, audience, or notes differ", () => {
+test("allows the same perfume name when volume, audience, or notes differ", async () => {
   render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Manage products");
 
-  const royalOudCardsBefore = screen.getAllByRole("heading", {
-    name: /Gulefirdous Royal Oud/i,
-  }).length;
+  const royalOudCardsBefore = screen.getAllByText(/^Gulefirdous Royal Oud$/i).length;
 
   fillProductDraftForm("Gulefirdous Royal Oud");
-  fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Save & publish to WordPress/i }));
 
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-  expect(
-    screen.getAllByRole("heading", { name: /Gulefirdous Royal Oud/i })
-  ).toHaveLength(royalOudCardsBefore + 1);
+  expect(screen.getAllByText(/^Gulefirdous Royal Oud$/i)).toHaveLength(royalOudCardsBefore + 1);
   expect(screen.getAllByText(/75 ml · Unisex/i).length).toBeGreaterThan(0);
 });
 
-test("warns when name, volume, audience, and notes all match an existing product", () => {
+test("warns when name, volume, audience, and notes all match an existing product", async () => {
   render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Manage products");
 
-  const royalOudCardsBefore = screen.getAllByRole("heading", {
-    name: /Gulefirdous Royal Oud/i,
-  }).length;
+  const royalOudCardsBefore = screen.getAllByText(/^Gulefirdous Royal Oud$/i).length;
 
   fireEvent.change(screen.getByPlaceholderText(/Example: Amber Musk Perfume/i), {
     target: { value: "Gulefirdous Royal Oud" },
@@ -179,18 +293,18 @@ test("warns when name, volume, audience, and notes all match an existing product
   fireEvent.click(screen.getByRole("button", { name: /^Oud$/i }));
   fireEvent.click(screen.getByRole("button", { name: /^Amber$/i }));
   fireEvent.click(screen.getByRole("button", { name: /^Woody$/i }));
-  fireEvent.click(screen.getByRole("button", { name: /Add product draft/i }));
+  fireEvent.click(screen.getByRole("button", { name: /Save & publish to WordPress/i }));
 
   expect(screen.getByRole("alert")).toHaveTextContent(
     /"Gulefirdous Royal Oud" already exists with the same name, volume, audience, and fragrance notes/i
   );
-  expect(
-    screen.getAllByRole("heading", { name: /Gulefirdous Royal Oud/i })
-  ).toHaveLength(royalOudCardsBefore);
+  expect(screen.getAllByText(/^Gulefirdous Royal Oud$/i)).toHaveLength(royalOudCardsBefore);
 });
 
 test("keeps adding unique perfume images beyond the first eight", async () => {
   render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Manage products");
 
   const imageGrid = () =>
     within(screen.getByLabelText(/Generated perfume picture options/i)).getAllByRole("img");
@@ -214,11 +328,13 @@ test("keeps adding unique perfume images beyond the first eight", async () => {
   fireEvent.click(screen.getByRole("button", { name: /Generate more picture options/i }));
   await waitFor(() => expect(imageGrid().length).toBe(initialCount + 12));
 
-  expect(screen.getByText(/Added 4 new unique photos/i)).toBeInTheDocument();
+  expect(screen.getByText(/Added 4 new unique Perfume photos/i)).toBeInTheDocument();
 });
 
-test("opens and closes a full perfume image preview", () => {
+test("opens and closes a full perfume image preview", async () => {
   render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Manage products");
 
   fireEvent.click(screen.getAllByRole("button", { name: /Preview full image/i })[0]);
 
@@ -230,8 +346,10 @@ test("opens and closes a full perfume image preview", () => {
   expect(screen.queryByRole("dialog", { name: /full image preview/i })).not.toBeInTheDocument();
 });
 
-test("edits an existing product and shows updated details to customers", () => {
+test("edits an existing product and shows updated details to customers", async () => {
   render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Manage products");
 
   fireEvent.click(screen.getAllByRole("button", { name: /Edit product/i })[1]);
 

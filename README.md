@@ -40,6 +40,15 @@ npm start
 
 Open `http://localhost:3000` in your browser.
 
+## Authentication
+
+Login supports **Google** and **mobile OTP**. The app assigns administrator or client access automatically after sign-in based on the authenticated account.
+
+For local development/tests without Firebase, auth runs in **mock mode** automatically.
+To enable real Google + OTP in production, copy `frontend/.env.example` to `frontend/.env`
+and add your Firebase project keys. In Firebase Console, enable **Google** and **Phone**
+authentication providers.
+
 ## Docker
 
 Run both services with Docker Compose:

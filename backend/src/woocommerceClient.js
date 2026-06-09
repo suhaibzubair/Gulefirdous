@@ -86,6 +86,42 @@ function createWooCommerceClient(env = process.env) {
       );
     },
 
+    updateProduct(productId, product) {
+      return wooFetch(
+        `/products/${encodeURIComponent(productId)}`,
+        {
+          method: "PUT",
+          body: product,
+        },
+        env
+      );
+    },
+
+    listCategories(params = {}) {
+      return wooFetch(
+        "/products/categories",
+        {
+          query: {
+            per_page: params.perPage || 100,
+            page: params.page || 1,
+            search: params.search,
+          },
+        },
+        env
+      );
+    },
+
+    createCategory(category) {
+      return wooFetch(
+        "/products/categories",
+        {
+          method: "POST",
+          body: category,
+        },
+        env
+      );
+    },
+
     listOrders(params = {}) {
       return wooFetch(
         "/orders",

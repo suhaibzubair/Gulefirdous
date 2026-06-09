@@ -30,6 +30,8 @@ order, and webhook endpoints.
 - `POST /api/products`
 - `GET /api/orders`
 - `PATCH /api/orders/:id/status`
+- `GET /api/shop/status`
+- `POST /api/shop/launch`
 - `POST /api/webhooks/woocommerce/order`
 - `POST /api/product-images/generate`
 
@@ -44,3 +46,9 @@ In WordPress admin:
 5. Create an order webhook pointing to `/api/webhooks/woocommerce/order`.
 
 Never put WooCommerce consumer secrets in the React frontend or mobile app.
+
+## Shop page / coming soon mode
+
+WooCommerce can hide the storefront behind **Coming soon** mode even when products are
+published. The backend disables that automatically when a product is created or updated,
+and you can also call `POST /api/shop/launch` manually.

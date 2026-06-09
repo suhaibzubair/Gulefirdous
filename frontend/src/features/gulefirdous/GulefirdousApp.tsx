@@ -1,10 +1,34 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  buildWooProductPayload,
+  createCategory,
+  fetchCategories,
+  fetchWooProducts,
+  mergeProductsWithWooCommerce,
+  publishWooProduct,
+  type ProductCategory,
+} from "./gulefirdousApi";
+import GulefirdousDashboard from "./GulefirdousDashboard";
+import GulefirdousLogin from "./GulefirdousLogin";
+import GulefirdousLogo from "./GulefirdousLogo";
+import { signOutUser, subscribeToAuthSession } from "./authService";
+import {
+  ADMIN_NAV,
+  CLIENT_NAV,
+  defaultPageForRole,
+  PAGE_TITLES,
+  type AppPage,
+  type UserRole,
+  type UserSession,
+} from "./gulefirdousNav";
+import {
   basePhotoKey,
   collectSeenPhotoKeys,
   createNextImageBatch,
+  createRealisticImageOptions,
   defaultRealisticImageOptions,
-  totalPhotoPoolSize,
+  getPhotoPoolSize,
+  handleProductImageError,
   type ImageSource,
   type ProductImageOption,
 } from "./productImages";
@@ -35,6 +59,7 @@ interface Product {
   imageUrl: string;
   imageSource: ImageSource;
   imageLabel: string;
+  wooCommerceId?: number;
 }
 
 const FRAGRANCE_NOTE_OPTIONS = [
@@ -49,6 +74,13 @@ const FRAGRANCE_NOTE_OPTIONS = [
   "Fruity",
 ] as const;
 
+const FALLBACK_CATEGORIES: ProductCategory[] = [
+  { id: 1, name: "Perfume", slug: "perfume", description: "Premium perfumes for men and women" },
+  { id: 2, name: "Gift Set", slug: "gift-set", description: "Curated fragrance gift boxes" },
+  { id: 3, name: "Attar", slug: "attar", description: "Traditional attars and oils" },
+  { id: 4, name: "Body Mist", slug: "body-mist", description: "Light daily body mists" },
+];
+
 const emptyProductForm = {
   name: "",
   price: "",
@@ -56,6 +88,7 @@ const emptyProductForm = {
   volumeMl: "50",
   audience: "Unisex" as ProductAudience,
   notes: [] as string[],
+  category: "",
 };
 
 interface Order {
@@ -85,6 +118,12 @@ const statusOrder: OrderStatus[] = [
   "Shipped",
   "Delivered",
 ];
+
+const heritageAttarDefaultImage = createRealisticImageOptions(
+  "Heritage Attar Gift Set",
+  2,
+  "Gift Set"
+)[0];
 
 const initialProducts: Product[] = [
   {
@@ -131,9 +170,9 @@ const initialProducts: Product[] = [
     volumeMl: 30,
     audience: "Unisex",
     notes: ["Vanilla", "Spicy", "Amber"],
-    imageUrl: defaultRealisticImageOptions[3].url,
+    imageUrl: heritageAttarDefaultImage.url,
     imageSource: "AI generated",
-    imageLabel: defaultRealisticImageOptions[3].label,
+    imageLabel: heritageAttarDefaultImage.label,
   },
 ];
 
@@ -256,6 +295,19 @@ function buildDefaultPostCaption(product: Product) {
   )}\nOrder now: ${withSource(product, "facebook")}`;
 }
 
+function buildDisplayName(loginId: string, role: UserRole) {
+  if (loginId.includes("@")) {
+    const local = loginId.split("@")[0].replace(/[._-]+/g, " ").trim();
+    const formatted = local.replace(/\b\w/g, (char) => char.toUpperCase());
+
+    return role === "admin" ? `${formatted} (Admin)` : formatted;
+  }
+
+  const digits = loginId.replace(/\D/g, "");
+
+  return role === "admin" ? `Admin ${digits.slice(-4) || "User"}` : `Client ${digits.slice(-4) || "User"}`;
+}
+
 function GulefirdousApp() {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [selectedProductId, setSelectedProductId] = useState(initialProducts[0].id);
@@ -275,7 +327,7 @@ function GulefirdousApp() {
   );
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const [imageGenerationNote, setImageGenerationNote] = useState(
-    "Glass perfume bottle photos only. Click generate for a fresh flacon set."
+    "Perfume product photos loaded. Click generate for more perfume images."
   );
   const [imageGenerationCount, setImageGenerationCount] = useState(0);
   const seenPhotoKeysRef = useRef(
@@ -290,6 +342,96 @@ function GulefirdousApp() {
   const [captionDrafts, setCaptionDrafts] = useState<Record<number, string>>(() =>
     Object.fromEntries(initialProducts.map((product) => [product.id, buildDefaultPostCaption(product)]))
   );
+  const [session, setSession] = useState<UserSession | null>(null);
+  const [activePage, setActivePage] = useState<AppPage>("dashboard");
+  const [orderNotice, setOrderNotice] = useState("");
+  const [categories, setCategories] = useState<ProductCategory[]>(FALLBACK_CATEGORIES);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDescription, setNewCategoryDescription] = useState("");
+  const [categoryFormError, setCategoryFormError] = useState("");
+  const [categoryNotice, setCategoryNotice] = useState("");
+  const [productSyncNotice, setProductSyncNotice] = useState("");
+  const [isPublishingProduct, setIsPublishingProduct] = useState(false);
+  const sessionRef = useRef<UserSession | null>(null);
+  const previousImageCategoryRef = useRef("");
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
+
+  useEffect(() => {
+    return subscribeToAuthSession((nextSession) => {
+      if (!nextSession) {
+        return;
+      }
+
+      sessionRef.current = nextSession;
+      setSession(nextSession);
+      setActivePage(defaultPageForRole(nextSession.role));
+    });
+  }, []);
+
+  useEffect(() => {
+    if (session?.role !== "admin") {
+      return;
+    }
+
+    fetchCategories()
+      .then((data) => setCategories(data.categories))
+      .catch(() => setCategories(FALLBACK_CATEGORIES));
+
+    fetchWooProducts()
+      .then((data) => {
+        setProducts((current) => mergeProductsWithWooCommerce(current, data.products));
+      })
+      .catch(() => {
+        // Keep local product drafts when WooCommerce sync is unavailable.
+      });
+  }, [session?.role]);
+
+  useEffect(() => {
+    if (!categories.length) {
+      return;
+    }
+
+    setNewProduct((current) =>
+      current.category ? current : { ...current, category: categories[0].name }
+    );
+  }, [categories]);
+
+  const loadCategoryImageOptions = (category: string, productName = "") => {
+    if (!category) {
+      return;
+    }
+
+    const seenKeys = new Set<string>();
+    const result = createNextImageBatch(
+      productName || `Gulefirdous ${category}`,
+      0,
+      seenKeys,
+      Date.now(),
+      undefined,
+      category
+    );
+
+    setImageOptions(result.images);
+    setSelectedImage(result.images[0] || defaultRealisticImageOptions[0]);
+    seenPhotoKeysRef.current = seenKeys;
+    seenImageIdsRef.current = collectSeenPhotoKeys(result.images);
+    setImageGenerationCount(0);
+    setImageGenerationNote(
+      `${category} product photos loaded. Click generate for more ${category.toLowerCase()} images.`
+    );
+  };
+
+  useEffect(() => {
+    if (!newProduct.category || newProduct.category === previousImageCategoryRef.current) {
+      return;
+    }
+
+    previousImageCategoryRef.current = newProduct.category;
+    loadCategoryImageOptions(newProduct.category, newProduct.name);
+  }, [newProduct.category]);
 
   useEffect(() => {
     if (!imagePreview) {
@@ -342,6 +484,35 @@ function GulefirdousApp() {
   const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
   const instagramOrders = orders.filter((order) => order.source === "Instagram").length;
   const facebookOrders = orders.filter((order) => order.source === "Facebook").length;
+  const productsByCategory = useMemo(() => {
+    const grouped = new Map<string, Product[]>();
+
+    categories.forEach((category) => {
+      grouped.set(category.name, []);
+    });
+
+    products.forEach((product) => {
+      const list = grouped.get(product.category) || [];
+      list.push(product);
+      grouped.set(product.category, list);
+    });
+
+    return Array.from(grouped.entries());
+  }, [products, categories]);
+  const clientOrders = useMemo(() => {
+    if (!session || session.role !== "client") {
+      return [];
+    }
+
+    return orders.filter(
+      (order) => order.customer === session.displayName || order.source === "App"
+    );
+  }, [orders, session]);
+  const clientLatestOrder = clientOrders[0];
+  const clientLatestProduct =
+    clientLatestOrder &&
+    (products.find((product) => product.id === clientLatestOrder.productId) || products[0]);
+  const navItems = session?.role === "admin" ? ADMIN_NAV : CLIENT_NAV;
 
   const updateCaptionDraft = (value: string) => {
     setCaptionDrafts((current) => ({
@@ -378,9 +549,38 @@ function GulefirdousApp() {
   };
 
   const resetProductForm = () => {
-    setNewProduct({ ...emptyProductForm });
+    setNewProduct({
+      ...emptyProductForm,
+      category: categories[0]?.name || "",
+    });
     setEditingProductId(null);
     setProductFormError("");
+  };
+
+  const saveCategory = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCategoryFormError("");
+    setCategoryNotice("");
+
+    const trimmedName = newCategoryName.trim();
+
+    if (!trimmedName) {
+      setCategoryFormError("Category name is required.");
+      return;
+    }
+
+    try {
+      const { category } = await createCategory(trimmedName, newCategoryDescription.trim());
+      setCategories((current) => [...current, category]);
+      setNewCategoryName("");
+      setNewCategoryDescription("");
+      setCategoryNotice(`Category "${category.name}" added. You can now assign products to it.`);
+      setNewProduct((current) => ({ ...current, category: category.name }));
+    } catch (error) {
+      setCategoryFormError(
+        error instanceof Error ? error.message : "Could not save category. Try again."
+      );
+    }
   };
 
   const toggleFragranceNote = (note: string) => {
@@ -390,6 +590,61 @@ function GulefirdousApp() {
         ? current.notes.filter((item) => item !== note)
         : [...current.notes, note],
     }));
+  };
+
+  const publishProductToWordPress = async (product: Product) => {
+    const category = categories.find((item) => item.name === product.category);
+
+    setIsPublishingProduct(true);
+    setProductSyncNotice("");
+
+    try {
+      const payload = buildWooProductPayload({
+        name: product.name,
+        price: product.price,
+        description: product.description,
+        stock: product.stock,
+        categoryWooCommerceId: category?.wooCommerceId,
+        imageUrl: product.imageUrl,
+      });
+      const { product: published, storeLaunch } = await publishWooProduct(
+        payload,
+        product.wooCommerceId
+      );
+
+      if (published.status && published.status !== "publish") {
+        throw new Error(`WooCommerce saved the product as "${published.status}" instead of publish.`);
+      }
+
+      setProducts((current) =>
+        current.map((item) =>
+          item.id === product.id
+            ? {
+                ...item,
+                wooCommerceId: published.id,
+                link: published.permalink,
+              }
+            : item
+        )
+      );
+
+      const launchNote =
+        storeLaunch?.launched || storeLaunch?.alreadyLive
+          ? ` ${storeLaunch.message}`
+          : "";
+
+      setProductSyncNotice(
+        `"${product.name}" is published on gulefirdous.com. Customers can open it at ${published.permalink}.${launchNote}`
+      );
+    } catch (error) {
+      setProductSyncNotice(
+        error instanceof Error
+          ? `Could not publish "${product.name}" to WordPress: ${error.message}`
+          : `Could not publish "${product.name}" to WordPress. Check backend credentials and try again.`
+      );
+    } finally {
+      setIsPublishingProduct(false);
+    }
   };
 
   const startEditingProduct = (product: Product) => {
@@ -403,6 +658,7 @@ function GulefirdousApp() {
       volumeMl: String(product.volumeMl),
       audience: product.audience,
       notes: [...product.notes],
+      category: product.category,
     });
     setSelectedImage({
       id: `existing-${product.id}`,
@@ -412,14 +668,21 @@ function GulefirdousApp() {
     });
   };
 
-  const saveProduct = (event: React.FormEvent<HTMLFormElement>) => {
+  const saveProduct = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setProductFormError("");
+    setProductSyncNotice("");
 
     const trimmedName = newProduct.name.trim();
 
-    if (!trimmedName || !newProduct.price || !newProduct.stock || !newProduct.volumeMl) {
-      setProductFormError("Product name, price, stock, and volume (ml) are required.");
+    if (
+      !trimmedName ||
+      !newProduct.price ||
+      !newProduct.stock ||
+      !newProduct.volumeMl ||
+      !newProduct.category
+    ) {
+      setProductFormError("Product name, category, price, stock, and volume (ml) are required.");
       return;
     }
 
@@ -452,36 +715,47 @@ function GulefirdousApp() {
     const slug = buildProductSlug(trimmedName, volumeMl);
 
     if (editingProductId) {
+      const existingProduct = products.find((product) => product.id === editingProductId);
+
+      if (!existingProduct) {
+        setProductFormError("Could not find the product you are editing.");
+        return;
+      }
+
+      const updatedProduct: Product = {
+        ...existingProduct,
+        name: trimmedName,
+        price: Number(newProduct.price),
+        stock: Number(newProduct.stock),
+        volumeMl,
+        audience: newProduct.audience,
+        notes: [...newProduct.notes],
+        category: newProduct.category,
+        description,
+        link: existingProduct.link || `https://gulefirdous.com/product/${slug}/`,
+        sourceCode: `${trimmedName.toUpperCase().replace(/[^A-Z0-9]+/g, "-")}-${volumeMl}ML`,
+        imageUrl: selectedImage.url,
+        imageSource: selectedImage.source,
+        imageLabel: selectedImage.label,
+      };
+
       setProducts((current) =>
-        current.map((product) =>
-          product.id === editingProductId
-            ? {
-                ...product,
-                name: trimmedName,
-                price: Number(newProduct.price),
-                stock: Number(newProduct.stock),
-                volumeMl,
-                audience: newProduct.audience,
-                notes: [...newProduct.notes],
-                description,
-                link: `https://gulefirdous.com/product/${slug}/`,
-                sourceCode: `${trimmedName.toUpperCase().replace(/[^A-Z0-9]+/g, "-")}-${volumeMl}ML`,
-                imageUrl: selectedImage.url,
-                imageSource: selectedImage.source,
-                imageLabel: selectedImage.label,
-              }
-            : product
-        )
+        current.map((product) => (product.id === editingProductId ? updatedProduct : product))
       );
       setSelectedProductId(editingProductId);
       resetProductForm();
+
+      if (updatedProduct.wooCommerceId) {
+        await publishProductToWordPress(updatedProduct);
+      }
+
       return;
     }
 
     const product: Product = {
       id: Date.now(),
       name: trimmedName,
-      category: "Perfume",
+      category: newProduct.category,
       price: Number(newProduct.price),
       stock: Number(newProduct.stock),
       volumeMl,
@@ -502,6 +776,7 @@ function GulefirdousApp() {
       [product.id]: buildDefaultPostCaption(product),
     }));
     resetProductForm();
+    await publishProductToWordPress(product);
   };
 
   const generateImageOptions = () => {
@@ -511,11 +786,14 @@ function GulefirdousApp() {
 
     setIsGeneratingImages(true);
 
+    const category = newProduct.category || "Perfume";
     const result = createNextImageBatch(
       productName,
       nextGenerationCount,
       seenPhotoKeysRef.current,
-      nonce
+      nonce,
+      undefined,
+      category
     );
 
     setImageOptions((current) => {
@@ -531,8 +809,8 @@ function GulefirdousApp() {
 
       setImageGenerationNote(
         freshImages.length > 0
-          ? `Added ${freshImages.length} new unique photos · ${mergedImages.length} total shown (${totalPhotoPoolSize} base bottles in library). Keep clicking for more.`
-          : "Could not find new photos. Try again for fresh style variations."
+          ? `Added ${freshImages.length} new unique ${category} photos · ${mergedImages.length} total shown (${getPhotoPoolSize(category)} base images in library). Keep clicking for more.`
+          : `Could not find new ${category} photos. Try again for fresh style variations.`
       );
 
       if (freshImages[0]) {
@@ -576,10 +854,23 @@ function GulefirdousApp() {
     reader.readAsDataURL(file);
   };
 
-  const placeOrder = (product: Product, source: string) => {
+  const handleSignIn = (nextSession: UserSession) => {
+    sessionRef.current = nextSession;
+    setSession(nextSession);
+    setActivePage(defaultPageForRole(nextSession.role));
+  };
+
+  const handleSignOut = () => {
+    void signOutUser();
+    sessionRef.current = null;
+    setSession(null);
+    setActivePage("dashboard");
+  };
+
+  const placeOrder = (product: Product, source: string, customerName?: string) => {
     const order: Order = {
       id: `GF-${Math.floor(1000 + Math.random() * 9000)}`,
-      customer: "Demo Customer",
+      customer: customerName || sessionRef.current?.displayName || "Demo Customer",
       productId: product.id,
       total: product.price,
       paymentMethod: "Cash on Delivery",
@@ -588,6 +879,7 @@ function GulefirdousApp() {
     };
 
     setOrders((current) => [order, ...current]);
+    setOrderNotice(`Order ${order.id} placed with ${order.paymentMethod}.`);
   };
 
   const openImagePreview = (preview: { url: string; label: string; source?: string }) => {
@@ -616,105 +908,27 @@ function GulefirdousApp() {
     );
   };
 
-  return (
-    <main className="gf-app">
-      <div className="gf-topbar">
-        <span>Fragrance of Humanity</span>
-        <span>Free shipping · COD across Pakistan · gulefirdous.com</span>
+  const renderManageProducts = () => (
+    <>
+      <div className="gf-checklist">
+        <div>
+          <strong>1. Publish goes live on gulefirdous.com</strong>
+          <p>
+            Save &amp; publish creates a public product page and automatically launches your shop
+            catalog on /shop when WooCommerce coming-soon mode is enabled.
+          </p>
+        </div>
+        <div>
+          <strong>2. Add COD and TCS shipping rules</strong>
+          <p>Pakistan COD first; international checkout needs an online payment option later.</p>
+        </div>
+        <div>
+          <strong>3. Create API credentials</strong>
+          <p>Use WooCommerce REST keys to sync catalog, inventory, and orders.</p>
+        </div>
       </div>
 
-      <header className="gf-site-header">
-        <div className="gf-site-brand">
-          <div className="gf-logo" aria-label="Gulefirdous perfume logo">
-            GF
-          </div>
-          <div>
-            <strong>Gulefirdous</strong>
-            <span>Premium perfumes and attars</span>
-          </div>
-        </div>
-        <nav className="gf-site-nav" aria-label="Store highlights">
-          <span>Men</span>
-          <span>Women</span>
-          <span>Gifts</span>
-          <span className="gf-sale-pill">Sale</span>
-        </nav>
-      </header>
-
-      <section className="gf-hero">
-        <div className="gf-brand">
-          <div>
-            <p className="gf-eyebrow">Admin &amp; mobile commerce</p>
-            <h1>Gulefirdous commerce and social publishing app</h1>
-            <p>
-              Manage WordPress products, publish posts to Facebook and Instagram, receive
-              engagement notifications, and process COD orders with TCS tracking.
-            </p>
-          </div>
-        </div>
-        <div className="gf-hero-card">
-          <span className="gf-hero-badge">New season</span>
-          <strong>Shop-ready dashboard for gulefirdous.com</strong>
-          <p>WooCommerce sync, social ads, customer COD orders, and TCS tracking in one place.</p>
-          <button
-            type="button"
-            className="gf-hero-cta"
-            onClick={() => document.getElementById("gf-shop")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            Explore storefront
-          </button>
-        </div>
-      </section>
-
-      <section className="gf-stats" aria-label="App readiness">
-        <article>
-          <span>WooCommerce</span>
-          <strong>Setup required</strong>
-          <p>Install plugin, create API keys, then sync products.</p>
-        </article>
-        <article>
-          <span>Meta channels</span>
-          <strong>Facebook + Instagram</strong>
-          <p>Separate publish buttons with per-platform status.</p>
-        </article>
-        <article>
-          <span>Payments</span>
-          <strong>COD first</strong>
-          <p>JazzCash, Easypaisa, and bank gateways can follow.</p>
-        </article>
-        <article>
-          <span>Delivery</span>
-          <strong>TCS tracking</strong>
-          <p>Admin adds tracking numbers for customer visibility.</p>
-        </article>
-      </section>
-
-      <section className="gf-grid">
-        <article className="gf-panel gf-wide">
-          <div className="gf-panel-title">
-            <div>
-              <p className="gf-eyebrow">Admin</p>
-              <h2>WordPress product upload and sync</h2>
-            </div>
-            <span className="gf-pill">gulefirdous.com</span>
-          </div>
-
-          <div className="gf-checklist">
-            <div>
-              <strong>1. Install WooCommerce</strong>
-              <p>Required before the app can create products or read orders.</p>
-            </div>
-            <div>
-              <strong>2. Add COD and TCS shipping rules</strong>
-              <p>Pakistan COD first; international checkout needs an online payment option later.</p>
-            </div>
-            <div>
-              <strong>3. Create API credentials</strong>
-              <p>Use WooCommerce REST keys to sync catalog, inventory, and orders.</p>
-            </div>
-          </div>
-
-          <form className="gf-product-form" onSubmit={saveProduct}>
+      <form className="gf-product-form" onSubmit={saveProduct}>
             <div className="gf-product-form-grid">
               <label>
                 Product name
@@ -762,6 +976,25 @@ function GulefirdousApp() {
                 />
               </label>
               <label>
+                Category
+                <select
+                  value={newProduct.category}
+                  onChange={(event) =>
+                    setNewProduct((current) => ({
+                      ...current,
+                      category: event.target.value,
+                    }))
+                  }
+                  aria-label="Product category"
+                >
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
                 For
                 <select
                   value={newProduct.audience}
@@ -802,9 +1035,19 @@ function GulefirdousApp() {
               </p>
             ) : null}
 
+            {productSyncNotice ? (
+              <p className="gf-form-notice" role="status">
+                {productSyncNotice}
+              </p>
+            ) : null}
+
             <div className="gf-form-actions">
-              <button type="submit">
-                {editingProductId ? "Save product changes" : "Add product draft"}
+              <button type="submit" disabled={isPublishingProduct}>
+                {editingProductId
+                  ? "Save product changes"
+                  : isPublishingProduct
+                    ? "Publishing to WordPress..."
+                    : "Save & publish to WordPress"}
               </button>
               {editingProductId ? (
                 <button type="button" className="gf-secondary-button" onClick={resetProductForm}>
@@ -818,7 +1061,10 @@ function GulefirdousApp() {
             <div className="gf-panel-title">
               <div>
                 <p className="gf-eyebrow">Product pictures</p>
-                <h3>Choose AI generated or mobile gallery image</h3>
+                <h3>
+                  Choose AI generated or mobile gallery image for{" "}
+                  {newProduct.category || "this category"}
+                </h3>
               </div>
             </div>
             <p className="gf-image-note">{imageGenerationNote}</p>
@@ -862,7 +1108,12 @@ function GulefirdousApp() {
                     aria-pressed={selectedImage.id === option.id}
                   >
                     <div className="gf-image-frame gf-image-frame-option">
-                      <img src={option.url} alt={`${option.label} perfume concept`} />
+                      <img
+                        src={option.url}
+                        alt={`${option.label} perfume concept`}
+                        referrerPolicy="no-referrer"
+                        onError={handleProductImageError}
+                      />
                     </div>
                     <span>{option.label}</span>
                   </button>
@@ -884,7 +1135,12 @@ function GulefirdousApp() {
             </div>
             <div className="gf-selected-image">
               <div className="gf-image-frame gf-image-frame-selected">
-                <img src={selectedImage.url} alt="Selected perfume product visual" />
+                <img
+                  src={selectedImage.url}
+                  alt="Selected perfume product visual"
+                  referrerPolicy="no-referrer"
+                  onError={handleProductImageError}
+                />
               </div>
               <div>
                 <strong>Selected image</strong>
@@ -921,7 +1177,12 @@ function GulefirdousApp() {
                   onClick={() => setSelectedProductId(product.id)}
                 >
                   <div className="gf-image-frame gf-image-frame-thumb">
-                    <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
+                    <img
+                      src={product.imageUrl}
+                      alt={`${product.name} thumbnail`}
+                      referrerPolicy="no-referrer"
+                      onError={handleProductImageError}
+                    />
                   </div>
                   <span>{product.name}</span>
                   <small>{formatProductMeta(product)}</small>
@@ -931,6 +1192,16 @@ function GulefirdousApp() {
                   <small>
                     {product.imageSource}: {product.imageLabel}
                   </small>
+                  {product.wooCommerceId ? (
+                    <small>
+                      Live on{" "}
+                      <a href={product.link} target="_blank" rel="noreferrer">
+                        {product.link}
+                      </a>
+                    </small>
+                  ) : (
+                    <small>Not published to WordPress yet</small>
+                  )}
                 </button>
                 <div className="gf-product-list-actions">
                   <button
@@ -946,6 +1217,18 @@ function GulefirdousApp() {
                   >
                     Preview image
                   </button>
+                  {!product.wooCommerceId ? (
+                    <button
+                      type="button"
+                      className="gf-publish-product"
+                      disabled={isPublishingProduct}
+                      onClick={() => {
+                        void publishProductToWordPress(product);
+                      }}
+                    >
+                      Publish to WordPress
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className="gf-edit-product"
@@ -957,228 +1240,547 @@ function GulefirdousApp() {
               </article>
             ))}
           </div>
-        </article>
+    </>
+  );
 
-        <article className="gf-panel">
-          <div className="gf-panel-title">
-            <div>
-              <p className="gf-eyebrow">Post builder</p>
-              <h2>Editable social ad</h2>
-            </div>
-          </div>
-          <label className="gf-select-label">
-            Select product
-            <select
-              value={selectedProductId}
-              onChange={(event) => setSelectedProductId(Number(event.target.value))}
-            >
-              {products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="gf-caption-label">
-            Ad description
-            <textarea
-              className="gf-caption"
-              value={editableCaption}
-              onChange={(event) => updateCaptionDraft(event.target.value)}
-              rows={11}
-              aria-label="Editable social ad description"
-              placeholder="Product details, coupon codes, vouchers, and order link..."
-            />
-          </label>
-          <p className="gf-caption-hint">
-            Auto-filled from the product. Add coupon codes (REF10, INSTA10), vouchers, or any
-            extra promo text before posting.
-          </p>
-          <button type="button" className="gf-reset-caption" onClick={resetCaptionDraft}>
-            Reset to auto-fill
-          </button>
-          <div className="gf-publish-actions">
-            <button type="button" onClick={() => publishPost("facebook")}>
-              Post to Facebook
-            </button>
-            <button type="button" onClick={() => publishPost("instagram")}>
-              Post to Instagram
-            </button>
-          </div>
-          <div className="gf-platform-status">
-            <span>Facebook: {publishStatus.facebook}</span>
-            <span>Instagram: {publishStatus.instagram}</span>
-          </div>
-        </article>
-
-        <article className="gf-panel">
-          <div className="gf-panel-title">
-            <div>
-              <p className="gf-eyebrow">Engagement inbox</p>
-              <h2>Likes and comments</h2>
-            </div>
-          </div>
-          <div className="gf-feed">
-            {engagements.map((item) => (
-              <div key={item.id} className="gf-feed-item">
-                <span>{item.platform}</span>
-                <strong>{item.type}</strong>
-                <p>{item.message}</p>
-                <small>
-                  {item.product} - {item.time}
-                </small>
-              </div>
-            ))}
-          </div>
-        </article>
-      </section>
-
-      <section className="gf-grid">
-        <article className="gf-panel gf-wide" id="gf-shop">
-          <div className="gf-panel-title">
-            <div>
-              <p className="gf-eyebrow">Customer app</p>
-              <h2>Shop products and place COD orders</h2>
-            </div>
-            <span className="gf-pill">Android + iPhone ready UX</span>
-          </div>
-          <div className="gf-shop">
-            {products.map((product) => (
-              <div className="gf-product-card" key={product.id}>
-                <div className="gf-product-image-wrap">
-                  <div className="gf-image-frame gf-image-frame-shop">
-                    <img
-                      className="gf-product-image"
-                      src={product.imageUrl}
-                      alt={`${product.name} product visual`}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    className="gf-preview-button"
-                    onClick={() =>
-                      openImagePreview({
-                        url: product.imageUrl,
-                        label: product.name,
-                        source: product.imageSource,
-                      })
-                    }
-                  >
-                    Preview full image
-                  </button>
-                </div>
-                <span>
-                  {product.category} · {product.audience}
-                </span>
-                <h3>{product.name}</h3>
-                <p className="gf-product-meta">{formatProductMeta(product)}</p>
-                <p>{product.description}</p>
-                {product.notes.length ? (
-                  <div className="gf-note-tags">
-                    {product.notes.map((note) => (
-                      <span key={note}>{note}</span>
-                    ))}
-                  </div>
-                ) : null}
-                <strong>{formatPrice(product.price)}</strong>
-                <button type="button" onClick={() => placeOrder(product, "App")}>
-                  Order with COD
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="gf-inline-tracking">
-            <div>
-              <p className="gf-eyebrow">Latest customer order</p>
-              <h3>{latestOrder.id}</h3>
-              <p>
-                {latestOrder.customer} ordered {latestOrderProduct.name} through{" "}
-                {latestOrder.source}.
-              </p>
-              <strong>{latestOrder.paymentMethod}</strong>
-            </div>
-            <div className="gf-timeline">
-              {statusOrder.map((status, index) => (
-                <span
-                  key={status}
-                  className={index <= statusOrder.indexOf(latestOrder.status) ? "done" : ""}
-                >
-                  {status}
-                </span>
-              ))}
-            </div>
-            <div className="gf-order-actions">
-              <span>Tracking: {latestOrder.trackingNumber || "Waiting for shipment"}</span>
-              <button type="button" onClick={() => advanceOrder(latestOrder.id)}>
-                Move to next status
-              </button>
-            </div>
-          </div>
-        </article>
-
-        <article className="gf-panel">
-          <div className="gf-panel-title">
-            <div>
-              <p className="gf-eyebrow">Discounts</p>
-              <h2>Referral and source tracking</h2>
-            </div>
-          </div>
-          <div className="gf-coupons">
-            <div>
-              <strong>REF10</strong>
-              <span>10% first order referral discount</span>
-            </div>
-            <div>
-              <strong>INSTA10</strong>
-              <span>Instagram source campaign</span>
-            </div>
-            <div>
-              <strong>FB10</strong>
-              <span>Facebook source campaign</span>
-            </div>
-          </div>
-          <div className="gf-metrics">
-            <span>Total revenue</span>
-            <strong>{formatPrice(totalRevenue)}</strong>
-            <small>
-              Instagram orders: {instagramOrders} | Facebook orders: {facebookOrders}
-            </small>
-          </div>
-        </article>
-      </section>
-
-      <section className="gf-panel">
+  const renderSocialAds = () => (
+    <div className="gf-grid gf-grid-single">
+      <article className="gf-panel">
         <div className="gf-panel-title">
           <div>
-            <p className="gf-eyebrow">Admin and customer</p>
-            <h2>Order management and tracking</h2>
+            <p className="gf-eyebrow">Post builder</p>
+            <h2>Editable social ad</h2>
           </div>
-          <span className="gf-pill">Courier: TCS</span>
         </div>
-        <div className="gf-order-table">
-          {orders.map((order) => {
-            const product = products.find((item) => item.id === order.productId) || products[0];
+        <label className="gf-select-label">
+          Select product
+          <select
+            value={selectedProductId}
+            onChange={(event) => setSelectedProductId(Number(event.target.value))}
+          >
+            {products.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="gf-caption-label">
+          Ad description
+          <textarea
+            className="gf-caption"
+            value={editableCaption}
+            onChange={(event) => updateCaptionDraft(event.target.value)}
+            rows={11}
+            aria-label="Editable social ad description"
+            placeholder="Product details, coupon codes, vouchers, and order link..."
+          />
+        </label>
+        <p className="gf-caption-hint">
+          Auto-filled from the product. Add coupon codes (REF10, INSTA10), vouchers, or any extra
+          promo text before posting.
+        </p>
+        <button type="button" className="gf-reset-caption" onClick={resetCaptionDraft}>
+          Reset to auto-fill
+        </button>
+        <div className="gf-publish-actions">
+          <button type="button" onClick={() => publishPost("facebook")}>
+            Post to Facebook
+          </button>
+          <button type="button" onClick={() => publishPost("instagram")}>
+            Post to Instagram
+          </button>
+        </div>
+        <div className="gf-platform-status">
+          <span>Facebook: {publishStatus.facebook}</span>
+          <span>Instagram: {publishStatus.instagram}</span>
+        </div>
+      </article>
 
-            return (
-              <article key={order.id} className="gf-order-row">
-                <span>{order.id}</span>
-                <strong>{product.name}</strong>
-                <p>
-                  {order.customer} - {order.paymentMethod} - Source: {order.source}
-                </p>
-                <small>{formatPrice(order.total)}</small>
-                <em>{order.status}</em>
+      <article className="gf-panel">
+        <div className="gf-panel-title">
+          <div>
+            <p className="gf-eyebrow">Engagement inbox</p>
+            <h2>Likes and comments</h2>
+          </div>
+        </div>
+        <div className="gf-feed">
+          {engagements.map((item) => (
+            <div key={item.id} className="gf-feed-item">
+              <span>{item.platform}</span>
+              <strong>{item.type}</strong>
+              <p>{item.message}</p>
+              <small>
+                {item.product} - {item.time}
+              </small>
+            </div>
+          ))}
+        </div>
+      </article>
+    </div>
+  );
+
+  const renderOrderTable = (showAdminActions: boolean) => (
+    <div className="gf-order-table">
+      {(showAdminActions ? orders : clientOrders).map((order) => {
+        const product = products.find((item) => item.id === order.productId) || products[0];
+
+        return (
+          <article key={order.id} className="gf-order-row">
+            <span>{order.id}</span>
+            <strong>{product.name}</strong>
+            <p>
+              {order.customer} - {order.paymentMethod} - Source: {order.source}
+            </p>
+            <small>{formatPrice(order.total)}</small>
+            <em>{order.status}</em>
+            <div>
+              <small>{order.trackingNumber || "Waiting for shipment"}</small>
+              {showAdminActions ? (
+                <button type="button" onClick={() => advanceOrder(order.id)}>
+                  Next status
+                </button>
+              ) : null}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+
+  const renderTrackingTimeline = (order: Order, productName: string) => (
+    <div className="gf-inline-tracking">
+      <div>
+        <p className="gf-eyebrow">Shipment status</p>
+        <h3>{order.id}</h3>
+        <p>
+          {order.customer} ordered {productName} through {order.source}.
+        </p>
+        <strong>{order.paymentMethod}</strong>
+      </div>
+      <div className="gf-timeline">
+        {statusOrder.map((status, index) => (
+          <span
+            key={status}
+            className={index <= statusOrder.indexOf(order.status) ? "done" : ""}
+          >
+            {status}
+          </span>
+        ))}
+      </div>
+      <div className="gf-order-actions">
+        <span>Tracking: {order.trackingNumber || "Waiting for shipment"}</span>
+      </div>
+    </div>
+  );
+
+  const renderPageContent = () => {
+    if (!session) {
+      return null;
+    }
+
+    if (session.role === "admin") {
+      switch (activePage) {
+        case "dashboard":
+          return (
+            <GulefirdousDashboard
+              orders={orders}
+              products={products}
+              totalRevenue={totalRevenue}
+              displayName={session.displayName}
+            />
+          );
+        case "product-catalog":
+          return (
+            <section className="gf-catalog">
+              {productsByCategory.map(([category, categoryProducts]) => (
+                <article className="gf-panel" key={category}>
+                  <div className="gf-panel-title">
+                    <div>
+                      <p className="gf-eyebrow">Category</p>
+                      <h2>{category}</h2>
+                    </div>
+                    <span className="gf-pill">{categoryProducts.length} products</span>
+                  </div>
+                  {categoryProducts.length ? (
+                    <div className="gf-catalog-list">
+                      {categoryProducts.map((product) => (
+                        <div className="gf-catalog-item" key={product.id}>
+                          <div className="gf-image-frame gf-image-frame-thumb">
+                            <img
+                      src={product.imageUrl}
+                      alt={`${product.name} thumbnail`}
+                      referrerPolicy="no-referrer"
+                      onError={handleProductImageError}
+                    />
+                          </div>
+                          <div>
+                            <strong>{product.name}</strong>
+                            <p>{formatProductMeta(product)}</p>
+                            <small>
+                              {formatPrice(product.price)} · {product.stock} in stock
+                            </small>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="gf-empty-state">
+                      No products in this category yet. Add a category product from Manage products.
+                    </p>
+                  )}
+                </article>
+              ))}
+            </section>
+          );
+        case "manage-categories":
+          return (
+            <section className="gf-panel gf-wide">
+              <div className="gf-panel-title">
                 <div>
-                  <small>{order.trackingNumber || "Waiting for shipment"}</small>
-                  <button type="button" onClick={() => advanceOrder(order.id)}>
-                    Next status
+                  <p className="gf-eyebrow">Catalog setup</p>
+                  <h2>Product categories</h2>
+                </div>
+                <span className="gf-pill">Backend + WooCommerce sync</span>
+              </div>
+
+              {categoryNotice ? (
+                <p className="gf-order-notice" role="status">
+                  {categoryNotice}
+                </p>
+              ) : null}
+
+              <form className="gf-category-form" onSubmit={saveCategory}>
+                <div className="gf-product-form-grid">
+                  <label>
+                    Category name
+                    <input
+                      value={newCategoryName}
+                      onChange={(event) => {
+                        setCategoryFormError("");
+                        setNewCategoryName(event.target.value);
+                      }}
+                      placeholder="Example: Candles, Hair Mist, Room Spray"
+                    />
+                  </label>
+                  <label>
+                    Short description
+                    <input
+                      value={newCategoryDescription}
+                      onChange={(event) => setNewCategoryDescription(event.target.value)}
+                      placeholder="Optional description for mobile app and website"
+                    />
+                  </label>
+                </div>
+
+                {categoryFormError ? (
+                  <p className="gf-form-alert" role="alert">
+                    {categoryFormError}
+                  </p>
+                ) : null}
+
+                <div className="gf-form-actions">
+                  <button type="submit">Add category</button>
+                </div>
+              </form>
+
+              <div className="gf-category-list">
+                {categories.map((category) => {
+                  const productCount = products.filter(
+                    (product) => product.category === category.name
+                  ).length;
+
+                  return (
+                    <article className="gf-category-card" key={category.id}>
+                      <div>
+                        <strong>{category.name}</strong>
+                        <p>{category.description || "No description yet"}</p>
+                        <small>{productCount} products assigned</small>
+                      </div>
+                      <span className="gf-pill">{category.slug}</span>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        case "manage-products":
+          return (
+            <section className="gf-panel gf-wide">
+              <div className="gf-panel-title">
+                <div>
+                  <p className="gf-eyebrow">Admin</p>
+                  <h2>WordPress product upload and sync</h2>
+                </div>
+                <span className="gf-pill">gulefirdous.com</span>
+              </div>
+              {renderManageProducts()}
+            </section>
+          );
+        case "social-ads":
+          return renderSocialAds();
+        case "orders-delivery":
+          return (
+            <section className="gf-panel">
+              <div className="gf-panel-title">
+                <div>
+                  <p className="gf-eyebrow">Admin and customer</p>
+                  <h2>Order management and tracking</h2>
+                </div>
+                <span className="gf-pill">Courier: TCS</span>
+              </div>
+              {renderOrderTable(true)}
+              {renderTrackingTimeline(latestOrder, latestOrderProduct.name)}
+            </section>
+          );
+        case "payments":
+          return (
+            <section className="gf-panel">
+              <div className="gf-panel-title">
+                <div>
+                  <p className="gf-eyebrow">Discounts</p>
+                  <h2>Referral and source tracking</h2>
+                </div>
+              </div>
+              <div className="gf-coupons">
+                <div>
+                  <strong>REF10</strong>
+                  <span>10% first order referral discount</span>
+                </div>
+                <div>
+                  <strong>INSTA10</strong>
+                  <span>Instagram source campaign</span>
+                </div>
+                <div>
+                  <strong>FB10</strong>
+                  <span>Facebook source campaign</span>
+                </div>
+              </div>
+              <div className="gf-metrics">
+                <span>Total revenue</span>
+                <strong>{formatPrice(totalRevenue)}</strong>
+                <small>
+                  Instagram orders: {instagramOrders} | Facebook orders: {facebookOrders}
+                </small>
+              </div>
+            </section>
+          );
+        case "account-settings":
+          return (
+            <section className="gf-panel gf-account-panel">
+              <div className="gf-panel-title">
+                <div>
+                  <p className="gf-eyebrow">Administrator</p>
+                  <h2>Account settings</h2>
+                </div>
+              </div>
+              <div className="gf-account-card">
+                <strong>{session.displayName}</strong>
+                <p>{session.loginId}</p>
+                <span className="gf-role-badge">Administrator</span>
+                <p>
+                  Use the mobile app with this login to post ads, update products, and process
+                  delivery from anywhere.
+                </p>
+                <button type="button" className="gf-secondary-button" onClick={handleSignOut}>
+                  Sign out
+                </button>
+              </div>
+            </section>
+          );
+        default:
+          return null;
+      }
+    }
+
+    switch (activePage) {
+      case "shop":
+        return (
+          <section className="gf-panel gf-wide">
+            <div className="gf-panel-title">
+              <div>
+                <p className="gf-eyebrow">Customer app</p>
+                <h2>Shop products and place COD orders</h2>
+              </div>
+              <span className="gf-pill">Android + iPhone ready UX</span>
+            </div>
+            {orderNotice ? (
+              <p className="gf-order-notice" role="status">
+                {orderNotice}
+              </p>
+            ) : null}
+            <div className="gf-shop">
+              {products.map((product) => (
+                <div className="gf-product-card" key={product.id}>
+                  <div className="gf-product-image-wrap">
+                    <div className="gf-image-frame gf-image-frame-shop">
+                      <img
+                        className="gf-product-image"
+                        src={product.imageUrl}
+                        alt={`${product.name} product visual`}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="gf-preview-button"
+                      onClick={() =>
+                        openImagePreview({
+                          url: product.imageUrl,
+                          label: product.name,
+                          source: product.imageSource,
+                        })
+                      }
+                    >
+                      Preview full image
+                    </button>
+                  </div>
+                  <span>
+                    {product.category} · {product.audience}
+                  </span>
+                  <h3>{product.name}</h3>
+                  <p className="gf-product-meta">{formatProductMeta(product)}</p>
+                  <p>{product.description}</p>
+                  {product.notes.length ? (
+                    <div className="gf-note-tags">
+                      {product.notes.map((note) => (
+                        <span key={note}>{note}</span>
+                      ))}
+                    </div>
+                  ) : null}
+                  <strong>{formatPrice(product.price)}</strong>
+                  <button
+                    type="button"
+                    onClick={() => placeOrder(product, "App", session.displayName)}
+                  >
+                    Order with COD
                   </button>
                 </div>
-              </article>
-            );
-          })}
+              ))}
+            </div>
+          </section>
+        );
+      case "my-orders":
+        return (
+          <section className="gf-panel">
+            <div className="gf-panel-title">
+              <div>
+                <p className="gf-eyebrow">Your orders</p>
+                <h2>Order history</h2>
+              </div>
+            </div>
+            {clientOrders.length ? (
+              renderOrderTable(false)
+            ) : (
+              <p className="gf-empty-state">
+                No orders yet. Browse perfumes and place your first COD order from the shop.
+              </p>
+            )}
+          </section>
+        );
+      case "track-delivery":
+        return (
+          <section className="gf-panel">
+            <div className="gf-panel-title">
+              <div>
+                <p className="gf-eyebrow">Delivery</p>
+                <h2>Track your shipment</h2>
+              </div>
+              <span className="gf-pill">Courier: TCS</span>
+            </div>
+            {clientLatestOrder && clientLatestProduct ? (
+              renderTrackingTimeline(clientLatestOrder, clientLatestProduct.name)
+            ) : (
+              <p className="gf-empty-state">
+                Place an order first, then return here to follow TCS delivery updates.
+              </p>
+            )}
+          </section>
+        );
+      case "account-settings":
+        return (
+          <section className="gf-panel gf-account-panel">
+            <div className="gf-panel-title">
+              <div>
+                <p className="gf-eyebrow">Client</p>
+                <h2>Account settings</h2>
+              </div>
+            </div>
+            <div className="gf-account-card">
+              <strong>{session.displayName}</strong>
+              <p>{session.loginId}</p>
+              <span className="gf-role-badge gf-role-badge-client">Client</span>
+              <p>Order perfumes and track delivery from the same login on your mobile app.</p>
+              <button type="button" className="gf-secondary-button" onClick={handleSignOut}>
+                Sign out
+              </button>
+            </div>
+          </section>
+        );
+      default:
+        return null;
+    }
+  };
+
+  if (!session) {
+    return (
+      <main className="gf-app gf-app-login">
+        <GulefirdousLogin onSignIn={handleSignIn} />
+      </main>
+    );
+  }
+
+  return (
+    <main className="gf-app">
+      <div className="gf-shell">
+        <aside className="gf-sidebar" aria-label="App navigation">
+          <div className="gf-sidebar-brand">
+            <GulefirdousLogo variant="sidebar" />
+          </div>
+
+          <p className="gf-sidebar-role">
+            {session.role === "admin" ? "Administrator" : "Client"} · {session.displayName}
+          </p>
+
+          <nav className="gf-sidebar-nav">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={activePage === item.id ? "active" : ""}
+                aria-current={activePage === item.id ? "page" : undefined}
+                onClick={() => setActivePage(item.id)}
+              >
+                <span>{item.label}</span>
+                <small>{item.hint}</small>
+              </button>
+            ))}
+          </nav>
+
+          <div className="gf-sidebar-footer">
+            <p>Mobile app controls this site — post ads, update products, and track orders.</p>
+            <button type="button" className="gf-sidebar-signout" onClick={handleSignOut}>
+              Sign out
+            </button>
+          </div>
+        </aside>
+
+        <div className="gf-main">
+          <header className="gf-main-header">
+            <div>
+              <p className="gf-eyebrow">
+                {session.role === "admin" ? "Admin control center" : "Client storefront"}
+              </p>
+              <h1>{PAGE_TITLES[activePage]}</h1>
+            </div>
+            <div className="gf-main-header-meta">
+              <span>Preview · port 3000</span>
+              <span>COD · TCS · gulefirdous.com</span>
+            </div>
+          </header>
+
+          <div className="gf-page-content">{renderPageContent()}</div>
         </div>
-      </section>
+      </div>
 
       {imagePreview ? (
         <div
@@ -1200,7 +1802,12 @@ function GulefirdousApp() {
               Close preview
             </button>
             <div className="gf-image-frame gf-image-frame-preview">
-              <img src={imagePreview.url} alt={`${imagePreview.label} full preview`} />
+              <img
+                src={imagePreview.url}
+                alt={`${imagePreview.label} full preview`}
+                referrerPolicy="no-referrer"
+                onError={handleProductImageError}
+              />
             </div>
             <p className="gf-preview-caption">
               <strong>{imagePreview.label}</strong>
