@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import GulefirdousLogo from "./GulefirdousLogo";
 import type { UserRole } from "./gulefirdousNav";
 
 interface GulefirdousLoginProps {
@@ -27,14 +28,10 @@ function GulefirdousLogin({ onSignIn }: GulefirdousLoginProps) {
     <div className="gf-login-page">
       <div className="gf-login-card">
         <div className="gf-login-brand">
-          <div className="gf-logo" aria-hidden="true">
-            GF
-          </div>
-          <div>
-            <p className="gf-eyebrow">Fragrance of Humanity</p>
-            <h1>Gulefirdous</h1>
-            <p>Mobile app and web control center for perfumes, orders, and social ads.</p>
-          </div>
+          <GulefirdousLogo variant="login" />
+          <p className="gf-login-tagline">
+            Mobile app and web control center for perfumes, orders, and social ads.
+          </p>
         </div>
 
         <form className="gf-login-form" onSubmit={submit}>

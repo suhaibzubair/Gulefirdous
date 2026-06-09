@@ -6,6 +6,7 @@ import {
 } from "./gulefirdousApi";
 import GulefirdousDashboard from "./GulefirdousDashboard";
 import GulefirdousLogin from "./GulefirdousLogin";
+import GulefirdousLogo from "./GulefirdousLogo";
 import {
   ADMIN_NAV,
   CLIENT_NAV,
@@ -1598,13 +1599,7 @@ function GulefirdousApp() {
       <div className="gf-shell">
         <aside className="gf-sidebar" aria-label="App navigation">
           <div className="gf-sidebar-brand">
-            <div className="gf-logo" aria-hidden="true">
-              GF
-            </div>
-            <div>
-              <strong>Gulefirdous</strong>
-              <span>Fragrance of Humanity</span>
-            </div>
+            <GulefirdousLogo variant="sidebar" />
           </div>
 
           <p className="gf-sidebar-role">
