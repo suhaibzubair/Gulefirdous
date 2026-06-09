@@ -6,6 +6,8 @@ import {
 } from "./gulefirdousApi";
 import GulefirdousDashboard from "./GulefirdousDashboard";
 import GulefirdousLogin from "./GulefirdousLogin";
+import GulefirdousLogo from "./GulefirdousLogo";
+import { signOutUser, subscribeToAuthSession } from "./authService";
 import {
   ADMIN_NAV,
   CLIENT_NAV,
@@ -341,6 +343,18 @@ function GulefirdousApp() {
   useEffect(() => {
     sessionRef.current = session;
   }, [session]);
+
+  useEffect(() => {
+    return subscribeToAuthSession((nextSession) => {
+      if (!nextSession) {
+        return;
+      }
+
+      sessionRef.current = nextSession;
+      setSession(nextSession);
+      setActivePage(defaultPageForRole(nextSession.role));
+    });
+  }, []);
 
   useEffect(() => {
     if (session?.role !== "admin") {
@@ -750,19 +764,14 @@ function GulefirdousApp() {
     reader.readAsDataURL(file);
   };
 
-  const handleSignIn = (loginId: string, role: UserRole) => {
-    const nextSession = {
-      loginId,
-      role,
-      displayName: buildDisplayName(loginId, role),
-    };
-
+  const handleSignIn = (nextSession: UserSession) => {
     sessionRef.current = nextSession;
     setSession(nextSession);
-    setActivePage(defaultPageForRole(role));
+    setActivePage(defaultPageForRole(nextSession.role));
   };
 
   const handleSignOut = () => {
+    void signOutUser();
     sessionRef.current = null;
     setSession(null);
     setActivePage("dashboard");
@@ -1580,13 +1589,7 @@ function GulefirdousApp() {
       <div className="gf-shell">
         <aside className="gf-sidebar" aria-label="App navigation">
           <div className="gf-sidebar-brand">
-            <div className="gf-logo" aria-hidden="true">
-              GF
-            </div>
-            <div>
-              <strong>Gulefirdous</strong>
-              <span>Fragrance of Humanity</span>
-            </div>
+            <GulefirdousLogo variant="sidebar" />
           </div>
 
           <p className="gf-sidebar-role">
