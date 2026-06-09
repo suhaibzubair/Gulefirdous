@@ -607,7 +607,10 @@ function GulefirdousApp() {
         categoryWooCommerceId: category?.wooCommerceId,
         imageUrl: product.imageUrl,
       });
-      const { product: published } = await publishWooProduct(payload, product.wooCommerceId);
+      const { product: published, storeLaunch } = await publishWooProduct(
+        payload,
+        product.wooCommerceId
+      );
 
       if (published.status && published.status !== "publish") {
         throw new Error(`WooCommerce saved the product as "${published.status}" instead of publish.`);
@@ -624,8 +627,14 @@ function GulefirdousApp() {
             : item
         )
       );
+
+      const launchNote =
+        storeLaunch?.launched || storeLaunch?.alreadyLive
+          ? ` ${storeLaunch.message}`
+          : "";
+
       setProductSyncNotice(
-        `"${product.name}" is published on gulefirdous.com. Customers can open it at ${published.permalink}`
+        `"${product.name}" is published on gulefirdous.com. Customers can open it at ${published.permalink}.${launchNote}`
       );
     } catch (error) {
       setProductSyncNotice(
@@ -905,9 +914,8 @@ function GulefirdousApp() {
         <div>
           <strong>1. Publish goes live on gulefirdous.com</strong>
           <p>
-            Save &amp; publish creates a public product page on your website. The direct product
-            link opens for customers immediately. If /shop still shows a coming-soon page, update
-            that WordPress shop page to use the WooCommerce catalog.
+            Save &amp; publish creates a public product page and automatically launches your shop
+            catalog on /shop when WooCommerce coming-soon mode is enabled.
           </p>
         </div>
         <div>

@@ -141,17 +141,34 @@ export function mergeProductsWithWooCommerce<
   });
 }
 
+export interface StoreLaunchResult {
+  launched: boolean;
+  alreadyLive?: boolean;
+  message: string;
+}
+
+export interface WooProductResponse {
+  product: WooCreatedProduct;
+  storeLaunch?: StoreLaunchResult;
+}
+
 export function createWooProduct(product: WooProductPayload) {
-  return request<{ product: WooCreatedProduct }>("/api/products", {
+  return request<WooProductResponse>("/api/products", {
     method: "POST",
     body: JSON.stringify(product),
   });
 }
 
 export function updateWooProduct(productId: number, product: WooProductPayload) {
-  return request<{ product: WooCreatedProduct }>(`/api/products/${productId}`, {
+  return request<WooProductResponse>(`/api/products/${productId}`, {
     method: "PUT",
     body: JSON.stringify(product),
+  });
+}
+
+export function launchStorefront() {
+  return request<StoreLaunchResult>("/api/shop/launch", {
+    method: "POST",
   });
 }
 

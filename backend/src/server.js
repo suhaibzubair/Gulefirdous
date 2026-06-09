@@ -3,6 +3,7 @@ const path = require("node:path");
 const { createCategoryStore, slugifyCategoryName } = require("./categoryStore");
 const { createNextImageBatch, getPhotoPoolSize } = require("./productImages");
 const { createWooCommerceClient, verifyWooCommerceSignature } = require("./woocommerceClient");
+const { getComingSoonOptions, launchStore } = require("./wordpressSiteVisibility");
 
 const jsonHeaders = {
   "Content-Type": "application/json",
@@ -39,6 +40,18 @@ function getCorsHeaders(env = process.env) {
   };
 }
 
+async function ensureStoreIsLive(launchStoreFn, env) {
+  try {
+    return await launchStoreFn(env);
+  } catch (error) {
+    return {
+      launched: false,
+      alreadyLive: false,
+      message: error.message || "Could not launch the storefront.",
+    };
+  }
+}
+
 function sanitizeProduct(input) {
   const stockQuantity = input.stock_quantity ?? input.stock;
   const hasStockQuantity = stockQuantity !== undefined && stockQuantity !== null && stockQuantity !== "";
@@ -64,6 +77,8 @@ function sanitizeProduct(input) {
 function createServer(options = {}) {
   const env = options.env || process.env;
   const client = options.client || createWooCommerceClient(env);
+  const launchStoreFn = options.launchStore || launchStore;
+  const getComingSoonOptionsFn = options.getComingSoonOptions || getComingSoonOptions;
   const categoryStore =
     options.categoryStore ||
     createCategoryStore(
@@ -131,10 +146,32 @@ function createServer(options = {}) {
         return;
       }
 
+      if (request.method === "GET" && url.pathname === "/api/shop/status") {
+        const options = await getComingSoonOptionsFn(env);
+        sendJson(
+          response,
+          200,
+          {
+            comingSoon: options.woocommerce_coming_soon === "yes",
+            storePagesOnly: options.woocommerce_store_pages_only === "yes",
+            options,
+          },
+          corsHeaders
+        );
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/shop/launch") {
+        const launchResult = await launchStoreFn(env);
+        sendJson(response, 200, launchResult, corsHeaders);
+        return;
+      }
+
       if (request.method === "POST" && url.pathname === "/api/products") {
         const product = sanitizeProduct(parseJson(await readBody(request)));
         const createdProduct = await client.createProduct(product);
-        sendJson(response, 201, { product: createdProduct }, corsHeaders);
+        const storeLaunch = await ensureStoreIsLive(launchStoreFn, env);
+        sendJson(response, 201, { product: createdProduct, storeLaunch }, corsHeaders);
         return;
       }
 
@@ -142,7 +179,8 @@ function createServer(options = {}) {
       if (request.method === "PUT" && productUpdateMatch) {
         const product = sanitizeProduct(parseJson(await readBody(request)));
         const updatedProduct = await client.updateProduct(productUpdateMatch[1], product);
-        sendJson(response, 200, { product: updatedProduct }, corsHeaders);
+        const storeLaunch = await ensureStoreIsLive(launchStoreFn, env);
+        sendJson(response, 200, { product: updatedProduct, storeLaunch }, corsHeaders);
         return;
       }
 

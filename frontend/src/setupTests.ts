@@ -43,6 +43,11 @@ beforeEach(() => {
               status: 'publish',
               permalink: `https://gulefirdous.com/product/${slug}/`,
             },
+            storeLaunch: {
+              launched: true,
+              alreadyLive: false,
+              message: 'Store launched. Products are now visible on gulefirdous.com/shop.',
+            },
           }),
         } as Response;
       }

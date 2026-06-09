@@ -186,6 +186,35 @@ test("product creation sanitizes payload before proxying", async () => {
   });
 });
 
+test("shop launch endpoint disables WooCommerce coming soon mode", async () => {
+  let launchCalls = 0;
+
+  const launchStore = async () => {
+    launchCalls += 1;
+    return {
+      launched: true,
+      alreadyLive: false,
+      message: "Store launched. Products are now visible on gulefirdous.com/shop.",
+    };
+  };
+
+  await withServer(
+    {},
+    async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/api/shop/launch`, { method: "POST" });
+      const body = await response.json();
+
+      assert.equal(response.status, 200);
+      assert.equal(body.launched, true);
+      assert.match(body.message, /visible on gulefirdous.com\/shop/i);
+    },
+    {},
+    { launchStore, getComingSoonOptions: async () => ({}) }
+  );
+
+  assert.equal(launchCalls, 1);
+});
+
 test("product update endpoint re-publishes an existing WooCommerce product", async () => {
   const client = {
     async updateProduct(productId, product) {
