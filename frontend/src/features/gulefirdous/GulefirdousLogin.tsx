@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getLoginRoleHint, looksLikeEmail, looksLikePhone, toUserSession } from "./authConfig";
+import GulefirdousLogo from "./GulefirdousLogo";
 import {
   sendPhoneOtp,
   setupRecaptcha,
@@ -89,14 +90,10 @@ function GulefirdousLogin({ onSignIn }: GulefirdousLoginProps) {
     <div className="gf-login-page">
       <div className="gf-login-card">
         <div className="gf-login-brand">
-          <div className="gf-logo" aria-hidden="true">
-            GF
-          </div>
-          <div>
-            <p className="gf-eyebrow">Fragrance of Humanity</p>
-            <h1>Gulefirdous</h1>
-            <p>Sign in with Google or mobile OTP. Your role is detected automatically.</p>
-          </div>
+          <GulefirdousLogo variant="login" />
+          <p className="gf-login-tagline">
+            Sign in with Google or mobile OTP to access perfumes, orders, and social ads.
+          </p>
         </div>
 
         <div className="gf-login-form">

@@ -75,8 +75,7 @@ test("does not show administrator or client role buttons on login", () => {
 test("renders the Gulefirdous MVP dashboard", async () => {
   render(<App />);
 
-  expect(screen.getByRole("heading", { name: /Gulefirdous/i })).toBeInTheDocument();
-  expect(screen.getByText(/Fragrance of Humanity/i)).toBeInTheDocument();
+  expect(screen.getByAltText(/Gul-e-FIRDOUS Curated Elegance/i)).toBeInTheDocument();
 
   await signInAsAdmin();
 
