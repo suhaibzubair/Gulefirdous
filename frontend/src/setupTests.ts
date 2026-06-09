@@ -26,21 +26,43 @@ beforeEach(() => {
       } as Response;
     }
 
-    if (url.includes('/api/products') && init?.method === 'POST') {
-      const body = JSON.parse(String(init.body || '{}')) as { name?: string };
-      const slug = String(body.name || 'demo-product')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
+    if (url.includes('/api/products')) {
+      if (init?.method === 'POST') {
+        const body = JSON.parse(String(init.body || '{}')) as { name?: string };
+        const slug = String(body.name || 'demo-product')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+
+        return {
+          ok: true,
+          json: async () => ({
+            product: {
+              id: 9001,
+              name: body.name || 'Demo product',
+              permalink: `https://gulefirdous.com/product/${slug}/`,
+            },
+          }),
+        } as Response;
+      }
 
       return {
         ok: true,
         json: async () => ({
-          product: {
-            id: 9001,
-            name: body.name || 'Demo product',
-            permalink: `https://gulefirdous.com/product/${slug}/`,
-          },
+          products: [
+            {
+              id: 6127,
+              name: 'Gulefirdous Bloom Mist',
+              slug: 'gulefirdous-bloom-mist',
+              permalink: 'https://gulefirdous.com/product/gulefirdous-bloom-mist/',
+            },
+            {
+              id: 6126,
+              name: 'Gulefirdous Royal Oud',
+              slug: 'gulefirdous-royal-oud',
+              permalink: 'https://gulefirdous.com/product/gulefirdous-royal-oud/',
+            },
+          ],
         }),
       } as Response;
     }

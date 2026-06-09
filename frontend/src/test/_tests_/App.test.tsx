@@ -60,6 +60,24 @@ test("shows category management and product category picker for admin", async ()
   expect(screen.getByLabelText(/Product category/i)).toBeInTheDocument();
 });
 
+test("shows live WordPress links after syncing products from WooCommerce on admin login", async () => {
+  render(<App />);
+  await signInAsAdmin();
+  goToSidebarPage("Manage products");
+
+  expect(
+    await screen.findByRole("link", {
+      name: "https://gulefirdous.com/product/gulefirdous-bloom-mist/",
+    })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("link", {
+      name: "https://gulefirdous.com/product/gulefirdous-royal-oud/",
+    })
+  ).toBeInTheDocument();
+  expect(screen.getByText(/Not published to WordPress yet/i)).toBeInTheDocument();
+});
+
 test("does not show administrator or client role buttons on login", () => {
   render(<App />);
 

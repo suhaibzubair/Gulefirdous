@@ -78,9 +78,60 @@ export function buildWooProductPayload(input: {
   return payload;
 }
 
-export function fetchWooProducts(search?: string) {
-  const query = search ? `?search=${encodeURIComponent(search)}` : "";
-  return request<{ products: WooCreatedProduct[] }>(`/api/products${query}`);
+export function fetchWooProducts(search?: string, perPage = 100) {
+  const params = new URLSearchParams();
+
+  if (search) {
+    params.set("search", search);
+  }
+
+  if (perPage) {
+    params.set("perPage", String(perPage));
+  }
+
+  const query = params.toString();
+  return request<{ products: WooCreatedProduct[] }>(`/api/products${query ? `?${query}` : ""}`);
+}
+
+export function slugifyWooProductName(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+export function findWooProductMatch(
+  localName: string,
+  wooProducts: WooCreatedProduct[]
+): WooCreatedProduct | undefined {
+  const normalized = localName.trim().toLowerCase();
+  const localSlug = slugifyWooProductName(localName);
+
+  return wooProducts.find((product) => {
+    const nameMatch = product.name.trim().toLowerCase() === normalized;
+    const slugMatch = product.slug === localSlug;
+    const permalinkMatch = product.permalink?.toLowerCase().includes(`/${localSlug}/`);
+
+    return nameMatch || slugMatch || permalinkMatch;
+  });
+}
+
+export function mergeProductsWithWooCommerce<
+  T extends { name: string; link: string; wooCommerceId?: number },
+>(localProducts: T[], wooProducts: WooCreatedProduct[]): T[] {
+  return localProducts.map((product) => {
+    const match = findWooProductMatch(product.name, wooProducts);
+
+    if (!match) {
+      return product;
+    }
+
+    return {
+      ...product,
+      wooCommerceId: match.id,
+      link: match.permalink,
+    };
+  });
 }
 
 export function createWooProduct(product: WooProductPayload) {

@@ -3,6 +3,8 @@ import {
   buildWooProductPayload,
   createCategory,
   fetchCategories,
+  fetchWooProducts,
+  mergeProductsWithWooCommerce,
   publishWooProduct,
   type ProductCategory,
 } from "./gulefirdousApi";
@@ -377,6 +379,14 @@ function GulefirdousApp() {
     fetchCategories()
       .then((data) => setCategories(data.categories))
       .catch(() => setCategories(FALLBACK_CATEGORIES));
+
+    fetchWooProducts()
+      .then((data) => {
+        setProducts((current) => mergeProductsWithWooCommerce(current, data.products));
+      })
+      .catch(() => {
+        // Keep local product drafts when WooCommerce sync is unavailable.
+      });
   }, [session?.role]);
 
   useEffect(() => {
