@@ -6,6 +6,7 @@ import {
 } from "./gulefirdousApi";
 import GulefirdousDashboard from "./GulefirdousDashboard";
 import GulefirdousLogin from "./GulefirdousLogin";
+import GulefirdousLogo from "./GulefirdousLogo";
 import {
   ADMIN_NAV,
   CLIENT_NAV,
@@ -21,6 +22,7 @@ import {
   createNextImageBatch,
   defaultRealisticImageOptions,
   getPhotoPoolSize,
+  handleProductImageError,
   type ImageSource,
   type ProductImageOption,
 } from "./productImages";
@@ -996,7 +998,11 @@ function GulefirdousApp() {
                     aria-pressed={selectedImage.id === option.id}
                   >
                     <div className="gf-image-frame gf-image-frame-option">
-                      <img src={option.url} alt={`${option.label} perfume concept`} />
+                      <img
+                        src={option.url}
+                        alt={`${option.label} perfume concept`}
+                        onError={handleProductImageError}
+                      />
                     </div>
                     <span>{option.label}</span>
                   </button>
@@ -1018,7 +1024,11 @@ function GulefirdousApp() {
             </div>
             <div className="gf-selected-image">
               <div className="gf-image-frame gf-image-frame-selected">
-                <img src={selectedImage.url} alt="Selected perfume product visual" />
+                <img
+                  src={selectedImage.url}
+                  alt="Selected perfume product visual"
+                  onError={handleProductImageError}
+                />
               </div>
               <div>
                 <strong>Selected image</strong>
@@ -1055,7 +1065,11 @@ function GulefirdousApp() {
                   onClick={() => setSelectedProductId(product.id)}
                 >
                   <div className="gf-image-frame gf-image-frame-thumb">
-                    <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
+                    <img
+                      src={product.imageUrl}
+                      alt={`${product.name} thumbnail`}
+                      onError={handleProductImageError}
+                    />
                   </div>
                   <span>{product.name}</span>
                   <small>{formatProductMeta(product)}</small>
@@ -1258,7 +1272,11 @@ function GulefirdousApp() {
                       {categoryProducts.map((product) => (
                         <div className="gf-catalog-item" key={product.id}>
                           <div className="gf-image-frame gf-image-frame-thumb">
-                            <img src={product.imageUrl} alt={`${product.name} thumbnail`} />
+                            <img
+                      src={product.imageUrl}
+                      alt={`${product.name} thumbnail`}
+                      onError={handleProductImageError}
+                    />
                           </div>
                           <div>
                             <strong>{product.name}</strong>
@@ -1464,6 +1482,7 @@ function GulefirdousApp() {
                         className="gf-product-image"
                         src={product.imageUrl}
                         alt={`${product.name} product visual`}
+                        onError={handleProductImageError}
                       />
                     </div>
                     <button
@@ -1580,13 +1599,7 @@ function GulefirdousApp() {
       <div className="gf-shell">
         <aside className="gf-sidebar" aria-label="App navigation">
           <div className="gf-sidebar-brand">
-            <div className="gf-logo" aria-hidden="true">
-              GF
-            </div>
-            <div>
-              <strong>Gulefirdous</strong>
-              <span>Fragrance of Humanity</span>
-            </div>
+            <GulefirdousLogo variant="sidebar" />
           </div>
 
           <p className="gf-sidebar-role">
@@ -1654,7 +1667,11 @@ function GulefirdousApp() {
               Close preview
             </button>
             <div className="gf-image-frame gf-image-frame-preview">
-              <img src={imagePreview.url} alt={`${imagePreview.label} full preview`} />
+              <img
+                src={imagePreview.url}
+                alt={`${imagePreview.label} full preview`}
+                onError={handleProductImageError}
+              />
             </div>
             <p className="gf-preview-caption">
               <strong>{imagePreview.label}</strong>

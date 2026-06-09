@@ -43,24 +43,34 @@
 }
 
 .gf-login-brand {
-  display: flex;
-  gap: 20px;
-  align-items: center;
+  display: grid;
+  gap: 18px;
+  justify-items: center;
   margin-bottom: 28px;
+  text-align: center;
 }
 
-.gf-login-brand h1 {
-  margin: 4px 0 8px;
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 42px;
-  line-height: 1;
-  color: var(--gf-dark);
-}
-
-.gf-login-brand p {
+.gf-login-tagline {
   margin: 0;
+  max-width: 420px;
   color: var(--gf-muted);
   line-height: 1.55;
+}
+
+.gf-brand-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.gf-brand-logo-login {
+  max-width: 300px;
+}
+
+.gf-brand-logo-sidebar {
+  max-width: 176px;
+  filter: brightness(1.05);
 }
 
 .gf-login-form label {
@@ -167,32 +177,8 @@
 
 .gf-sidebar-brand {
   display: flex;
-  gap: 14px;
-  align-items: center;
-}
-
-.gf-sidebar-brand .gf-logo {
-  flex: 0 0 56px;
-  width: 56px;
-  height: 56px;
-  font-size: 18px;
-}
-
-.gf-sidebar-brand strong {
-  display: block;
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 26px;
-  line-height: 1;
-}
-
-.gf-sidebar-brand span {
-  display: block;
-  margin-top: 4px;
-  color: rgba(244, 235, 226, 0.62);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
+  justify-content: center;
+  padding: 4px 8px 8px;
 }
 
 .gf-sidebar-role {
@@ -1167,20 +1153,20 @@
 }
 
 .gf-image-frame-option {
-  height: 96px;
+  height: 140px;
 }
 
 .gf-image-frame-selected {
-  width: 148px;
-  height: 112px;
+  width: 168px;
+  height: 140px;
 }
 
 .gf-image-frame-thumb {
-  height: 88px;
+  height: 104px;
 }
 
 .gf-image-frame-shop {
-  height: 132px;
+  height: 168px;
 }
 
 .gf-image-frame-preview {

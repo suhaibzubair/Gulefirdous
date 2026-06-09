@@ -3,6 +3,9 @@
 This repository contains the Gulefirdous MVP migrated from the SolsGate
 `cursor/gulefirdous-mvp-caad` branch.
 
+**Continuing development with Cursor?** Read the full agent onboarding guide:
+[`docs/CURSOR_AGENT_GUIDE.md`](docs/CURSOR_AGENT_GUIDE.md)
+
 - A React MVP dashboard for product drafts, Facebook/Instagram publishing actions,
   COD ordering, TCS tracking, referrals, and source analytics.
 - A Node backend proxy under `backend/` for secure WooCommerce product/order sync.
@@ -39,6 +42,14 @@ npm start
 ```
 
 Open `http://localhost:3000` in your browser.
+
+**Quick start (both servers):**
+
+```bash
+bash scripts/start-gulefirdous.sh
+```
+
+If the page looks blank or unstyled, hard refresh with `Ctrl+Shift+R` (or `Cmd+Shift+R` on Mac) to clear cached HTML/CSS.
 
 ## Docker
 

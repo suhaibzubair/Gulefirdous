@@ -65,8 +65,7 @@ test("shows category management and product category picker for admin", () => {
 test("renders the Gulefirdous MVP dashboard", () => {
   render(<App />);
 
-  expect(screen.getByRole("heading", { name: /Gulefirdous/i })).toBeInTheDocument();
-  expect(screen.getByText(/Fragrance of Humanity/i)).toBeInTheDocument();
+  expect(screen.getByAltText(/Gul-e-FIRDOUS Curated Elegance/i)).toBeInTheDocument();
 
   signInAsAdmin();
 
