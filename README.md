@@ -43,6 +43,14 @@ npm start
 
 Open `http://localhost:3000` in your browser.
 
+**Quick start (both servers):**
+
+```bash
+bash scripts/start-gulefirdous.sh
+```
+
+If the page looks blank or unstyled, hard refresh with `Ctrl+Shift+R` (or `Cmd+Shift+R` on Mac) to clear cached HTML/CSS.
+
 ## Docker
 
 Run both services with Docker Compose:
