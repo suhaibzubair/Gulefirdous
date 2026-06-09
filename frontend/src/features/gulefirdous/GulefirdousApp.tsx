@@ -1160,7 +1160,7 @@ function GulefirdousApp() {
                     <small>
                       Live on{" "}
                       <a href={product.link} target="_blank" rel="noreferrer">
-                        gulefirdous.com
+                        {product.link}
                       </a>
                     </small>
                   ) : (
