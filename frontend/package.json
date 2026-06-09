@@ -44,7 +44,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "preview": "serve -s build -l 3000",
+    "preview": "serve -s build --listen tcp://0.0.0.0:3000",
+    "preview:dev": "HOST=0.0.0.0 PORT=3000 react-scripts start",
     "test": "jest",
     "eject": "react-scripts eject"
   },

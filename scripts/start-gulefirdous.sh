@@ -16,14 +16,12 @@ start_tmux_session() {
   tmux -f "$TMUX_CONF" send-keys -t "$session_name:0.0" "$command" C-m
 }
 
-echo "Building frontend..."
-(cd "$FRONTEND_DIR" && npm run build)
-
 echo "Starting backend on http://localhost:4000 ..."
 start_tmux_session "gulefirdous-backend" "$BACKEND_DIR" "npm start"
 
-echo "Starting frontend preview on http://localhost:3000 ..."
-start_tmux_session "gulefirdous-static-server" "$FRONTEND_DIR" "npm run preview"
+echo "Starting frontend dev server on http://localhost:3000 ..."
+echo "Cursor should auto-detect port 3000. If not, use the plug icon -> Forward port 3000."
+start_tmux_session "gulefirdous-static-server" "$FRONTEND_DIR" "npm run preview:dev"
 
 sleep 2
 

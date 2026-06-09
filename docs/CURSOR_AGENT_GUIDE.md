@@ -196,17 +196,45 @@ npm start
 # → http://localhost:3000
 ```
 
-### Run frontend (production preview — what users often use)
+### Run frontend (production preview)
 
 ```bash
 cd frontend
 npm run build
-cd build
-python3 -m http.server 3000
-# → http://localhost:3000 (static build, no hot reload)
+npm run preview
+# → http://localhost:3000 (static build, binds 0.0.0.0)
 ```
 
-> **Known issue:** The static preview server (`python3 -m http.server 3000`) can stop unexpectedly. Restart it from `frontend/build` if the site won't load.
+### Run frontend (dev server — best for Cursor port forwarding)
+
+```bash
+cd frontend
+npm run preview:dev
+# → http://localhost:3000 (hot reload, binds 0.0.0.0:3000)
+```
+
+Run this in a **foreground Cursor terminal** (not only background tmux) so port 3000 appears in the Ports panel.
+
+### Cursor port forwarding (Cloud Agent)
+
+If `http://localhost:3000` shows **ERR_CONNECTION_REFUSED** and port 3000 is not listed:
+
+1. Connect to the agent in the **Cursor desktop Agents Window** (not only the web chat).
+2. Click the **plug icon** (top-right) → **Ports** panel.
+3. If port 3000 is missing, click **Forward a Port** → enter `3000`.
+4. In the agent terminal, run:
+   ```bash
+   cd frontend && npm run preview:dev
+   ```
+5. Open the forwarded URL from the Ports panel (or `http://localhost:3000` after forwarding).
+
+Both servers at once:
+
+```bash
+bash scripts/start-gulefirdous.sh
+```
+
+> **Note:** Background tmux servers may not trigger auto-forward. Prefer a foreground terminal for the frontend when you need the Ports panel to show 3000.
 
 ### Docker
 

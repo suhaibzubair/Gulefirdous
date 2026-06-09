@@ -1,0 +1,14 @@
+{
+  "remote.autoForwardPorts": true,
+  "remote.autoForwardPortsSource": "hybrid",
+  "remote.portsAttributes": {
+    "3000": {
+      "label": "Gulefirdous App",
+      "onAutoForward": "notify"
+    },
+    "4000": {
+      "label": "Gulefirdous API",
+      "onAutoForward": "silent"
+    }
+  }
+}
