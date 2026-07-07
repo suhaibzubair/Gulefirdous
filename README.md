@@ -17,6 +17,8 @@ WordPress status checked on `gulefirdous.com`:
 Do not place WooCommerce API secrets in the frontend. Store them in backend
 environment variables using `backend/.env.example` as the template.
 
+**New agent?** Read the full onboarding guide: [docs/CURSOR_AGENT_GUIDE.md](docs/CURSOR_AGENT_GUIDE.md)
+
 ## Local development
 
 Run the backend:

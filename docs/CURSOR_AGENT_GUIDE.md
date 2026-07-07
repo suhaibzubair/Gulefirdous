@@ -2,8 +2,8 @@
 
 Complete onboarding for new Cursor agents, developers, and cloud runs working on the **Gulefirdous** fragrance e-commerce MVP.
 
-**Repository:** https://github.com/suhaibzubair/Gulefirdous
-**Live site:** https://gulefirdous.com
+**Repository:** https://github.com/suhaibzubair/Gulefirdous  
+**Live site:** https://gulefirdous.com  
 **Stack:** React 18 (TypeScript) + Node.js HTTP API + WooCommerce REST API
 
 ---
@@ -64,7 +64,7 @@ git clone https://github.com/suhaibzubair/Gulefirdous.git
 cd Gulefirdous
 ```
 
-WooCommerce keys are **never** committed to GitHub. If WooCommerce only shows "Consumer key ending in …8a5cf71", the **secret cannot be recovered** — create a new Read/Write API key in WordPress.
+WooCommerce keys are **never** committed to GitHub. If WooCommerce only shows “Consumer key ending in …8a5cf71”, the **secret cannot be recovered** — create a new Read/Write API key in WordPress.
 
 ---
 
@@ -87,7 +87,7 @@ git fetch origin
 git checkout cursor/woocommerce-product-push-d9fc
 ```
 
-Branch naming for new work: `cursor/<topic>-d9fc`
+Branch naming for new work: `cursor/<descriptive-name>-d9fc`
 
 ---
 
@@ -388,7 +388,7 @@ When admin clicks **Save & publish to WordPress**:
 6. Backend calls `launchStore()` to disable WooCommerce **coming soon** mode
 7. Frontend stores `wooCommerceId` + real `permalink`
 
-On **admin login**, `fetchWooProducts()` merges live catalog so "Live on …" links persist after refresh.
+On **admin login**, `fetchWooProducts()` merges live catalog so “Live on …” links persist after refresh.
 
 ### Image rules for WooCommerce
 
@@ -408,7 +408,7 @@ Live link example: `https://gulefirdous.com/product/gulefirdous-bloom-mist/`
 
 WooCommerce can enable **Coming soon** mode, which hides `/shop` even when products exist.
 
-**Symptom:** `/shop` shows "Something big is brewing… launching soon" but direct product URLs work.
+**Symptom:** `/shop` shows “Something big is brewing… launching soon” but direct product URLs work.
 
 **Fix (automatic):** Publishing a product calls `POST /api/shop/launch` via `wordpressSiteVisibility.js`.
 
@@ -453,7 +453,7 @@ Set `REACT_APP_AUTH_MODE=mock` or leave Firebase keys empty with `auto`.
 ## 15. Product images
 
 - **Pools:** Perfume, Gift Set, Attar, Body Mist, Candles (WooCommerce branch)
-- **Sources:** Curated Unsplash/Pexels URLs labeled "AI generated"
+- **Sources:** Curated Unsplash/Pexels URLs labeled “AI generated”
 - **Fallback:** `handleProductImageError()` swaps broken images
 - **Sync rule:** When editing pools, update **both**:
   - `frontend/src/features/gulefirdous/productImages.ts`
@@ -511,7 +511,7 @@ docker compose up --build
 
 ## 18. Git and PR workflow
 
-1. Branch from latest feature branch: `cursor/<topic>-d9fc`
+1. Branch from latest feature branch: `cursor/<name>-d9fc`
 2. Make focused changes — avoid refactoring legacy SolsGate code
 3. Run backend + frontend tests
 4. Commit with clear messages
@@ -540,13 +540,13 @@ docker compose up --build
 
 ## 20. Troubleshooting
 
-### "Publish to WordPress" fails
+### “Publish to WordPress” fails
 
 - Is backend running on 4000?
 - Are `WOOCOMMERCE_*` keys real (not `ck_replace_me`)?
 - Restart backend after editing `.env`
 
-### Products show "not published" after refresh
+### Products show “not published” after refresh
 
 - Use `cursor/woocommerce-product-push-d9fc` branch (catalog merge on login)
 - Backend must be reachable when admin signs in
@@ -564,7 +564,7 @@ Or fix in WordPress: WooCommerce → Settings → Site visibility → Live
 - Start frontend with `HOST=0.0.0.0 PORT=3000 npm start`
 - Forward port 3000 in Cursor Ports panel
 
-### Agent machine "not running"
+### Agent machine “not running”
 
 Cloud VM resets wipe `node_modules` and `.env`:
 
@@ -606,7 +606,7 @@ Before committing:
 - [ ] No secrets in diff
 - [ ] `productImages.ts` and `productImages.js` still in sync (if images changed)
 
-Before telling user "publish works":
+Before telling user “publish works”:
 
 - [ ] `curl http://localhost:4000/api/products` returns products
 - [ ] Published product URL opens on gulefirdous.com
