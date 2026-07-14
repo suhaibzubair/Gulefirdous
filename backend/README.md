@@ -16,6 +16,7 @@ order, and webhook endpoints.
    - `WOOCOMMERCE_CONSUMER_KEY`
    - `WOOCOMMERCE_CONSUMER_SECRET`
    - `WOOCOMMERCE_WEBHOOK_SECRET`
+   - `WORDPRESS_USERNAME` and `WORDPRESS_APPLICATION_PASSWORD` (required for gallery image uploads)
 
 3. Start the server:
 
@@ -34,6 +35,7 @@ order, and webhook endpoints.
 - `POST /api/shop/launch`
 - `POST /api/webhooks/woocommerce/order`
 - `POST /api/product-images/generate`
+- `POST /api/media`
 
 ## WordPress/WooCommerce setup
 
@@ -44,6 +46,7 @@ In WordPress admin:
 3. Create WooCommerce REST API keys from WooCommerce settings.
 4. Store those keys only in this backend's `.env` file or deployment secrets.
 5. Create an order webhook pointing to `/api/webhooks/woocommerce/order`.
+6. For gallery uploads, create a WordPress **Application Password** (Users → Profile) and set `WORDPRESS_USERNAME` + `WORDPRESS_APPLICATION_PASSWORD` in `.env`.
 
 Never put WooCommerce consumer secrets in the React frontend or mobile app.
 

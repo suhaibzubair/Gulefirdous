@@ -1,6 +1,7 @@
 import {
   fetchWooProducts,
   findWooProductMatch,
+  getPublishableImageUrl,
   mergeProductsWithWooCommerce,
   slugifyWooProductName,
 } from "./gulefirdousApi";
@@ -23,6 +24,26 @@ describe("WooCommerce product sync helpers", () => {
 
   test("slugifyWooProductName normalizes product names", () => {
     expect(slugifyWooProductName("Heritage Attar Gift Set")).toBe("heritage-attar-gift-set");
+  });
+
+  test("getPublishableImageUrl accepts Pexels URLs and rejects gallery blobs", () => {
+    expect(
+      getPublishableImageUrl(
+        "https://images.pexels.com/photos/3785147/pexels-photo-3785147.jpeg?auto=compress&gen=1-2"
+      )
+    ).toContain("images.pexels.com");
+    expect(
+      getPublishableImageUrl(
+        "https://images.pexels.com/photos/3785147/pexels-photo-3785147.jpeg?auto=compress&gen=1-2"
+      )
+    ).not.toContain("gen=");
+    expect(getPublishableImageUrl("blob:http://localhost:3000/abc")).toBeUndefined();
+    expect(getPublishableImageUrl("data:image/jpeg;base64,abc")).toBeUndefined();
+    expect(
+      getPublishableImageUrl(
+        "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=900"
+      )
+    ).toBeUndefined();
   });
 
   test("findWooProductMatch matches by product name", () => {

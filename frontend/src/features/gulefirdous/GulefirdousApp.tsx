@@ -4,8 +4,10 @@ import {
   createCategory,
   fetchCategories,
   fetchWooProducts,
+  getPublishableImageUrl,
   mergeProductsWithWooCommerce,
   publishWooProduct,
+  uploadProductMedia,
   type ProductCategory,
 } from "./gulefirdousApi";
 import GulefirdousDashboard from "./GulefirdousDashboard";
@@ -59,6 +61,7 @@ interface Product {
   imageUrl: string;
   imageSource: ImageSource;
   imageLabel: string;
+  imageDataUrl?: string;
   wooCommerceId?: number;
 }
 
@@ -599,6 +602,37 @@ function GulefirdousApp() {
     setProductSyncNotice("");
 
     try {
+      let imageMediaId: number | undefined;
+      let imageWarning = "";
+      const needsMediaUpload =
+        product.imageSource === "Gallery upload" ||
+        Boolean(product.imageDataUrl) ||
+        product.imageUrl.startsWith("data:") ||
+        product.imageUrl.startsWith("blob:");
+
+      if (needsMediaUpload) {
+        const dataUrl =
+          product.imageDataUrl ||
+          (product.imageUrl.startsWith("data:") ? product.imageUrl : undefined);
+
+        if (!dataUrl) {
+          imageWarning =
+            " Gallery photo could not be uploaded because the image data is no longer available — re-select it and publish again.";
+        } else {
+          try {
+            const { media } = await uploadProductMedia({
+              dataUrl,
+              filename: product.imageLabel || `${product.name}.jpg`,
+            });
+            imageMediaId = media.id;
+          } catch (error) {
+            imageWarning = ` Gallery photo was not uploaded (${
+              error instanceof Error ? error.message : "media upload failed"
+            }). Product will publish without an image unless a stock photo is selected.`;
+          }
+        }
+      }
+
       const payload = buildWooProductPayload({
         name: product.name,
         price: product.price,
@@ -606,11 +640,22 @@ function GulefirdousApp() {
         stock: product.stock,
         categoryWooCommerceId: category?.wooCommerceId,
         imageUrl: product.imageUrl,
+        imageMediaId,
       });
-      const { product: published, storeLaunch } = await publishWooProduct(
-        payload,
-        product.wooCommerceId
-      );
+
+      if (
+        !payload.images?.length &&
+        product.imageUrl &&
+        !imageWarning &&
+        !getPublishableImageUrl(product.imageUrl) &&
+        !imageMediaId
+      ) {
+        imageWarning =
+          " Product image was skipped because WooCommerce cannot import that URL — using Pexels stock photos or a gallery upload."
+      }
+
+      const { product: published, storeLaunch, imageDropped, imageDropReason } =
+        await publishWooProduct(payload, product.wooCommerceId);
 
       if (published.status && published.status !== "publish") {
         throw new Error(`WooCommerce saved the product as "${published.status}" instead of publish.`);
@@ -632,9 +677,14 @@ function GulefirdousApp() {
         storeLaunch?.launched || storeLaunch?.alreadyLive
           ? ` ${storeLaunch.message}`
           : "";
+      const droppedNote = imageDropped
+        ? ` Warning: WooCommerce rejected the product image${
+            imageDropReason ? ` (${imageDropReason})` : ""
+          }, so the product published without a photo.`
+        : "";
 
       setProductSyncNotice(
-        `"${product.name}" is published on gulefirdous.com. Customers can open it at ${published.permalink}.${launchNote}`
+        `"${product.name}" is published on gulefirdous.com. Customers can open it at ${published.permalink}.${launchNote}${imageWarning}${droppedNote}`
       );
     } catch (error) {
       setProductSyncNotice(
@@ -665,6 +715,7 @@ function GulefirdousApp() {
       label: product.imageLabel,
       url: product.imageUrl,
       source: product.imageSource,
+      dataUrl: product.imageDataUrl,
     });
   };
 
@@ -737,6 +788,7 @@ function GulefirdousApp() {
         imageUrl: selectedImage.url,
         imageSource: selectedImage.source,
         imageLabel: selectedImage.label,
+        imageDataUrl: selectedImage.dataUrl,
       };
 
       setProducts((current) =>
@@ -767,6 +819,7 @@ function GulefirdousApp() {
       imageUrl: selectedImage.url,
       imageSource: selectedImage.source,
       imageLabel: selectedImage.label,
+      imageDataUrl: selectedImage.dataUrl,
     };
 
     setProducts((current) => [product, ...current]);
@@ -830,26 +883,19 @@ function GulefirdousApp() {
       return;
     }
 
-    if (typeof URL !== "undefined" && URL.createObjectURL) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || "");
       setSelectedImage({
         id: `gallery-${file.name}-${Date.now()}`,
         label: file.name,
-        url: URL.createObjectURL(file),
+        url: dataUrl,
+        dataUrl,
         source: "Gallery upload",
       });
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const galleryImage: ProductImageOption = {
-        id: `gallery-${file.name}-${Date.now()}`,
-        label: file.name,
-        url: String(reader.result),
-        source: "Gallery upload",
-      };
-
-      setSelectedImage(galleryImage);
+    };
+    reader.onerror = () => {
+      setProductFormError("Could not read the selected gallery image. Try another file.");
     };
     reader.readAsDataURL(file);
   };

@@ -3,6 +3,7 @@ const path = require("node:path");
 const { createCategoryStore, slugifyCategoryName } = require("./categoryStore");
 const { createNextImageBatch, getPhotoPoolSize } = require("./productImages");
 const { createWooCommerceClient, verifyWooCommerceSignature } = require("./woocommerceClient");
+const { uploadMediaToWordPress } = require("./wordpressMedia");
 const { getComingSoonOptions, launchStore } = require("./wordpressSiteVisibility");
 
 const jsonHeaders = {
@@ -181,6 +182,32 @@ function createServer(options = {}) {
         const updatedProduct = await client.updateProduct(productUpdateMatch[1], product);
         const storeLaunch = await ensureStoreIsLive(launchStoreFn, env);
         sendJson(response, 200, { product: updatedProduct, storeLaunch }, corsHeaders);
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/media") {
+        const uploadMedia = options.uploadMedia || uploadMediaToWordPress;
+        const body = parseJson(await readBody(request));
+        const media = await uploadMedia(
+          {
+            dataUrl: body.dataUrl,
+            base64: body.base64,
+            filename: body.filename,
+            mimeType: body.mimeType,
+          },
+          env
+        );
+        sendJson(
+          response,
+          201,
+          {
+            media: {
+              id: media.id,
+              sourceUrl: media.sourceUrl,
+            },
+          },
+          corsHeaders
+        );
         return;
       }
 

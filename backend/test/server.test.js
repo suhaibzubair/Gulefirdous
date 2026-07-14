@@ -321,10 +321,39 @@ test("product image endpoint returns realistic photo concepts", async () => {
 
     assert.equal(response.status, 200);
     assert.equal(body.images.length, 4);
-    assert.match(body.images[0].url, /^https:\/\/images\.(unsplash|pexels)\.com\//);
+    assert.match(body.images[0].url, /^https:\/\/images\.pexels\.com\//);
     assert.equal(body.mode, "category-studio-photos");
     assert.ok(body.seenPhotoKeys);
   });
+});
+
+test("media endpoint uploads gallery images to WordPress", async () => {
+  const uploadMedia = async (input) => {
+    assert.match(input.dataUrl, /^data:image\/jpeg;base64,/);
+    assert.equal(input.filename, "gallery-shot.jpg");
+    return { id: 901, sourceUrl: "https://gulefirdous.com/wp-content/uploads/gallery-shot.jpg" };
+  };
+
+  await withServer(
+    {},
+    async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/api/media`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dataUrl: "data:image/jpeg;base64,/9j/4AAQ",
+          filename: "gallery-shot.jpg",
+        }),
+      });
+      const body = await response.json();
+
+      assert.equal(response.status, 201);
+      assert.equal(body.media.id, 901);
+      assert.match(body.media.sourceUrl, /gallery-shot\.jpg$/);
+    },
+    {},
+    { uploadMedia }
+  );
 });
 
 test("product image endpoint returns category-specific photo pools", async () => {

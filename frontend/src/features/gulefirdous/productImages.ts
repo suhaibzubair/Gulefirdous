@@ -5,14 +5,18 @@ export interface ProductImageOption {
   label: string;
   url: string;
   source: ImageSource;
+  /** Base64 data URL for gallery uploads that must be sent to WordPress media. */
+  dataUrl?: string;
 }
 
 type PhotoPoolEntry = { label: string; url: string };
 
 const BATCH_SIZE = 4;
 
-export const FALLBACK_PRODUCT_IMAGE_URL =
-  "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=900&h=700&q=80";
+const pexelsUrl = (id: number) =>
+  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop`;
+
+export const FALLBACK_PRODUCT_IMAGE_URL = pexelsUrl(3785147);
 
 export function handleProductImageError(event: { currentTarget: HTMLImageElement }) {
   const image = event.currentTarget;
@@ -26,153 +30,50 @@ export function handleProductImageError(event: { currentTarget: HTMLImageElement
 }
 
 const PERFUME_PHOTOS: PhotoPoolEntry[] = [
-  {
-    label: "Emerald glass oud",
-    url: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Rose gold flacon",
-    url: "https://images.unsplash.com/photo-1458538977777-0549b2370168?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Crystal amber bottle",
-    url: "https://images.unsplash.com/photo-1543422655-ac1c6ca993ed?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Noir glass perfume",
-    url: "https://images.pexels.com/photos/3785147/pexels-photo-3785147.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Vintage glass parfum",
-    url: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Amber studio flacon",
-    url: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Soft pink perfume",
-    url: "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Classic square flacon",
-    url: "https://images.unsplash.com/photo-1543422655-ac1c6ca993ed?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Pearl glass bottle",
-    url: "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Blush glass perfume",
-    url: "https://images.unsplash.com/photo-1458538977777-0549b2370168?auto=format&fit=crop&w=900&h=700&q=80",
-  },
+  { label: "Emerald glass oud", url: pexelsUrl(2736497) },
+  { label: "Rose gold flacon", url: pexelsUrl(4041392) },
+  { label: "Crystal amber bottle", url: pexelsUrl(4041391) },
+  { label: "Noir glass perfume", url: pexelsUrl(3785147) },
+  { label: "Vintage glass parfum", url: pexelsUrl(4465121) },
+  { label: "Amber studio flacon", url: pexelsUrl(3059609) },
+  { label: "Soft pink perfume", url: pexelsUrl(4938275) },
+  { label: "Classic square flacon", url: pexelsUrl(3059644) },
+  { label: "Pearl glass bottle", url: pexelsUrl(4050393) },
+  { label: "Blush glass perfume", url: pexelsUrl(4050383) },
 ];
 
 const GIFT_SET_PHOTOS: PhotoPoolEntry[] = [
-  {
-    label: "Twin luxury flacons",
-    url: "https://images.unsplash.com/photo-1622618991746-fe6004db3a47?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Ribbon gift box set",
-    url: "https://images.unsplash.com/photo-1615529328331-f8917597711f?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Gold cap duo set",
-    url: "https://images.pexels.com/photos/3360268/pexels-photo-3360268.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Boutique gift packaging",
-    url: "https://images.pexels.com/photos/3327412/pexels-photo-3327412.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Satin rose gift pair",
-    url: "https://images.unsplash.com/photo-1622618991746-fe6004db3a47?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Clear luxury duo",
-    url: "https://images.pexels.com/photos/965989/pexels-photo-965989.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Ivory presentation set",
-    url: "https://images.pexels.com/photos/5316920/pexels-photo-5316920.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Premium boxed collection",
-    url: "https://images.pexels.com/photos/18946587/pexels-photo-18946587.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
+  { label: "Twin luxury flacons", url: pexelsUrl(965990) },
+  { label: "Ribbon gift box set", url: pexelsUrl(4465124) },
+  { label: "Gold cap duo set", url: pexelsUrl(3360268) },
+  { label: "Boutique gift packaging", url: pexelsUrl(3327412) },
+  { label: "Satin rose gift pair", url: pexelsUrl(965991) },
+  { label: "Clear luxury duo", url: pexelsUrl(965989) },
+  { label: "Ivory presentation set", url: pexelsUrl(5316920) },
+  { label: "Premium boxed collection", url: pexelsUrl(18946587) },
 ];
 
 const ATTAR_PHOTOS: PhotoPoolEntry[] = [
-  {
-    label: "Midnight glass attar",
-    url: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Dark oud decanter",
-    url: "https://images.pexels.com/photos/1103905/pexels-photo-1103905.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Matte black attar",
-    url: "https://images.pexels.com/photos/1103905/pexels-photo-1103905.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Onyx studio attar",
-    url: "https://images.pexels.com/photos/18946587/pexels-photo-18946587.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Golden attar vial",
-    url: "https://images.pexels.com/photos/3327412/pexels-photo-3327412.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Heritage oud bottle",
-    url: "https://images.unsplash.com/photo-1587017539504-67cfbddac569?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Royal attar flask",
-    url: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Noir oud presentation",
-    url: "https://images.pexels.com/photos/3785147/pexels-photo-3785147.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
+  { label: "Midnight glass attar", url: pexelsUrl(3738345) },
+  { label: "Dark oud decanter", url: pexelsUrl(1103905) },
+  { label: "Matte black attar", url: pexelsUrl(3738387) },
+  { label: "Onyx studio attar", url: pexelsUrl(18946587) },
+  { label: "Golden attar vial", url: pexelsUrl(3327412) },
+  { label: "Heritage oud bottle", url: pexelsUrl(4041398) },
+  { label: "Royal attar flask", url: pexelsUrl(4870707) },
+  { label: "Noir oud presentation", url: pexelsUrl(3785147) },
 ];
 
 const BODY_MIST_PHOTOS: PhotoPoolEntry[] = [
-  {
-    label: "Frosted glass mist",
-    url: "https://images.pexels.com/photos/4202325/pexels-photo-4202325.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Champagne mist bottle",
-    url: "https://images.pexels.com/photos/4202325/pexels-photo-4202325.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Minimal clear mist",
-    url: "https://images.pexels.com/photos/5316920/pexels-photo-5316920.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Soft pink body mist",
-    url: "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Sleek spray flacon",
-    url: "https://images.pexels.com/photos/5316920/pexels-photo-5316920.jpeg?auto=compress&cs=tinysrgb&w=900&h=700&fit=crop",
-  },
-  {
-    label: "Fresh citrus mist",
-    url: "https://images.unsplash.com/photo-1622618991746-fe6004db3a47?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Pearl mist bottle",
-    url: "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?auto=format&fit=crop&w=900&h=700&q=80",
-  },
-  {
-    label: "Blush daily mist",
-    url: "https://images.unsplash.com/photo-1458538977777-0549b2370168?auto=format&fit=crop&w=900&h=700&q=80",
-  },
+  { label: "Frosted glass mist", url: pexelsUrl(4202325) },
+  { label: "Champagne mist bottle", url: pexelsUrl(7246345) },
+  { label: "Minimal clear mist", url: pexelsUrl(5316920) },
+  { label: "Soft pink body mist", url: pexelsUrl(4938275) },
+  { label: "Sleek spray flacon", url: pexelsUrl(8128083) },
+  { label: "Fresh citrus mist", url: pexelsUrl(5553534) },
+  { label: "Pearl mist bottle", url: pexelsUrl(4050393) },
+  { label: "Blush daily mist", url: pexelsUrl(4050383) },
 ];
-
 const CANDLE_PHOTOS: PhotoPoolEntry[] = [
   {
     label: "Amber jar candle",

@@ -28,7 +28,7 @@ export interface WooProductPayload {
   catalog_visibility?: "visible" | "catalog" | "search" | "hidden";
   stock_status?: "instock" | "outofstock" | "onbackorder";
   categories?: Array<{ id: number }>;
-  images?: Array<{ src: string }>;
+  images?: Array<{ src?: string; id?: number }>;
 }
 
 export interface WooCreatedProduct {
@@ -40,12 +40,18 @@ export interface WooCreatedProduct {
 }
 
 export function getPublishableImageUrl(url: string): string | undefined {
-  if (!url || url.startsWith("blob:") || !/^https?:\/\//i.test(url)) {
+  if (!url || url.startsWith("blob:") || url.startsWith("data:") || !/^https?:\/\//i.test(url)) {
     return undefined;
   }
 
   if (/pexels\.com/i.test(url)) {
-    return url;
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.delete("gen");
+      return parsed.toString();
+    } catch {
+      return url.replace(/([?&])gen=[^&]*&?/g, "$1").replace(/[?&]$/, "");
+    }
   }
 
   if (/\.(jpe?g|png|webp)(\?|$)/i.test(url)) {
@@ -62,6 +68,7 @@ export function buildWooProductPayload(input: {
   stock: number;
   categoryWooCommerceId?: number | null;
   imageUrl?: string;
+  imageMediaId?: number;
 }): WooProductPayload {
   const payload: WooProductPayload = {
     name: input.name,
@@ -77,9 +84,13 @@ export function buildWooProductPayload(input: {
     payload.categories = [{ id: input.categoryWooCommerceId }];
   }
 
-  const imageSrc = input.imageUrl ? getPublishableImageUrl(input.imageUrl) : undefined;
-  if (imageSrc) {
-    payload.images = [{ src: imageSrc }];
+  if (input.imageMediaId) {
+    payload.images = [{ id: input.imageMediaId }];
+  } else {
+    const imageSrc = input.imageUrl ? getPublishableImageUrl(input.imageUrl) : undefined;
+    if (imageSrc) {
+      payload.images = [{ src: imageSrc }];
+    }
   }
 
   return payload;
@@ -150,6 +161,13 @@ export interface StoreLaunchResult {
 export interface WooProductResponse {
   product: WooCreatedProduct;
   storeLaunch?: StoreLaunchResult;
+  imageDropped?: boolean;
+  imageDropReason?: string;
+}
+
+export interface UploadedMedia {
+  id: number;
+  sourceUrl: string;
 }
 
 export function createWooProduct(product: WooProductPayload) {
@@ -172,6 +190,17 @@ export function launchStorefront() {
   });
 }
 
+export function uploadProductMedia(input: {
+  dataUrl: string;
+  filename?: string;
+  mimeType?: string;
+}) {
+  return request<{ media: UploadedMedia }>("/api/media", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
 async function publishWooProductPayload(product: WooProductPayload, existingProductId?: number) {
   if (existingProductId) {
     return updateWooProduct(existingProductId, product);
@@ -182,12 +211,18 @@ async function publishWooProductPayload(product: WooProductPayload, existingProd
 
 export async function publishWooProduct(product: WooProductPayload, existingProductId?: number) {
   try {
-    return await publishWooProductPayload(product, existingProductId);
+    const result = await publishWooProductPayload(product, existingProductId);
+    return { ...result, imageDropped: false };
   } catch (error) {
-    const message = error instanceof Error ? error.message.toLowerCase() : "";
-    if (product.images?.length && message.includes("image")) {
+    const message = error instanceof Error ? error.message : "";
+    if (product.images?.length && /image/i.test(message)) {
       const { images, ...rest } = product;
-      return publishWooProductPayload(rest, existingProductId);
+      const result = await publishWooProductPayload(rest, existingProductId);
+      return {
+        ...result,
+        imageDropped: true,
+        imageDropReason: message,
+      };
     }
 
     throw error;
